@@ -69,10 +69,10 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
 
     def __init__(self, createanims, palette_canvas, pal_rectangle, pal, pal_label):
         self.createanims = createanims
+        self.palette_canvas = palette_canvas
         self.pal_rectangle = pal_rectangle #This is actually a literal int. Pretty cool. #Alternative name pal_rectangle_id to make it clear it's a literal int/ID.
         self.pal = pal
         self.pal_label = pal_label
-        self.palette_canvas = palette_canvas
         self.palette_canvas.tag_bind(self.pal_rectangle, "<Enter>", self.on_enter)
         self.palette_canvas.tag_bind(self.pal_rectangle, "<Button-1>", self.on_left_click)
 
@@ -84,6 +84,22 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
             self.palette_canvas.itemconfig(self.createanims.current_pal_rectangle, outline="")
         self.palette_canvas.itemconfig(self.pal_rectangle, outline="red")
         self.createanims.current_pal_rectangle = self.pal_rectangle
+
+class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the color picker.
+
+    def __init__(self, createanims, color_picker_canvas, color_picker_rectangle, pal, pal_label):
+        self.createanims = createanims
+        self.color_picker_canvas = color_picker_canvas
+        self.color_picker_rectangle = color_picker_rectangle
+        self.pal = pal
+        self.pal_label = pal_label
+        self.color_picker_canvas.tag_bind(self.color_picker_rectangle, "<Button-1>", self.on_left_click)
+
+    def on_left_click(self, event=None):
+        if self.createanims.current_color_picker_rectangle is not None:
+            self.color_picker_canvas.itemconfig(self.createanims.current_color_picker_rectangle, outline="")
+        self.color_picker_canvas.itemconfig(self.color_picker_rectangle, outline="blue")
+        self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
 
 class TileUtils:
 

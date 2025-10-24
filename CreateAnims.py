@@ -23,6 +23,7 @@ class CreateAnims:
         self.tile_utils = TileUtils(self)
         self.characters_palettes = []
         self.current_pal_rectangle = None
+        self.current_color_picker_rectangle = None
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -39,6 +40,26 @@ class CreateAnims:
         self.pal_label.grid(row=0, column=0, sticky="w")
         self.character_palette_canvas = tkinter.Canvas(frame_palette, width=256, height=32, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.character_palette_canvas.grid(row=1, column=0)
+        self.color_picker_canvas = tkinter.Canvas(frame_palette, width=256, height=69, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
+        self.color_picker_canvas.grid(row=2, column=0, pady=30)
+        self.create_color_picker()
+
+    def create_color_picker(self): #Its own function 'cause, it does have some complexity. #Also, it could be in TileUtils but... it's initialization still. So I'll go this route.
+        from TileUtils import SYSTEM_PALETTE, ColorPickerRectangle #Let's borrow it for a bit.
+        self.color_picker_rectangles = []
+        pal_index = 0x0 #We'll start from zero, all the way to the end.
+        initial_y = -16 #The trick of starting with a negative so that it works also the first iteration. Great awesome.
+        for row in range(4):
+            initial_x = 0
+            initial_y += 17
+            for col in range(16):
+                rgb_triplet = SYSTEM_PALETTE[pal_index]
+                r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
+                rgb = f"#{r:02X}{g:02X}{b:02X}"
+                color_picker_rectangle = self.color_picker_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 16, fill=rgb, outline=rgb, width=1)
+                self.color_picker_rectangles.append(ColorPickerRectangle(self, self.color_picker_canvas, color_picker_rectangle, pal_index, self.pal_label))
+                initial_x += 16
+                pal_index += 1
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.

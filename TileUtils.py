@@ -67,10 +67,11 @@ SYSTEM_PALETTE = [
 
 class PalRectangle: #I usually don't do this, but whatever. The main is TileUtils.
 
-    def __init__(self, createanims, palette_canvas, pal_rectangle, pal, pal_label):
+    def __init__(self, createanims, palette_canvas, pal_rectangle, character_pal_index, pal, pal_label):
         self.createanims = createanims
         self.palette_canvas = palette_canvas
         self.pal_rectangle = pal_rectangle #This is actually a literal int. Pretty cool. #Alternative name pal_rectangle_id to make it clear it's a literal int/ID.
+        self.character_pal_index = character_pal_index #This will be used to know what value to update such that now when refresh_palette runs, it will display updated palette.
         self.pal = pal
         self.pal_label = pal_label
         self.palette_canvas.tag_bind(self.pal_rectangle, "<Enter>", self.on_enter)
@@ -97,11 +98,12 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
 
 class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the color picker.
 
-    def __init__(self, createanims, color_picker_canvas, color_picker_rectangle, pal, pal_label):
+    def __init__(self, createanims, color_picker_canvas, color_picker_rectangle, pal, rgb, pal_label):
         self.createanims = createanims
         self.color_picker_canvas = color_picker_canvas
         self.color_picker_rectangle = color_picker_rectangle
         self.pal = pal
+        self.rgb = rgb #We will use it after all, just for something else.
         self.pal_label = pal_label
         self.color_picker_canvas.tag_bind(self.color_picker_rectangle, "<Button-1>", self.on_left_click)
 
@@ -111,6 +113,17 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
             self.color_picker_canvas.itemconfig(self.createanims.current_color_picker_rectangle, outline=current_rgb) #Outline "" doesn't really work. It leaves some borders. (copypasted)
         self.color_picker_canvas.itemconfig(self.color_picker_rectangle, outline="blue")
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
+        self.update_pal_rectangle()
+
+    def update_pal_rectangle(self):
+        if self.createanims.current_pal_rectangle is None:
+            return #Nothing to do then. This logic only applies if there is a pal rectangle selected.
+        pal_rectangle_object = self.createanims.pal_rectangles[self.createanims.current_pal_rectangle]
+        character_palette = self.createanims.characters_palettes[self.createanims.current_character]
+        character_palette[pal_rectangle_object.character_pal_index] = self.pal #Now the character palette is updated and will be picked by refresh_palette.
+        #self.createanims.tile_utils.refresh_palette() #Might be worth it to... I mean for anims, I would like to have something running every time and we just update the values and it immediately picks it up when it consumes the updated values. For this, we need to call it manually. There's nothing running every frame. There's no schedule or anything like that, but there probably will be for stuff like the anims themselves.
+        pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)
+        self.pal_label.config(text=f"Palette: {self.pal:02X}") #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
 
 class TileUtils:
 
@@ -120,11 +133,12 @@ class TileUtils:
     def refresh_palette(self): #Show according to what's already stored, or, well yeah. Passing the index isn't my style. I think.
         palette = self.createanims.characters_palettes[self.createanims.current_character]
         initial_x = 0
-        self.createanims.pal_rectangles = [] #So now I'm wondering how much I need init_state? Well it's more for stuff that needs an initial value because it won't be necessarily initialized at some other points, or it may be used at multiple points the first time. It's not the case here. This is meant to run the first time the UI starts. But there's a bit of randomness to it. Sometimes I just like to add stuff there to have it all in one place.
-        for pal in palette:
+        self.createanims.pal_rectangles = {} #Updated to dictionary now. Easier to pick up by pal_rectangle id. #So now I'm wondering how much I need init_state? Well it's more for stuff that needs an initial value because it won't be necessarily initialized at some other points, or it may be used at multiple points the first time. It's not the case here. This is meant to run the first time the UI starts. But there's a bit of randomness to it. Sometimes I just like to add stuff there to have it all in one place.
+        for i, pal in enumerate(palette):
             rgb_triplet = SYSTEM_PALETTE[pal]
             r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
             rgb = f"#{r:02X}{g:02X}{b:02X}"
             pal_rectangle = self.createanims.character_palette_canvas.create_rectangle(initial_x, 0, initial_x + 31, 31, fill=rgb, outline=rgb, width=1)
-            self.createanims.pal_rectangles.append(PalRectangle(self.createanims, self.createanims.character_palette_canvas, pal_rectangle, pal, self.createanims.pal_label))
+            pal_rectangle_object = PalRectangle(self.createanims, self.createanims.character_palette_canvas, pal_rectangle, i, pal, self.createanims.pal_label)
+            self.createanims.pal_rectangles[pal_rectangle] = pal_rectangle_object
             initial_x += 32

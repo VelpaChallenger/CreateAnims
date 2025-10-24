@@ -57,7 +57,7 @@ class CreateAnims:
                 r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
                 rgb = f"#{r:02X}{g:02X}{b:02X}"
                 color_picker_rectangle = self.color_picker_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 16, fill=rgb, outline=rgb, width=1)
-                self.color_picker_rectangles.append(ColorPickerRectangle(self, self.color_picker_canvas, color_picker_rectangle, pal_index, self.pal_label))
+                self.color_picker_rectangles.append(ColorPickerRectangle(self, self.color_picker_canvas, color_picker_rectangle, pal_index, rgb, self.pal_label))
                 initial_x += 16
                 pal_index += 1
 

@@ -4,6 +4,7 @@ import tkinter
 from tkinter import Tk
 
 from TileUtils import *
+from Command import *
 
 FONT = ("TkDefaultFont", 16)
 
@@ -21,9 +22,11 @@ class CreateAnims:
     def init_state(self):
         self.root = Tk()
         self.tile_utils = TileUtils(self)
+        self.command = Command(self)
         self.characters_palettes = []
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
+        self.palette_directory = None
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -43,6 +46,12 @@ class CreateAnims:
         self.color_picker_canvas = tkinter.Canvas(frame_palette, width=256, height=69, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.color_picker_canvas.grid(row=2, column=0, pady=30)
         self.create_color_picker()
+
+        menu_bar = tkinter.Menu(self.root)
+        file_menu = tkinter.Menu(menu_bar, tearoff=0)
+        file_menu.add_command(label="Save palette", command=self.command.save_palette)
+        menu_bar.add_cascade(label="File", menu=file_menu)
+        self.root.config(menu=menu_bar)
 
     def create_color_picker(self): #Its own function 'cause, it does have some complexity. #Also, it could be in TileUtils but... it's initialization still. So I'll go this route.
         from TileUtils import SYSTEM_PALETTE, ColorPickerRectangle #Let's borrow it for a bit.

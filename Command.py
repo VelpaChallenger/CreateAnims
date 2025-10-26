@@ -21,4 +21,4 @@ class Command:
             return
         self.createanims.palette_directory = os.path.dirname(pal_filename) #Directory where the file selected is.
         with open(pal_filename, "wb") as pal_file:
-            pal_file.write(bytearray(self.createanims.characters_palettes[self.createanims.current_character]))
+            pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].palette))

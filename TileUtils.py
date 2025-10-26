@@ -1,3 +1,5 @@
+from PIL import Image, ImageTk
+
 SYSTEM_PALETTE = [
 	[116, 116, 116],
 	[36, 24, 140],
@@ -141,3 +143,63 @@ class TileUtils:
             pal_rectangle_object = PalRectangle(self.createanims, self.createanims.character_palette_canvas, pal_rectangle, i, pal, self.createanims.pal_label)
             self.createanims.pal_rectangles[pal_rectangle] = pal_rectangle_object
             initial_x += 32
+
+    def refresh_chr(self):
+        chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]
+        character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
+        self.create_chr_images(chr_palette, character_chr)
+
+    def create_chr_images(self, chr_palette, character_chr):
+        tile_i = 0
+        initial_y = -16
+        for row in range(8):
+            initial_x = 0
+            initial_y += 16
+            for col in range(16):
+                self.create_chr_image(initial_x, initial_y, tile_i, chr_palette, character_chr)
+                initial_x += 16
+                tile_i += 1
+
+    def create_chr_image(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
+        pixels = self.get_pixels(tile_i, character_chr)
+        img = Image.frombytes("P", (8, 8), bytes(pixels))
+        tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
+        img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
+        final_img = ImageTk.PhotoImage(img.resize((16, 16)))
+        self.createanims.chr_img.append(final_img) #We need to do this to avoid Python gc killer taking care of the PhotoImage on its own. Though it also helps for cache, tee hee.
+        self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+
+    def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
+        pixels = []
+        chr_row = 0x10*tile_i #Let's distinguish: chr_row is the row with all the pixels_rows. So 16 bytes from chr_row have bits for the 8 pixel rows. chr_row and pixel_row.
+        bytes_tile_chr_row = character_chr[chr_row:chr_row+0x10] #tile_row+0x10 is not included, so this gets us what we want.
+        for pixel_row in range(8): #Until 7, but don't include 8.
+            pixel_row_byte_low = bytes_tile_chr_row[pixel_row] #I know most documentation refers to it as planes and bla bla bla yada yada but I understand it more as high and low.
+            pixel_row_byte_high = bytes_tile_chr_row[pixel_row+8] #So bytes_tile_chr_row has the bytes for the CHR row, in other words, for the tile (yeah, chr_tile_row might be a bit redundant but I understand it better that way). 
+            bit_col = 0x80 #To different of pixel_col which will be used for the range. But they fundamentally represent the same just with different numbers.
+            for pixel_col in range(8): #And another 8 times for a total of 64 pixels to add. #Okay much better, pixel_row and pixel_col.
+                bit_low = pixel_row_byte_low & bit_col
+                if bit_low:
+                    bit_low = 0x1 #To avoid having to shift aaaaall the way to the right.
+                bit_high = pixel_row_byte_high & bit_col
+                if bit_high:
+                    bit_high = 0x1
+                pixel = (bit_high << 1) | (bit_low) #Will give either 0, 1, 2 or 3. That will be the color to use.
+                pixels.append(pixel)
+                bit_col >>= 1 #Can you do >>= without it breaking?
+        return pixels
+
+    def get_tile_palette(self, tile_i, chr_palette):
+        tile_palette = []
+        tile_palette_row = tile_i // 8 #We don't care, in this context, about the remainder. Not yet, at least.
+        tile_palette_row_tile = tile_i % 8 #Changed to tile, seems more accurate now. #Now we care about the remainder. So chr_palette_row and chr_palette_row_tile will pinpoint us the exact location.
+        tile_palette_row_byte = chr_palette[tile_palette_row]
+        tile_palette_group = tile_palette_row_byte & (1 << tile_palette_row_tile)
+        if tile_palette_group:
+            pal_group = self.createanims.characters[self.createanims.current_character].palette[4:8] #This makes it more explicit that I want exactly the last 4.
+        else:
+            pal_group = self.createanims.characters[self.createanims.current_character].palette[0:4] #And here the first 4.
+        for pal in pal_group: #Some call the pal_group the subpalette so aka subpalette.
+            rgb_triplet = SYSTEM_PALETTE[pal]
+            tile_palette.extend(rgb_triplet) #putpalette doesn't accept triplets it would seem, has to be all values as a sequence.
+        return tile_palette

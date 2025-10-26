@@ -24,6 +24,7 @@ class CreateAnims:
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
         self.characters = []
+        self.chr_img = []
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
         self.palette_directory = None
@@ -51,7 +52,7 @@ class CreateAnims:
         frame_chr.grid(row=1, column=1, sticky="nw")
         self.chr_label = tkinter.Label(frame_chr, text="CHR Bank:", anchor="w", font=FONT)
         self.chr_label.grid(row=0, column=0, sticky="w")
-        self.chr_canvas = tkinter.Canvas(frame_chr, width=350, height=160, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
+        self.chr_canvas = tkinter.Canvas(frame_chr, width=256, height=128, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.chr_canvas.grid(row=1, column=0)
 
         menu_bar = tkinter.Menu(self.root)
@@ -79,3 +80,4 @@ class CreateAnims:
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
+        self.tile_utils.refresh_chr()

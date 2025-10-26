@@ -11,8 +11,10 @@ def load_game_anims(createanims): #Another idea was to have a call to this in in
 
 def main():
     createanims = CreateAnims()
+    #createanims.chr_palette = get_chr_palette() #This is probably the only one that doesn't depend on which character is being loaded.
     load_game_anims(createanims)
     createanims.current_character = 0 #ID-based.
+    createanims.current_chr_bank = next(iter(createanims.characters[0].chrs)) #Though I don't really like having to use next and iter. But meh. To get first key. #More generic this way. Won't matter whoever is first character. #0x9C
     createanims.refresh_UI()
     createanims.root.mainloop()
 main()

@@ -126,6 +126,22 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)
         self.pal_label.config(text=f"Palette: {self.pal:02X}") #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
 
+class TileImage:
+
+    def __init__(self, createanims, chr_canvas, tile_image, final_img):
+        self.createanims = createanims
+        self.chr_canvas = chr_canvas
+        self.tile_image = tile_image #Beware, it's not the image object itself. It's the ID of the image which we'll use to make changes and stuff. Very much same as PalRectangle and ColorPickerRectangle.
+        self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
+        self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
+
+    def on_left_click(self, event=None):
+        x, y = self.chr_canvas.coords(self.tile_image)
+        if self.createanims.current_tile_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
+            self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+16, y+16, width=2, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
+        else:
+            self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x, y) #Nothing to move if it doesn't exist. So that's why the if.
+
 class TileUtils:
 
     def __init__(self, createanims):
@@ -166,8 +182,8 @@ class TileUtils:
         tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
         img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
-        self.createanims.chr_img.append(final_img) #We need to do this to avoid Python gc killer taking care of the PhotoImage on its own. Though it also helps for cache, tee hee.
-        self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+        tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
 
     def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
         pixels = []

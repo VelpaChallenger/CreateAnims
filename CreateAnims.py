@@ -24,9 +24,10 @@ class CreateAnims:
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
         self.characters = []
-        self.chr_img = []
+        self.tiles_images = [] #This one I prefer to init here cause, it's used in a context where we call lots of methods so its meaning can get a bit lost. It's all based on a lot of factors. So this one is going to be used both to prevent PhotoImage from being killed er I mean collected by the gc aaand to help with image selection. It also follows same nomenclature as other rectangles/elements in canvas. Like pal_rectangles and color_picker_rectangles.
         self.current_pal_rectangle = None
         self.current_color_picker_rectangle = None
+        self.current_tile_image_rectangle = None
         self.palette_directory = None
 
     def init_anim_window(self):

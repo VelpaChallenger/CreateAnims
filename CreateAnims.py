@@ -51,10 +51,12 @@ class CreateAnims:
 
         frame_chr = tkinter.Frame(self.root, border=0)
         frame_chr.grid(row=1, column=1, sticky="nw")
-        self.chr_label = tkinter.Label(frame_chr, text="CHR Bank:", anchor="w", font=FONT)
+        self.chr_label = tkinter.Label(frame_chr, text="CHR Bank: 9C", anchor="w", font=FONT)
         self.chr_label.grid(row=0, column=0, sticky="w")
         self.chr_canvas = tkinter.Canvas(frame_chr, width=256, height=128, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.chr_canvas.grid(row=1, column=0)
+        self.tile_label = tkinter.Label(frame_chr, text="Tile: 00 / 00", anchor="w", font=FONT)
+        self.tile_label.grid(row=2, column=0, sticky="w")
 
         menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(menu_bar, tearoff=0)

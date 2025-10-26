@@ -128,12 +128,19 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
 
 class TileImage:
 
-    def __init__(self, createanims, chr_canvas, tile_image, final_img):
+    def __init__(self, createanims, chr_canvas, tile_image, tile_index, tile_palette_group, tile_label, final_img):
         self.createanims = createanims
         self.chr_canvas = chr_canvas
         self.tile_image = tile_image #Beware, it's not the image object itself. It's the ID of the image which we'll use to make changes and stuff. Very much same as PalRectangle and ColorPickerRectangle.
+        self.tile_index = tile_index
+        self.tile_palette_group = tile_palette_group
+        self.tile_label = tile_label
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
+        self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter)
         self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
+
+    def on_enter(self, event=None):
+        self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
 
     def on_left_click(self, event=None):
         x, y = self.chr_canvas.coords(self.tile_image)
@@ -183,11 +190,11 @@ class TileUtils:
     def create_chr_image(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
         pixels = self.get_pixels(tile_i, character_chr)
         img = Image.frombytes("P", (8, 8), bytes(pixels))
-        tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
+        tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
         img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
+        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
 
     def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
         pixels = []
@@ -222,4 +229,4 @@ class TileUtils:
         for pal in pal_group: #Some call the pal_group the subpalette so aka subpalette.
             rgb_triplet = SYSTEM_PALETTE[pal]
             tile_palette.extend(rgb_triplet) #putpalette doesn't accept triplets it would seem, has to be all values as a sequence.
-        return tile_palette
+        return int(bool(tile_palette_group)), tile_palette #Could be int(bool(tile_palette_group)), maybe to be more explicit but... either works. Actually yes, I'll just add it to make it explicit for me.

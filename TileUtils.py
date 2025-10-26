@@ -218,7 +218,7 @@ class TileUtils:
 
     def get_tile_palette(self, tile_i, chr_palette):
         tile_palette = []
-        tile_palette_row = tile_i // 8 #We don't care, in this context, about the remainder. Not yet, at least.
+        tile_palette_row = tile_i // 8 #We don't care, in this context, about the remainder. Not yet, at least. #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
         tile_palette_row_tile = tile_i % 8 #Changed to tile, seems more accurate now. #Now we care about the remainder. So chr_palette_row and chr_palette_row_tile will pinpoint us the exact location.
         tile_palette_row_byte = chr_palette[tile_palette_row]
         tile_palette_group = tile_palette_row_byte & (1 << tile_palette_row_tile)

@@ -117,6 +117,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
         self.update_pal_rectangle()
         self.createanims.tile_utils.refresh_chr()
+        self.delete_tile_image_rectangles() #The just in case goes more for the deletion in chr_canvas, but the current selection must be updated to None otherwise we get bug where rectangles are not drawn on screen anymore. Probably images overlap them? Or something of the sort. #Just in case. Let us avoid a memory leak, performance issues and stuff like that.
 
     def update_pal_rectangle(self):
         if self.createanims.current_pal_rectangle is None:
@@ -126,6 +127,14 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         character_palette[pal_rectangle_object.character_pal_index] = self.pal #Now the character palette is updated and will be picked by refresh_palette.
         pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)
         self.pal_label.config(text=f"Palette: {self.pal:02X}") #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
+
+    def delete_tile_image_rectangles(self):
+        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_rectangle)
+        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_inner_rectangle)
+        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_outer_rectangle)
+        self.createanims.current_tile_image_rectangle = None
+        self.createanims.current_tile_image_inner_rectangle = None
+        self.createanims.current_tile_image_outer_rectangle = None
 
 class TileImage:
 

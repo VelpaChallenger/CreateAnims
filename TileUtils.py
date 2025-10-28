@@ -141,6 +141,9 @@ class TileImage:
         self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter)
         self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
         self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", self.on_double_left_click)
+        self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", self.on_right_click_motion)
+        self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", self.on_right_click_release)
+        self.in_motion = False
 
     def on_enter(self, event=None):
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
@@ -174,11 +177,37 @@ class TileImage:
         self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter) #Maybe... it would be better to just create a new TileImage altogether.
         self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
         self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", self.on_double_left_click)
+        self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", self.on_right_click_motion)
+        self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", self.on_right_click_release)
         x, y = initial_x, initial_y
         self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
         self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
         self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black")
         self.tile_palette_group = tile_palette_group
+
+    def on_right_click_motion(self, event): #Not None anymore cause now I'm gonna use it.
+        if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+            return
+        tile_row = event.y // 16
+        tile_col = event.x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
+        tile_selected = tile_row*0x10 + tile_col
+        tile_image = self.createanims.tiles_images[tile_selected]
+        tile_image.on_enter() #Update labels.
+        if tile_image.in_motion or self.createanims.current_tile_image_rectangle is None: #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
+            return
+        tile_image.in_motion = True
+        tile_image.on_double_left_click() #So beautiful. Because event=None, it just works. And we're being explicit that we want the exact same thing to happen.
+
+    def verify_motion_coordinates(self, x, y):
+        return (
+            x >= 0 and #Both have to be positive (i.e., don't go too much to the left or too much up).
+            y >= 0 and
+            x < 256 and #Actually, those have to be < and not <=. At that point, the result gives a tile out of range. I think this is still correct either way though, as I'm pretty sure last one is pixels 112 to 127 and 240 to 255. #Each image is 16 pixels wide, canvas is 256 pixels wide.
+            y < 128 #Same, now for y. So with this we cover all 4 corners.
+        )
+
+    def on_right_click_release(self, event=None):
+        self.createanims.tile_utils.clear_in_motion() #Do it for aaall tile images.
 
 class TileUtils:
 
@@ -267,3 +296,7 @@ class TileUtils:
         self.createanims.current_tile_image_rectangle = None
         self.createanims.current_tile_image_inner_rectangle = None
         self.createanims.current_tile_image_outer_rectangle = None
+
+    def clear_in_motion(self):
+        for tile_image in self.createanims.tiles_images: #tile_images but... whatever. Let's leave tiles_images.
+            tile_image.in_motion = False

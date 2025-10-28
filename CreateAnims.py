@@ -28,6 +28,7 @@ class CreateAnims:
         self.current_color_picker_rectangle = None
         self.current_tile_image_rectangle = None
         self.palette_directory = None
+        self.chr_palette_directory = None
 
     def init_anim_window(self):
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
@@ -60,6 +61,7 @@ class CreateAnims:
         menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Save palette", command=self.command.save_palette)
+        file_menu.add_command(label="Save CHR palette", command=self.command.save_chr_palette)
         menu_bar.add_cascade(label="File", menu=file_menu)
         self.root.config(menu=menu_bar)
 

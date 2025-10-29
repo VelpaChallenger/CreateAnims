@@ -130,13 +130,14 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
 
 class TileImage:
 
-    def __init__(self, createanims, chr_canvas, tile_image, tile_index, tile_palette_group, tile_label, final_img):
+    def __init__(self, createanims, chr_canvas, tile_image, tile_index, tile_palette_group, tile_label, pre_tkimg, final_img):
         self.createanims = createanims
         self.chr_canvas = chr_canvas
         self.tile_image = tile_image #Beware, it's not the image object itself. It's the ID of the image which we'll use to make changes and stuff. Very much same as PalRectangle and ColorPickerRectangle.
         self.tile_index = tile_index
         self.tile_palette_group = tile_palette_group
         self.tile_label = tile_label
+        self.pre_tkimg = pre_tkimg #This is the image as in img.putpalette. It's before we do the conversion from PIL image to Tkinter image. So, pre_tkimg. Useful for transparency when drawing anim.
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
         self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter)
         self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
@@ -252,7 +253,7 @@ class TileUtils:
         img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
+        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, img, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
 
     def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
         pixels = []

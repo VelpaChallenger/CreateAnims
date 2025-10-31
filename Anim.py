@@ -30,6 +30,18 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.tile_label = tile_label
         self.pre_tkimg = pre_tkimg #This is the image as in img.putpalette. It's before we do the conversion from PIL image to Tkinter image. So, pre_tkimg. Useful for transparency when drawing anim.
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
+        self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", self.on_left_click)
+
+    def on_left_click(self, event=None):
+        x, y = self.anim_canvas.coords(self.anim_image)
+        if self.createanims.current_anim_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
+            self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
+            self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+            self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black") #And now outer, helps a lot too.
+        else:
+            self.anim_canvas.moveto(self.createanims.current_anim_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
+            self.anim_canvas.moveto(self.createanims.current_anim_image_inner_rectangle, x, y)
+            self.anim_canvas.moveto(self.createanims.current_anim_image_outer_rectangle, x-2, y-2)
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.
 
@@ -40,6 +52,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.frame_rectangle = None #No ID, will be created later if option is turned on.
 
     def refresh(self):
+        self.createanims.anim_canvas.delete("all") #Yeah, we will delete everything just in case just like TileUtils. And well, not 'just in case', without this, tag bind Button-1, then Shift+T, and second time it doesn't work anymore. Probably due to these references not letting the changes go through or something of the sort.
         initial_y = INITIAL_Y_FRAME - 16
         self.createanims.anim_images = []
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame]

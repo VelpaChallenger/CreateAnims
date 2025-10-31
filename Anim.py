@@ -52,6 +52,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.frame_rectangle = None #No ID, will be created later if option is turned on.
 
     def refresh(self):
+        if self.createanims.current_anim_image_rectangle is not None:
+            self.store_anim_image_rectangle_coords() #We need to do it this way cause, once we hit delete, there's no turning back. But at the same time, we need to regenerate everything once it's been deleted. So, yeah.
         self.createanims.anim_canvas.delete("all") #Yeah, we will delete everything just in case just like TileUtils. And well, not 'just in case', without this, tag bind Button-1, then Shift+T, and second time it doesn't work anymore. Probably due to these references not letting the changes go through or something of the sort.
         initial_y = INITIAL_Y_FRAME - 16
         self.createanims.anim_images = []
@@ -75,9 +77,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.anim_canvas.delete(self.frame_rectangle)
         if self.draw_frame_rectangle:
             self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME, INITIAL_Y_FRAME, INITIAL_X_FRAME + 16*frame.metadata.x_length, INITIAL_Y_FRAME + 16*frame.metadata.y_length, outline="red", width=2)
+        if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
+            self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
 
     def decide_transparency_anim_image(self, pre_tkimg, transparency):
         if transparency: #Updated logic. #One of those cases where I prefer == 0 rather than using not.
             pre_tkimg.info['transparency'] = 0
         else: #Yeah now it should be 1, it's a toggle. #Should be None, but I'll interpret any other value the same way. Seems cleaner than elif and then else or just leaving the elif or showing some msg...
             pre_tkimg.info.pop('transparency', None) #No errors if the key doesn't exist.
+
+    def store_anim_image_rectangle_coords(self):
+        self.x1, self.y1, self.x2, self.y2 = self.createanims.anim_canvas.coords(self.createanims.current_anim_image_rectangle)
+        self.x1_inner, self.y1_inner, self.x2_inner, self.y2_inner = self.createanims.anim_canvas.coords(self.createanims.current_anim_image_inner_rectangle)
+        self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer = self.createanims.anim_canvas.coords(self.createanims.current_anim_image_outer_rectangle)
+
+    def regenerate_anim_image_rectangles(self): #Yes, regenerate. For anims, and well could replicate for CHR as well, it's nice to still keep the selection.
+        x1, y1, x2, y2 = self.x1, self.y1, self.x2, self.y2
+        self.createanims.current_anim_image_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="white")
+        x1, y1, x2, y2 = self.x1_inner, self.y1_inner, self.x2_inner, self.y2_inner
+        self.createanims.current_anim_image_inner_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
+        x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
+        self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")

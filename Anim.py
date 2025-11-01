@@ -36,6 +36,10 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
 
     def on_left_click(self, event=None):
         self.select()
+        if self.createanims.current_chr_tile_index is not None: #If there is some tile in the CHR window selected.
+            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
+            frame.tiles[self.anim_index] = self.createanims.current_chr_tile_index
+            self.createanims.anim.refresh()
 
     def on_right_click(self, event=None):
         self.select()

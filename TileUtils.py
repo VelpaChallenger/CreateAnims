@@ -214,6 +214,7 @@ class TileImage:
             self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
             self.chr_canvas.moveto(self.createanims.current_tile_image_inner_rectangle, x, y)
             self.chr_canvas.moveto(self.createanims.current_tile_image_outer_rectangle, x-2, y-2)
+        self.createanims.current_chr_tile_index = self.tile_index #So you might think, why not do like PalRectangle, use the IDs. It breaks logic tile_image_object = self.createanims.tiles_images[tile_id & 0x7F] in Anim. It can still work but I prefer to leave that as it is which is already very clear and instead do this. It makes sense that it's a different logic.
 
     def update_tile_label(self): #I feel more comfortable calling this method from other components rather than on_enter. It will also make it easier if on_enter has to make something additional but from other places it should still be just the label. Very experimental anyways, might change in the future. I already call on_double_click from motion so... yeah.
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")

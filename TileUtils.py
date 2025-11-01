@@ -117,8 +117,6 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.createanims.current_color_picker_rectangle = self.color_picker_rectangle
         self.update_pal_rectangle()
         self.createanims.tile_utils.refresh_chr()
-        if self.createanims.current_tile_image_rectangle is not None: #Typical fix.
-            self.createanims.tile_utils.delete_tile_image_rectangles() #The just in case goes more for the deletion in chr_canvas, but the current selection must be updated to None otherwise we get bug where rectangles are not drawn on screen anymore. Probably images overlap them? Or something of the sort. #Just in case. Let us avoid a memory leak, performance issues and stuff like that.
         self.createanims.anim.refresh()
 
     def update_pal_rectangle(self):
@@ -233,11 +231,15 @@ class TileUtils:
             initial_x += 32
 
     def refresh_chr(self):
+        if self.createanims.current_tile_image_rectangle is not None: #Typical fix. #I put this here but... actually it should be part of refresh. Let's move it.
+            self.store_tile_image_rectangle_coords() #The just in case goes more for the deletion in chr_canvas, but the current selection must be updated to None otherwise we get bug where rectangles are not drawn on screen anymore. Probably images overlap them? Or something of the sort. #Just in case. Let us avoid a memory leak, performance issues and stuff like that.
         self.createanims.chr_canvas.delete("all") #Nah changed my mind but still leaving it here. #I could import it at the top but it gives wrong idea. It's not really something that TileUtils uses like images. It's... for a variable. We could in fact just pass the string and whatever. It's not the same as saying "we can just copypaste the code". It's not the same thing.
         self.createanims.tiles_images = [] #Let's follow same as pal_rectangles for refresh_palette. Sometimes I use clear... this will do. Plus it won't work first time and it's already like this before so, yeah.
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]
         character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
         self.create_chr_images(chr_palette, character_chr)
+        if self.createanims.current_tile_image_rectangle is not None:
+            self.regenerate_tile_image_rectangles()
 
     def create_chr_images(self, chr_palette, character_chr):
         tile_i = 0
@@ -301,6 +303,19 @@ class TileUtils:
         self.createanims.current_tile_image_rectangle = None
         self.createanims.current_tile_image_inner_rectangle = None
         self.createanims.current_tile_image_outer_rectangle = None
+
+    def store_tile_image_rectangle_coords(self):
+        self.x1, self.y1, self.x2, self.y2 = self.createanims.chr_canvas.coords(self.createanims.current_tile_image_rectangle)
+        self.x1_inner, self.y1_inner, self.x2_inner, self.y2_inner = self.createanims.chr_canvas.coords(self.createanims.current_tile_image_inner_rectangle)
+        self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer = self.createanims.chr_canvas.coords(self.createanims.current_tile_image_outer_rectangle)
+
+    def regenerate_tile_image_rectangles(self):
+        x1, y1, x2, y2 = self.x1, self.y1, self.x2, self.y2
+        self.createanims.current_tile_image_rectangle = self.createanims.chr_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="white")
+        x1, y1, x2, y2 = self.x1_inner, self.y1_inner, self.x2_inner, self.y2_inner
+        self.createanims.current_tile_image_inner_rectangle = self.createanims.chr_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
+        x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
+        self.createanims.current_tile_image_outer_rectangle = self.createanims.chr_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
 
     def clear_in_motion(self):
         for tile_image in self.createanims.tiles_images: #tile_images but... whatever. Let's leave tiles_images.

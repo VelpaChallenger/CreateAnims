@@ -150,15 +150,7 @@ class TileImage:
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
 
     def on_left_click(self, event=None):
-        x, y = self.chr_canvas.coords(self.tile_image)
-        if self.createanims.current_tile_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
-            self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
-            self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-            self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black") #And now outer, helps a lot too.
-        else:
-            self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
-            self.chr_canvas.moveto(self.createanims.current_tile_image_inner_rectangle, x, y)
-            self.chr_canvas.moveto(self.createanims.current_tile_image_outer_rectangle, x-2, y-2)
+        self.select()
 
     def on_double_left_click(self, event=None):
         initial_x, initial_y = self.chr_canvas.coords(self.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
@@ -211,6 +203,17 @@ class TileImage:
 
     def on_right_click_release(self, event=None):
         self.createanims.tile_utils.clear_in_motion() #Do it for aaall tile images.
+
+    def select(self):
+        x, y = self.chr_canvas.coords(self.tile_image)
+        if self.createanims.current_tile_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
+            self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
+            self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+            self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black") #And now outer, helps a lot too.
+        else:
+            self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
+            self.chr_canvas.moveto(self.createanims.current_tile_image_inner_rectangle, x, y)
+            self.chr_canvas.moveto(self.createanims.current_tile_image_outer_rectangle, x-2, y-2)
 
 class TileUtils:
 

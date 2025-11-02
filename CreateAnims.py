@@ -33,6 +33,7 @@ class CreateAnims:
         self.current_anim_image_rectangle = None
         self.current_frame = None
         self.palette_directory = None
+        self.chr_directory = None
         self.chr_palette_directory = None
         self.frames_directory = None
 
@@ -80,6 +81,12 @@ class CreateAnims:
         anim_menu.add_command(label="Toggle draw empty cells", command=self.command.toggle_draw_empty_cells, accelerator="e") #We'll add a little 'anim' in the name for me. Yay.
         self.root.bind("e", self.command.toggle_draw_empty_cells)
         menu_bar.add_cascade(label="Anim", menu=anim_menu)
+        import_menu = tkinter.Menu(menu_bar, tearoff=0)
+        import_menu.add_command(label="Palette", command=self.command.import_palette)
+        import_menu.add_command(label="CHR", command=self.command.import_chr)
+        import_menu.add_command(label="CHR Palette", command=self.command.import_chr_palette)
+        import_menu.add_command(label="Frame", command=self.command.import_frame)
+        menu_bar.add_cascade(label="Import", menu=import_menu)
         self.root.config(menu=menu_bar)
 
     def create_color_picker(self): #Its own function 'cause, it does have some complexity. #Also, it could be in TileUtils but... it's initialization still. So I'll go this route.

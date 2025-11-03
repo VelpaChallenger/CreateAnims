@@ -67,6 +67,34 @@ SYSTEM_PALETTE = [
 	[0, 0, 0],
 ]
 
+def func_PalRectangle_on_enter(createanims, pal_rectangle, event=None): #Same, wrapper for memory leak issues. I'll probably add it somewhere and... or I just say it over again whatever.
+    pal_rectangle_object = createanims.pal_rectangles[pal_rectangle]
+    pal_rectangle_object.on_enter(event)
+
+def func_PalRectangle_on_left_click(createanims, pal_rectangle, event=None):
+    pal_rectangle_object = createanims.pal_rectangles[pal_rectangle]
+    pal_rectangle_object.on_left_click(event)
+
+def func_TileImage_on_enter(createanims, tile_index, event=None):
+    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object.on_enter(event)
+
+def func_TileImage_on_left_click(createanims, tile_index, event=None):
+    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object.on_left_click(event)
+
+def func_TileImage_on_double_left_click(createanims, tile_index, event=None):
+    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object.on_double_left_click(event)
+
+def func_TileImage_on_right_click_motion(createanims, tile_index, event=None):
+    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object.on_right_click_motion(event)
+
+def func_TileImage_on_right_click_release(createanims, tile_index, event=None):
+    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object.on_right_click_release(event)
+
 class PalRectangle: #I usually don't do this, but whatever. The main is TileUtils.
 
     def __init__(self, createanims, palette_canvas, pal_rectangle, character_pal_index, pal, pal_label):
@@ -76,8 +104,8 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
         self.character_pal_index = character_pal_index #This will be used to know what value to update such that now when refresh_palette runs, it will display updated palette.
         self.pal = pal
         self.pal_label = pal_label
-        self.palette_canvas.tag_bind(self.pal_rectangle, "<Enter>", self.on_enter)
-        self.palette_canvas.tag_bind(self.pal_rectangle, "<Button-1>", self.on_left_click)
+        self.palette_canvas.tag_bind(self.pal_rectangle, "<Enter>", lambda event: func_PalRectangle_on_enter(createanims, pal_rectangle, event))
+        self.palette_canvas.tag_bind(self.pal_rectangle, "<Button-1>", lambda event: func_PalRectangle_on_left_click(createanims, pal_rectangle, event))
 
     def on_enter(self, event=None):
         self.pal_label.config(text=f"Palette: {self.pal:02X}")
@@ -139,11 +167,11 @@ class TileImage:
         self.tile_label = tile_label
         self.pre_tkimg = pre_tkimg #This is the image as in img.putpalette. It's before we do the conversion from PIL image to Tkinter image. So, pre_tkimg. Useful for transparency when drawing anim.
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
-        self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter)
-        self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
-        self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", self.on_double_left_click)
-        self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", self.on_right_click_motion)
-        self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", self.on_right_click_release)
+        self.chr_canvas.tag_bind(self.tile_image, "<Enter>", lambda event: func_TileImage_on_enter(createanims, tile_index, event))
+        self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", lambda event: func_TileImage_on_left_click(createanims, tile_index, event))
+        self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", lambda event: func_TileImage_on_double_left_click(createanims, tile_index, event))
+        self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", lambda event: func_TileImage_on_right_click_motion(createanims, tile_index, event))
+        self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", lambda event: func_TileImage_on_right_click_release(createanims, tile_index, event))
         self.in_motion = False
 
     def on_enter(self, event=None):

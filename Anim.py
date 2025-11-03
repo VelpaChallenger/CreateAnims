@@ -3,6 +3,18 @@ from PIL import Image, ImageTk
 INITIAL_X_FRAME = 50 #To know from where to start col by col, row by row. The cells.
 INITIAL_Y_FRAME = 36
 
+def func_AnimImage_on_left_click(createanims, anim_index, event=None): #A wrapper to go around memory leak issues with Tkinter.
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_left_click(event)
+
+def func_AnimImage_on_right_click(createanims, anim_index, event=None): #Idem
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_right_click(event)
+
+def func_AnimImage_on_double_right_click(createanims, anim_index, event=None): #Idem
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_double_right_click(event)
+
 class Frame:
     
     def __init__(self, frame_bytes):
@@ -31,9 +43,9 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.tile_label = tile_label
         self.pre_tkimg = pre_tkimg #This is the image as in img.putpalette. It's before we do the conversion from PIL image to Tkinter image. So, pre_tkimg. Useful for transparency when drawing anim.
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
-        self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", self.on_left_click)
-        self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", self.on_right_click)
-        self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", self.on_double_right_click)
+        self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", lambda event: func_AnimImage_on_left_click(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", lambda event: func_AnimImage_on_right_click(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", lambda event: func_AnimImage_on_double_right_click(createanims, anim_index, event))
 
     def on_left_click(self, event=None):
         self.select()
@@ -91,7 +103,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     pre_tkimg = tile_image_object.pre_tkimg
                     self.decide_transparency_anim_image(pre_tkimg, self.transparency)
                     final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16))) #So yes, actually different images with same base, but still different.
-                    anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img) #WARNING! Potential memory issue here. I'm never deleting this anim_image with each refresh. Not a problem after doing many many tests but... it does make me curious that it seemed to be a problem with the CHR canvas. Or maybe that one was getting slower for different reasons. Could be. Still taking note of that here in case it comes handy later.
+                    anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img) #Thanks past me. Issue solved. #WARNING! Potential memory issue here. I'm never deleting this anim_image with each refresh. Not a problem after doing many many tests but... it does make me curious that it seemed to be a problem with the CHR canvas. Or maybe that one was getting slower for different reasons. Could be. Still taking note of that here in case it comes handy later.
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, tile_image_object, anim_image, cell_id, tile_image_object.tile_palette_group, self.createanims.tile_label, pre_tkimg, final_img))
                 else: #We will draw something, but not an image. A rectangle. A blue rectangle.
                     pixels = [0x00] * 64 #Fully transparent. This works as a fill.

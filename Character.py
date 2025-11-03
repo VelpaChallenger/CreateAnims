@@ -6,9 +6,9 @@ class Character:
         self.name = character_name #Not sure if we'll need it but... maybe for display purposes? We could add a dictionary or something... anyways, don't want to include too much in this final commit before going back to main.
         self.createanims = createanims
         self.palette = self.get_palette(character_name)
-        chr_ids = [0x9C] #When I add more characters, there'll be more and they'll be obtained after we parse the anim file.
+        self.frames = self.get_frames(character_name, [0x00, 0x01])
+        chr_ids = [self.frames[1].metadata.chr_bank] #When I add more characters, there'll be more and they'll be obtained after we parse the anim file.
         self.chr_palettes, self.chrs = self.get_chrs_and_palettes(character_name, chr_ids) #Whatever, the and makes it clear. Any other name to include both just doesn't make it clear.
-        self.frames = self.get_frames(character_name, [0x00, 0x01, 0x02, 0x03, 0x04, 0x05])
 
     def get_chrs_and_palettes(self, name, chr_ids): #Yeah, after all we're kinda going to do the loop thing now, though not entirely but leaving the bases.
         chr_palettes = {}

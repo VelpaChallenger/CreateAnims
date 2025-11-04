@@ -167,12 +167,15 @@ class TileImage:
         self.tile_label = tile_label
         self.pre_tkimg = pre_tkimg #This is the image as in img.putpalette. It's before we do the conversion from PIL image to Tkinter image. So, pre_tkimg. Useful for transparency when drawing anim.
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
+        self.bind(createanims, tile_index)
+        self.in_motion = False
+
+    def bind(self, createanims, tile_index): #I've been wanting to do this in a while. Let's take this opportunity to do it.
         self.chr_canvas.tag_bind(self.tile_image, "<Enter>", lambda event: func_TileImage_on_enter(createanims, tile_index, event))
         self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", lambda event: func_TileImage_on_left_click(createanims, tile_index, event))
         self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", lambda event: func_TileImage_on_double_left_click(createanims, tile_index, event))
         self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", lambda event: func_TileImage_on_right_click_motion(createanims, tile_index, event))
         self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", lambda event: func_TileImage_on_right_click_release(createanims, tile_index, event))
-        self.in_motion = False
 
     def on_enter(self, event=None):
         self.update_tile_label() #I could also say refresh but refresh gives me more the idea of like, what I do for CHR and anim. It's not exactly that here.
@@ -196,11 +199,7 @@ class TileImage:
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         self.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         self.final_img = final_img #And again, we need to keep the reference.
-        self.chr_canvas.tag_bind(self.tile_image, "<Enter>", self.on_enter) #Maybe... it would be better to just create a new TileImage altogether.
-        self.chr_canvas.tag_bind(self.tile_image, "<Button-1>", self.on_left_click)
-        self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", self.on_double_left_click)
-        self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", self.on_right_click_motion)
-        self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", self.on_right_click_release)
+        self.bind(self.createanims, self.tile_index)
         x, y = initial_x, initial_y
         self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
         self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.

@@ -5,6 +5,7 @@ from tkinter import Tk
 
 from TileUtils import *
 from Command import *
+from EntryReturn import *
 from Anim import *
 
 FONT = ("TkDefaultFont", 16)
@@ -24,6 +25,7 @@ class CreateAnims:
         self.root = Tk()
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
+        self.entry_return = EntryReturn(self)
         self.anim = Anim(self)
         self.characters = []
         self.current_pal_rectangle = None
@@ -64,7 +66,9 @@ class CreateAnims:
         frame_chr_bank.grid(row=0, column=0, sticky="nw")
         self.chr_label = tkinter.Label(frame_chr_bank, text="CHR Bank:", anchor="w", font=FONT)
         self.chr_label.pack(side="left")
-        self.chr_entry = tkinter.Entry(frame_chr_bank, width=3, font=FONT)
+        vcmd = (self.root.register(self.tile_utils.validate_chr_bank), "%P")
+        self.chr_entry = tkinter.Entry(frame_chr_bank, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.chr_entry.bind("<Return>", self.entry_return.chr_entry)
         self.chr_entry.pack(side="left")
         self.chr_canvas = tkinter.Canvas(frame_chr, width=256, height=128, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
         self.chr_canvas.grid(row=1, column=0)

@@ -354,3 +354,16 @@ class TileUtils:
     def clear_in_motion(self):
         for tile_image in self.createanims.tiles_images: #tile_images but... whatever. Let's leave tiles_images.
             tile_image.in_motion = False
+
+    def validate_chr_bank(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            return False
+        if int(new_value) > 255: #Validation 2: value must not be greater than 255.
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            return False
+        return True

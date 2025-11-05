@@ -44,14 +44,14 @@ class CreateAnims:
         self.root.geometry(f"{WIDTH}x{HEIGHT}+{INITIAL_X}+{INITIAL_Y}") #It's how my mind sees things. It's the initial, you might drag the window around and stuff. #Window x/y could be alternative name.
 
         frame_stage = tkinter.Frame(self.root, border=0) #Scenario also. But I like more stage. It's where the action happens.
-        frame_stage.grid(row=0, column=0, columnspan=2, sticky="w")
+        frame_stage.grid(row=0, column=0, columnspan=3, sticky="w")
         self.stage_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0", borderwidth=0, highlightthickness=0)
         self.stage_canvas.grid(row=0, column=0)
         self.anim_canvas = tkinter.Canvas(frame_stage, width=200, height=256, cursor="hand2", borderwidth=0, highlightthickness=0)
         self.anim_canvas.grid(row=0, column=0)
 
         frame_palette = tkinter.Frame(self.root, border=0)
-        frame_palette.grid(row=1, column=0, sticky="nw")
+        frame_palette.grid(row=1, column=0, rowspan=3, sticky="nw")
         self.pal_label = tkinter.Label(frame_palette, text="Palette:", anchor="w", font=FONT)
         self.pal_label.grid(row=0, column=0, sticky="w")
         self.character_palette_canvas = tkinter.Canvas(frame_palette, width=256, height=32, bg="#808080", cursor="hand2", borderwidth=0, highlightthickness=0)
@@ -61,7 +61,7 @@ class CreateAnims:
         self.create_color_picker()
 
         frame_chr = tkinter.Frame(self.root, border=0)
-        frame_chr.grid(row=1, column=1, sticky="nw")
+        frame_chr.grid(row=1, column=1, rowspan=3, columnspan=2, sticky="nw")
         frame_chr_bank = tkinter.Frame(frame_chr, border=0)
         frame_chr_bank.grid(row=0, column=0, sticky="nw")
         self.chr_label = tkinter.Label(frame_chr_bank, text="CHR Bank:", anchor="w", font=FONT)
@@ -74,6 +74,8 @@ class CreateAnims:
         self.chr_canvas.grid(row=1, column=0)
         self.tile_label = tkinter.Label(frame_chr, text="Tile: 00 / 00", anchor="w", font=FONT)
         self.tile_label.grid(row=2, column=0, sticky="w")
+        self.chr_info = tkinter.LabelFrame(frame_chr, text="CHR INFO", bd=2, width=150, height=160)
+        self.chr_info.grid(row=0, column=1, rowspan=3, padx=15, sticky="nw")
 
         menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(menu_bar, tearoff=0)

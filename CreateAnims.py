@@ -76,6 +76,8 @@ class CreateAnims:
         self.tile_label.grid(row=2, column=0, sticky="w")
         self.chr_info = tkinter.LabelFrame(frame_chr, text="CHR INFO", bd=2, width=150, height=160)
         self.chr_info.grid(row=0, column=1, rowspan=3, padx=15, sticky="nw")
+        self.chr_info_text = tkinter.Label(self.chr_info, text="", justify="left", wraplength=142)
+        self.chr_info_text.place(x=5, y=5)
 
         menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(menu_bar, tearoff=0)

@@ -357,13 +357,23 @@ class TileUtils:
 
     def validate_chr_bank(self, new_value):
         if not new_value: #Empty value is always welcome.
+            self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.chr_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
+            self.createanims.chr_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.chr_info_text.configure(text="CHR Bank must be a decimal number including zero.", fg="red")
             return False
         if int(new_value) > 255: #Validation 2: value must not be greater than 255.
+            self.createanims.chr_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.chr_info_text.configure(text="CHR Bank cannot be greater than 255.", fg="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.chr_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.chr_info_text.configure(text="CHR Bank cannot start with zero.", fg="red")
             return False
+        self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.chr_info_text.configure(text="")
         return True

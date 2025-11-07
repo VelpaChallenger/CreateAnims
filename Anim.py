@@ -144,3 +144,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.current_anim_image_inner_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
         x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
         self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
+
+    def validate_anim_entry(self, new_value):
+        return True
+
+    def validate_frame_entry(self, new_value):
+        return True
+
+    def validate_frame_id_entry(self, new_value):
+        return True

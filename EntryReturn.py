@@ -11,3 +11,12 @@ class EntryReturn:
             return False
         new_chr_bank = int(chr_entry_value)
         self.createanims.tile_utils.load_new_chr_bank(new_chr_bank) #New because it's not exactly the same thing we do on init. We don't display the text for example. Nor we care if the character has the CHR or not.
+
+    def anim_entry(self, event=None):
+        pass
+
+    def frame_entry(self, event=None):
+        pass
+
+    def frame_id_entry(self, event=None):
+        pass

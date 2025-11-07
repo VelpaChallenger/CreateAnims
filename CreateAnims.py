@@ -109,6 +109,48 @@ class CreateAnims:
         menu_bar.add_cascade(label="Import", menu=import_menu)
         self.root.config(menu=menu_bar)
 
+        separator = ttk.Separator(self.root, orient='horizontal')
+        separator.grid(row=4, column=0, columnspan=3, sticky="nsew")
+
+        frame_anim_field = tkinter.Frame(self.root, border=0) #Let's call these fields rather than entries.
+        frame_anim_field.grid(row=5, column=0, sticky="nw", padx=5, pady=5)
+        self.anim_label = tkinter.Label(frame_anim_field, text="Anim:", anchor="w", font=FONT, width=8)
+        self.anim_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_anim_entry), "%P")
+        self.anim_entry = tkinter.Entry(frame_anim_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.anim_entry.bind("<Return>", self.entry_return.anim_entry)
+        self.anim_entry.pack(side="left")
+        self.anim_left_arrow = ttk.Button(frame_anim_field, text="", style="Left.TButton")
+        self.anim_left_arrow.pack(side="left", padx=(5, 2))
+        self.anim_right_arrow = ttk.Button(frame_anim_field, text="", style="Right.TButton")
+        self.anim_right_arrow.pack(side="left")
+
+        frame_field = tkinter.Frame(self.root, border=0)
+        frame_field.grid(row=6, column=0, sticky="nw", padx=5, pady=5)
+        self.frame_label = tkinter.Label(frame_field, text="Frame:", anchor="w", font=FONT, width=8)
+        self.frame_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_frame_entry), "%P")
+        self.frame_entry = tkinter.Entry(frame_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.frame_entry.bind("<Return>", self.entry_return.frame_entry)
+        self.frame_entry.pack(side="left")
+        self.frame_left_arrow = ttk.Button(frame_field, text="", style="Left.TButton")
+        self.frame_left_arrow.pack(side="left", padx=(5, 2))
+        self.frame_right_arrow = ttk.Button(frame_field, text="", style="Right.TButton")
+        self.frame_right_arrow.pack(side="left")
+
+        frame_id_field = tkinter.Frame(self.root, border=0)
+        frame_id_field.grid(row=7, column=0, sticky="nw", padx=5, pady=5)
+        self.frame_id_label = tkinter.Label(frame_id_field, text="Frame ID:", anchor="w", font=FONT, width=8)
+        self.frame_id_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_frame_id_entry), "%P")
+        self.frame_id_entry = tkinter.Entry(frame_id_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.frame_id_entry.bind("<Return>", self.entry_return.frame_id_entry)
+        self.frame_id_entry.pack(side="left")
+        self.frame_id_left_arrow = ttk.Button(frame_id_field, text="", style="Left.TButton")
+        self.frame_id_left_arrow.pack(side="left", padx=(5, 2))
+        self.frame_id_right_arrow = ttk.Button(frame_id_field, text="", style="Right.TButton")
+        self.frame_id_right_arrow.pack(side="left")
+
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 
     def make_styles(self):

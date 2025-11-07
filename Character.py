@@ -26,7 +26,7 @@ class Character:
         return palette
 
     def get_chr_palette(self, name, chr_id): #When we include absolutely every CHR_PALETTE with its corresponding CHR (I used uppercase cause I wanted to), we can iterate over a loop and then append to a chr_palettes and character_chrs. Awesome.
-        with open(f"{self.createanims.root_dir}/{name}/chr/{name}_chr_palette_{chr_id:03d}.chr.pal", "rb") as character_chr_pal:
+        with open(f"{self.createanims.root_dir}/{name}/chr/{name}_chr_pal_{chr_id:03d}.chr.pal", "rb") as character_chr_pal:
             chr_palette = list(character_chr_pal.read())
         return chr_palette
 

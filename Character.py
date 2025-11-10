@@ -45,7 +45,7 @@ class Character:
 
     def get_frames_ids(self, name):
         frames_filenames=os.listdir(f"{self.createanims.root_dir}{os.sep}{name}{os.sep}frames") #Don't ask me why here I use os.sep and in other places I use forward slash.
-        frames_ids = [int(frame_filename.split(".frame")[0][-2:]) for frame_filename in frames_filenames]
+        frames_ids = [int(frame_filename.split(".frame")[0][-3:]) for frame_filename in frames_filenames]
         return frames_ids
 
     def get_frames(self, name, frame_ids):
@@ -56,13 +56,13 @@ class Character:
         return frames
 
     def get_frame(self, name, frame_id):
-        with open(f"{self.createanims.root_dir}/{name}/frames/{name}_frame_{frame_id:02d}.frame", "rb") as character_frame:
+        with open(f"{self.createanims.root_dir}/{name}/frames/{name}_frame_{frame_id:03d}.frame", "rb") as character_frame:
             frame = Frame(list(character_frame.read()))
         return frame
 
     def get_anims_ids(self, name):
         anims_filenames=os.listdir(f"{self.createanims.root_dir}{os.sep}{name}{os.sep}anims") #Don't ask me why here I use os.sep and in other places I use forward slash.
-        anims_ids = [int(anim_filename.split(".anim")[0][-2:]) for anim_filename in anims_filenames]
+        anims_ids = [int(anim_filename.split(".anim")[0][-3:]) for anim_filename in anims_filenames]
         return anims_ids
 
     def get_anims(self, name, anim_ids):
@@ -73,6 +73,6 @@ class Character:
         return anims
 
     def get_anim(self, name, anim_id):
-        with open(f"{self.createanims.root_dir}/{name}/anims/{name}_anim_{anim_id:02d}.anim", "rb") as character_anim:
+        with open(f"{self.createanims.root_dir}/{name}/anims/{name}_anim_{anim_id:03d}.anim", "rb") as character_anim:
             anim = CharacterAnim(list(character_anim.read()))
         return anim

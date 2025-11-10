@@ -1,9 +1,13 @@
+import os
+
 from CreateAnims import *
 from Character import *
 
 def load_game_anims(createanims): #Another idea was to have a call to this in init_state, which makes sense considering we're initializing values. But then I would sort of have a circular dependency. I would have to put that stuff in yet another file, and I kinda like it here in the main file, so to speak. So that's why I ended up doing this way. It still makes sense: all the data has to go to createanims.
-    character = Character(createanims, "sub_zero") #load_character("subzero") #What character to load. It's a prefix of sorts that might be needed for every character to get the right files? But I need to change how that is displayed so that users won't see pure keys let's say, or these IDs.
-    createanims.characters.append(character)
+    characters_name_list = os.listdir(createanims.root_dir)
+    for character_name in characters_name_list:
+        character = Character(createanims, character_name)
+        createanims.characters.append(character)
 
 def main():
     createanims = CreateAnims()

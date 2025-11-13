@@ -2,7 +2,7 @@ import os
 from PIL import Image, ImageTk
 
 INITIAL_X_FRAME = 375 #To know from where to start col by col, row by row. The cells.
-INITIAL_Y_FRAME = 36
+INITIAL_Y_FRAME = 200
 
 def func_AnimImage_on_left_click(createanims, anim_index, event=None): #A wrapper to go around memory leak issues with Tkinter.
     anim_image_object = createanims.anim_images[anim_index]
@@ -27,9 +27,9 @@ class FrameMetaData: #To make it clear that it's not the frame itself.
     def __init__(self, frame_bytes):
         self.x_length = frame_bytes[0]
         self.y_length = frame_bytes[1]
-        self.x_offset = frame_bytes[2]
+        self.x_offset = (frame_bytes[2] & 0x7F) * (1 if (frame_bytes[2] & 0x80) else -1) #For flipped, can add + and the same logic. -8 or 0. #Also yes, it's inverted between y offset and x offset. Go ask HT. #Don't get me wrong, it's still opposite. But, I put - y_offset instead of + y_offset to make it closer to what the code does. Who knows? Maybe whatever tool they were using at the time (we're talking the 90s) was doing operations like these, and the consequences of their inner workings are relevant even today, 30+ years later.
         self.chr_bank = frame_bytes[3]
-        self.y_offset = (frame_bytes[4] & 0xF) * (-1 if (frame_bytes[4] & 0x10) else 1) #I don't usually use ternary in Python but here it is pretty convenient.
+        self.y_offset = (frame_bytes[4] & 0xF) * (1 if (frame_bytes[4] & 0x10) else -1) #I don't usually use ternary in Python but here it is pretty convenient.
         self.special_palette_id = 0 #Unused, but we may give it an use later on.
 
 class CharacterAnim: #Yeah I know. Maybe it was better to say AnimUtils from the beginning. Meh. This works.
@@ -96,12 +96,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if self.createanims.current_anim_image_rectangle is not None:
             self.store_anim_image_rectangle_coords() #We need to do it this way cause, once we hit delete, there's no turning back. But at the same time, we need to regenerate everything once it's been deleted. So, yeah.
         self.createanims.anim_canvas.delete("all") #Yeah, we will delete everything just in case just like TileUtils. And well, not 'just in case', without this, tag bind Button-1, then Shift+T, and second time it doesn't work anymore. Probably due to these references not letting the changes go through or something of the sort.
-        initial_y = INITIAL_Y_FRAME - 16
         self.createanims.anim_images = []
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) - 16 #Has to happen at this point, where we now have access to the frame metadata. Also *2 because if y offset is 5, that means 10 pixels away in our system.
         cell_id = 0 #Let's call it this way, probably the most accurate. tile_id could be confused with the tile_id stored in the cell, frame_tile_id would be another candidate to refer to the tile_id stored in the frame, but mixing frame and tile can be a bit confusing as with row and tile in the same name (I did it for TileUtils).
         for row in range(frame.metadata.y_length):
-            initial_x = INITIAL_X_FRAME
+            initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
             initial_y += 16
             for col in range(frame.metadata.x_length):
                 tile_id = frame.tiles[cell_id]
@@ -129,7 +129,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if self.frame_rectangle is not None:
             self.createanims.anim_canvas.delete(self.frame_rectangle)
         if self.draw_frame_rectangle:
-            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME, INITIAL_Y_FRAME, INITIAL_X_FRAME + 16*frame.metadata.x_length, INITIAL_Y_FRAME + 16*frame.metadata.y_length, outline="red", width=2)
+            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2)
         if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
             self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
 

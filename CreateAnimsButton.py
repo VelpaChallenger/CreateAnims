@@ -53,7 +53,6 @@ class CreateAnimsButton:
         self.createanims.anim.disable_all()
         self.createanims.tile_utils.disable_all()
         self.createanims.play_anim_label = tkinter.Label(self.createanims.anim_canvas, bd=0)
-        self.createanims.play_anim_label.place(x=375, y=36)
         self.play_anim()
 
     def play_anim(self, event=None): #The one that runs over and over. Then the init code runs only once. Alternative is to create StringVar and then trace and pass this. But you still get two functions. I like more this.
@@ -65,6 +64,8 @@ class CreateAnimsButton:
         frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
         img = tkinter.PhotoImage(file=f"{self.createanims.root_dir}/{character.name}/images/{character.name}_frame_{frame_id:03d}.png") #(self.createanims.tiles_images[0].pre_tkimg.resize((16, 16)))
         self.createanims.png_img.append(img) #Say no to garbage collection of PhotoImage.
+        frame = character.frames[frame_id]
+        self.createanims.play_anim_label.place(x=375+(frame.metadata.x_offset*2), y=200 - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length))
         self.createanims.play_anim_label.configure(image=img)
         if self.createanims.current_frame == len(character.anims[self.createanims.current_anim].frame_ids) - 1:
             self.createanims.current_frame = 0

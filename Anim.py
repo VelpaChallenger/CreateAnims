@@ -227,22 +227,22 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
-    def load_new_character(self, new_character):
+    def load_new_character(self, new_character, new_frame=0):
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_character = new_character
         self.createanims.character_entry.delete(0, "end")
         self.createanims.character_entry.insert(0, str(new_character))
         self.decide_arrow_buttons_status(new_character, len(self.createanims.characters) - 1, self.createanims.character_left_arrow, self.createanims.character_right_arrow)
-        self.load_new_anim(self.createanims.current_anim) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
+        self.load_new_anim(self.createanims.current_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
 
-    def load_new_anim(self, new_anim):
+    def load_new_anim(self, new_anim, new_frame=0):
         self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_anim = new_anim
         self.createanims.anim_entry.delete(0, "end")
         self.createanims.anim_entry.insert(0, str(new_anim))
         character = self.createanims.characters[self.createanims.current_character]
         self.decide_arrow_buttons_status(new_anim, len(character.anims) - 1, self.createanims.anim_left_arrow, self.createanims.anim_right_arrow)
-        self.load_new_frame(0, refresh_UI_flag=False) #We always start at the first frame of the anim.
+        self.load_new_frame(new_frame, refresh_UI_flag=False) #We always start at the first frame of the anim. #But can be changed/adjusted. Very useful to keep editing the same frame after stop anim.
         self.createanims.refresh_UI() #Potencial refactor: let load_new_chr_bank do the UI refresh. So don't pass flag anymore. And make sure to decide arrow status and stuff before loading new CHR bank. In theory, it shouldn't affect anything, if load runs last.
 
     def load_new_frame(self, new_frame, refresh_UI_flag=True):

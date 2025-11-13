@@ -45,6 +45,7 @@ class CreateAnimsButton:
 
     def play_anim_button(self, event=None):
         import tkinter
+        self.createanims.current_frame_aux = self.createanims.current_frame
         self.createanims.anim.generate_png_from_anim_frames(self.createanims.characters[self.createanims.current_character]) #From the frames in the anim.
         self.createanims.in_play_anim = True
         self.createanims.play_anim_button.configure(state="disabled")
@@ -77,7 +78,7 @@ class CreateAnimsButton:
         self.createanims.anim.enable_all()
         self.createanims.tile_utils.enable_all()
         self.createanims.play_anim_label.destroy()
-        self.createanims.anim.load_new_character(self.createanims.current_character) #For now, but the idea is to save whatever frame was active when the anim was started. Then restore that. So load_new_frame and that frame. Anim will be the same, cannot be changed during playing since it's all disabled.
+        self.createanims.anim.load_new_character(self.createanims.current_character, new_frame=self.createanims.current_frame_aux) #For now, but the idea is to save whatever frame was active when the anim was started. Then restore that. So load_new_frame and that frame. Anim will be the same, cannot be changed during playing since it's all disabled.
         self.createanims.play_anim_button.configure(state="normal")
         self.createanims.stop_anim_button.configure(state="disabled")
         self.createanims.in_play_anim = False

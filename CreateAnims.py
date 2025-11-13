@@ -50,9 +50,7 @@ class CreateAnims:
 
         frame_stage = tkinter.Frame(self.root, border=0) #Scenario also. But I like more stage. It's where the action happens.
         frame_stage.grid(row=0, column=0, columnspan=3, sticky="w")
-        self.stage_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0", borderwidth=0, highlightthickness=0)
-        self.stage_canvas.grid(row=0, column=0)
-        self.anim_canvas = tkinter.Canvas(frame_stage, width=200, height=256, cursor="hand2", borderwidth=0, highlightthickness=0)
+        self.anim_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0", borderwidth=0, highlightthickness=0)
         self.anim_canvas.grid(row=0, column=0)
 
         frame_palette = tkinter.Frame(self.root, border=0)
@@ -161,7 +159,7 @@ class CreateAnims:
         self.frame_id_right_arrow.pack(side="left")
 
         frame_character = tkinter.Frame(frame_command_base)
-        frame_character.pack(side="top")
+        frame_character.pack(side="left", anchor="nw")
 
         frame_character_field = tkinter.Frame(frame_character)
         frame_character_field.grid(row=5, column=0, sticky="nw", padx=5, pady=5)
@@ -176,13 +174,14 @@ class CreateAnims:
         self.character_right_arrow = ttk.Button(frame_character_field, text="", style="Right.TButton", command=self.button.character_right_arrow_button)
         self.character_right_arrow.pack(side="left")
 
+        separator = ttk.Separator(frame_command_base, orient='vertical')
+        separator.pack(side="left", anchor="nw", fill="both")
+
         frame_anim_player = tkinter.Frame(frame_command_base) #Anim player, I like the sound of that! Then play_anim for the button itself. Or maybe button will be here in this frame.
         frame_anim_player.pack(side="left")
 
-        self.play_anim_button = ttk.Button(frame_anim_player, text="Play Anim", command=self.button.play_anim)
+        self.play_anim_button = ttk.Button(frame_anim_player, text="Play Anim", command=self.button.play_anim_button)
         self.play_anim_button.pack(side="left", padx=(5, 2))
-        self.play_anim_label = tkinter.Label(frame_anim_player)
-        self.play_anim_label.pack(side="left")
 
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 

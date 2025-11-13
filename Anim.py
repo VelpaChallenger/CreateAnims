@@ -1,6 +1,6 @@
 from PIL import Image, ImageTk
 
-INITIAL_X_FRAME = 50 #To know from where to start col by col, row by row. The cells.
+INITIAL_X_FRAME = 375 #To know from where to start col by col, row by row. The cells.
 INITIAL_Y_FRAME = 36
 
 def func_AnimImage_on_left_click(createanims, anim_index, event=None): #A wrapper to go around memory leak issues with Tkinter.

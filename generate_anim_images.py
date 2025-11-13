@@ -64,7 +64,7 @@ def get_tile_palette(character_palette, tile_i, chr_palette):
         pal_group = character_palette[5:8] #Custom code. So for this specific case, we want first to be always white. #This makes it more explicit that I want exactly the last 4.
     else:
         pal_group = character_palette[1:4]
-    rgb_triplet = [252, 252, 252] #Always white or whatever we want, configurable from here. # (Moved comment) #Update black to white.
+    rgb_triplet = [0xE0, 0xE0, 0xE0] #Always white or whatever we want, configurable from here. # (Moved comment) #Update black to white.
     tile_palette.extend(rgb_triplet)
     for pal in pal_group: #Some call the pal_group the subpalette so aka subpalette.
         rgb_triplet = SYSTEM_PALETTE[pal]
@@ -86,7 +86,7 @@ def generate_png(frame):
             else:
                 pixels = [0x00] * 64 #Maybe I can create an image like this and just reference it? Not sure how'd that work but might be worth a try. #Fully transparent. This works as a fill.
                 img = Image.frombytes("P", (8, 8), bytes(pixels))
-                tile_palette = [252] * 12 #Like, just whatever. We won't use them.
+                tile_palette = [0xE0] * 12 #Like, just whatever. We won't use them.
                 img.putpalette(tile_palette)
                 pre_tkimg = img
                 png.paste(pre_tkimg.resize((16, 16)), (initial_x, initial_y))

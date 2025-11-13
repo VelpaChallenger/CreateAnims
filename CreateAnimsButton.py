@@ -43,7 +43,14 @@ class CreateAnimsButton:
         new_character = self.createanims.current_character + 1
         self.createanims.anim.load_new_character(new_character)
 
-    def play_anim(self, event=None):
+    def play_anim_button(self, event=None):
+        import tkinter
+        self.createanims.anim_canvas.delete('all')
+        self.createanims.play_anim_label = tkinter.Label(self.createanims.anim_canvas, bd=0)
+        self.createanims.play_anim_label.place(x=375, y=36)
+        self.play_anim()
+
+    def play_anim(self, event=None): #The one that runs over and over. Then the init code runs only once. Alternative is to create StringVar and then trace and pass this. But you still get two functions. I like more this.
         import tkinter
         self.createanims.png_img.clear()
         character = self.createanims.characters[self.createanims.current_character]

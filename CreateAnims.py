@@ -17,6 +17,11 @@ HEIGHT = 620
 INITIAL_X = 500
 INITIAL_Y = 200
 
+PHYSICS_WIDTH = 430
+PHYSICS_HEIGHT = 310
+PHYSICS_INITIAL_X = 600
+PHYSICS_INITIAL_Y = 250
+
 class CreateAnims:
 
     def __init__(self):
@@ -199,6 +204,8 @@ class CreateAnims:
         self.play_anim_button.pack(side="top", padx=(5, 2), pady=(5, 5))
         self.stop_anim_button = ttk.Button(frame_anim_player, text="Stop Anim", command=self.button.stop_anim_button, state="disabled") #Only one can be active at a time.
         self.stop_anim_button.pack(side="top", padx=(5, 2), pady=(5, 5))
+        self.edit_physics_button = ttk.Button(frame_anim_player, text="Edit Physics", command=self.button.edit_physics_button)
+        self.edit_physics_button.pack(side="top", padx=(5, 2), pady=(5, 5))
 
         self.root.bind_all("<Button-1>", lambda event: event.widget.focus_set())
 
@@ -235,6 +242,18 @@ class CreateAnims:
                 self.color_picker_rectangles.append(ColorPickerRectangle(self, self.color_picker_canvas, color_picker_rectangle, pal_index, rgb, self.pal_label))
                 initial_x += 16
                 pal_index += 1
+
+    def init_physics_window(self): #Probably will have a destroy as well? In case of Ok/Cancel.
+        self.physics_window = tkinter.Toplevel(self.root)
+        self.physics_window.title("Create Anims Physics Manager") #Sometimes dreams come true! Believe in them!
+        self.physics_window.geometry(f"{PHYSICS_WIDTH}x{PHYSICS_HEIGHT}+{PHYSICS_INITIAL_X}+{PHYSICS_INITIAL_Y}")
+        self.root.attributes('-disabled', 1)
+        self.physics_window.transient(self.root) # set to be on top of the main window
+        self.physics_window.grab_set() # hijack all commands from the master (clicks on the main window are ignored)
+        self.physics_window.focus_force()
+        self.root.wait_window(self.physics_window) # pause anything on the main window until this one closes
+        self.root.attributes('-disabled', 0)
+        self.root.focus_force()
 
     def refresh_UI(self): #This will be part of CreateAnims. All directly UI-related, idea is that it's here. Maybe not the technical like more specific code per se, but at least the highest layer.
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.

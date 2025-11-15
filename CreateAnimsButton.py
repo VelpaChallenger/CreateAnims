@@ -72,3 +72,6 @@ class CreateAnimsButton:
         self.createanims.play_anim_button.configure(state="normal")
         self.createanims.stop_anim_button.configure(state="disabled")
         self.createanims.in_play_anim = False
+
+    def edit_physics_button(self, event=None):
+        self.createanims.init_physics_window() #All UI related is always CreateAnims.

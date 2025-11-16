@@ -435,6 +435,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         current_x = 0 #Exact same logic as play_anim
         current_y = 0
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        if len(physics) == 1: #Then there's only an 0x80 left. Not possible. Every physics needs to have at least 1 pair.
+            physics.insert(0, 0x00)
+            physics.insert(0, 0x00)
+            messagebox.showinfo(title="Physics Automatic Addition", message=f"Physics ID {self.createanims.current_physics_id} was found to be empty (just an $80 byte). This means the physics is UNUSED. You can use it, but it must have at least one pair of X and Y 00. Therefore, those were added automatically. You will not find them in the original binary.")
         for n in range(len(physics) // 2):
             label = tkinter.Label(self.createanims.frame_physics, text=f"{n:02d}")
             PhysicsLabel(self.createanims, label, n)

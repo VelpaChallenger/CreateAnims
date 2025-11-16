@@ -93,6 +93,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.draw_frame_rectangle = 1 #I know I know. I'm mixing Frame and Anim quite a lot. Oh well. We'll survive. I think.
         self.draw_empty_cells = 1
         self.frame_rectangle = None #No ID, will be created later if option is turned on.
+        self.play_physics = True #By default, but may be turned False if for example the frames don't match. Alternatively, raise a warning/make it configurable whether to raise a warning.
 
     def refresh(self):
         if self.createanims.current_anim_image_rectangle is not None:
@@ -255,8 +256,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
         anim.physics_id = new_physics_id #This is important because there can be two sources. Maybe we loaded a new anim, in which case this will leave it exactly as intended because, here the new_physics_id is the anim physics_id, but if we changed it via the physics ID entry, then it needs to be updated with the new value. And yes, same happens with CHR bank when we load_frame_id.
         self.decide_arrow_buttons_status(new_physics_id, len(self.createanims.physics_list) - 1, self.createanims.physics_id_left_arrow, self.createanims.physics_id_right_arrow) #And nothing else in this case. It's like loading a CHR in a way. Though it's even more different in that an update in physics ID does not require an UI refresh. It will only change the field, and then what happens when you click on Play Anim.
+        self.play_physics = True #Assume always possible unless stated (validated) otherwise.
         if not self.createanims.in_play_anim and len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2 != len(anim.frame_ids): #Don't show it when restarting due to Stop Anim.
             messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frames but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pairs. Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
+            self.play_physics = False
 
     def load_new_character(self, new_character, new_frame=0):
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -363,16 +366,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         import tkinter
         if not self.createanims.in_play_anim:
             return #And the chain stops.
+        if self.play_physics:
+            physics = self.createanims.physics_list[self.createanims.current_physics_id]
+            x_physics = 2*self.calculate_physics(physics[2*self.createanims.current_frame])
+            y_physics = 2*self.calculate_physics(physics[(2*self.createanims.current_frame) + 1])
+            self.createanims.physics_initial_x += x_physics
+            self.createanims.physics_initial_y += y_physics
         self.createanims.png_img.clear()
         character = self.createanims.characters[self.createanims.current_character]
         frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
         img = tkinter.PhotoImage(file=f"{self.createanims.root_dir}/{character.name}/images/{character.name}_frame_{frame_id:03d}.png") #(self.createanims.tiles_images[0].pre_tkimg.resize((16, 16)))
         self.createanims.png_img.append(img) #Say no to garbage collection of PhotoImage.
         frame = character.frames[frame_id]
-        self.createanims.play_anim_label.place(x=375+(frame.metadata.x_offset*2), y=200 - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length))
+        self.createanims.play_anim_label.place(x=375+(frame.metadata.x_offset*2) + self.createanims.physics_initial_x, y=200 - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) + self.createanims.physics_initial_y)
         self.createanims.play_anim_label.configure(image=img)
         if self.createanims.current_frame == len(character.anims[self.createanims.current_anim].frame_ids) - 1:
             self.createanims.current_frame = 0
+            if not self.check_physics_boundaries(self.createanims.physics_initial_x, self.createanims.physics_initial_y): #Otherwise, don't restart. I like more the look of it.
+                self.restart_physics() #Let's encapsulate it here. Will make it easier to not have the restart values in many places.
         else:
             self.createanims.current_frame += 1
         self.createanims.root.after(47, self.play_anim) #I think 47 is the magical number. Looks really, really good.
@@ -420,3 +431,15 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             return - (0x100 - value) #Yeah it's different because in calculate_fine_pitch, it has to give you the negative number still in 6502 format, like, 0xFD for example, but here I want the raw number, I want the -3 for example.
         else:
             return value
+
+    def check_physics_boundaries(self, x, y):
+        return (
+            x >= 0 and
+            y >= 0 and
+            x <= 399 and
+            y <= 256
+        )
+
+    def restart_physics(self):
+        self.createanims.physics_initial_x = -100 #Also yes, these could be members/fields of Anim. Key word "could".
+        self.createanims.physics_initial_y = 100

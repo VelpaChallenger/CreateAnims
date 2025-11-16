@@ -500,7 +500,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def check_physics_boundaries(self, x, y):
         return (
-            x >= 0 and
+            x >= -399 and #Remember: we're checking the initial_x here. Not the total position. Uhhhh... maybe not such a good idea. But for now it'll do.
             y >= 0 and
             x <= 399 and
             y <= 256

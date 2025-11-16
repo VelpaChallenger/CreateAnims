@@ -103,6 +103,12 @@ class PhysicsLabel:
 
     def on_shift_right_click(self, event=None):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        if (len(physics) // 2) == 60:
+            self.createanims.physics_window.attributes('-disabled', 1)
+            messagebox.showinfo(title="Too many frames", message="The anim may be long, but I still have to put a limit to it. Anyways, if you do need more frames, let me know!")
+            self.createanims.physics_window.attributes('-disabled', 0)
+            self.createanims.physics_window.focus_force()
+            return
         physics.insert((2*self.frame_index) + 2, 0x00) #You may think this won't work when inserting at the end, but it does. Why? Because, 2*self.frame_index returns the x of the last physics. And that's the key. Exactly +2 after that, there's the 0x80. So you're inserting where 0x80 is, pushing 0x80.
         physics.insert((2*self.frame_index) + 2, 0x00)
         self.createanims.anim.fill_physics_grid()

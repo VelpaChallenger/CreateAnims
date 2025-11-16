@@ -102,8 +102,8 @@ class PhysicsLabel:
 
     def on_shift_right_click(self, event=None):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
-        physics.insert(2*self.frame_index, 0x00)
-        physics.insert(2*self.frame_index, 0x00)
+        physics.insert((2*self.frame_index) + 2, 0x00) #You may think this won't work when inserting at the end, but it does. Why? Because, 2*self.frame_index returns the x of the last physics. And that's the key. Exactly +2 after that, there's the 0x80. So you're inserting where 0x80 is, pushing 0x80.
+        physics.insert((2*self.frame_index) + 2, 0x00)
         self.createanims.anim.fill_physics_grid()
 
 class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of it. #Similar structure to TileUtils. You have the main class, which then uses data from other classes to do its stuff.

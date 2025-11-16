@@ -46,6 +46,7 @@ class CreateAnims:
         self.chr_palette_directory = None
         self.frames_directory = None
         self.anims_directory = None
+        self.physics_directory = None
         self.png_img = []
         self.in_play_anim = False
         self.physics_list = []
@@ -99,6 +100,7 @@ class CreateAnims:
         file_menu.add_command(label="Save CHR palette", command=self.command.save_chr_palette)
         file_menu.add_command(labe="Save frame", command=self.command.save_frame)
         file_menu.add_command(label="Save anim", command=self.command.save_anim)
+        file_menu.add_command(label="Save physics", command=self.command.save_physics)
         self.menu_bar.add_cascade(label="File", menu=file_menu)
         anim_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
@@ -114,6 +116,7 @@ class CreateAnims:
         import_menu.add_command(label="CHR Palette", command=self.command.import_chr_palette)
         import_menu.add_command(label="Frame", command=self.command.import_frame)
         import_menu.add_command(label="Anim", command=self.command.import_anim)
+        import_menu.add_command(label="Physics", command=self.command.import_physics)
         self.menu_bar.add_cascade(label="Import", menu=import_menu)
         self.root.config(menu=self.menu_bar)
 

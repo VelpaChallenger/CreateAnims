@@ -83,6 +83,24 @@ class Command:
             anim_file.write(bytearray([anim.physics_id]))
             anim_file.write(bytearray(anim.frame_ids))
 
+    def save_physics(self):
+        initial_directory = self.createanims.physics_directory
+        if initial_directory is None:
+            initial_directory = os.getcwd()
+        physics_filename = filedialog.asksaveasfilename(
+            defaultextension=".physics",
+            filetypes=[("Physics files", ".physics"), ("All files", "*.*")],
+            initialdir=initial_directory,
+            title="Save physics",
+            parent=self.createanims.root
+        )
+        if not physics_filename: #Then save was aborted.
+            return
+        self.createanims.physics_directory = os.path.dirname(physics_filename) #Directory where the file selected is.
+        with open(physics_filename, "wb") as physics_file:
+            physics = self.createanims.physics_list[self.createanims.current_physics_id]
+            physics_file.write(bytearray(physics))
+
     def toggle_anim_transparency(self, event=None): #When it's called from keyboard shortcut, event is sent. So we need event=None, we won't use it anyways.
         self.createanims.anim.transparency ^= 1 #Let's make it a literal toggle.
         self.createanims.anim.refresh() #But, as usual, a refresh also.
@@ -191,3 +209,21 @@ class Command:
             anim = CharacterAnim(list(anim_file.read()))
             character.anims[self.createanims.current_anim] = anim
             self.createanims.anim.load_new_anim(self.createanims.current_anim) #Ironic but yes. Load the same ID, so not new but, you will find changes when loading it. #self.createanims.current_frame_id = character.anims[self.createanims.current_anim].frame_ids[0] #Very important otherwise UI refresh won't draw it updated. (oh no, I just made the horizontal scrollbar of death appear!) Also no, no need to call load_new_anim here, though of course it would work. But I feel this is cleaner in this context. Nothing has to change except this. Even the arrow status will be fine as it is, as it is still the same ids. Huh wait. Yes I do need to call it. Thanks me for writing this. import_frame indeed doesn't need it because the change is only graphical, like, only the tiles will change.
+
+    def import_physics(self):
+        initial_directory = self.createanims.physics_directory
+        if initial_directory is None:
+            initial_directory = os.getcwd()
+        physics_filename = filedialog.askopenfilename(
+            defaultextension=".physics",
+            filetypes=[("Physics files", ".physics"), ("All files", "*.*")],
+            initialdir=initial_directory,
+            title="Import physics",
+            parent=self.createanims.root
+        )
+        if not physics_filename: #Then save was aborted. #Import was aborted. But you know copypaste.
+            return
+        self.createanims.physics_directory = os.path.dirname(physics_filename) #Directory where the file selected is.
+        with open(physics_filename, "rb") as physics_file:
+            self.createanims.physics_list[self.createanims.current_physics_id] = list(physics_file.read())
+            self.createanims.anim.load_new_physics_id(self.createanims.current_physics_id) #Similar logic to why loading new anim when importing an anim. There are some updates that need to run. Like for example, if the new physics has a mismatch, that has to run. And has to set the flag.

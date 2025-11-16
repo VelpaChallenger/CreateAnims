@@ -59,7 +59,9 @@ class Command:
         with open(frame_filename, "wb") as frame_file:
             frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
             metadata = frame.metadata
-            frame_file.write(bytearray([metadata.x_length, metadata.y_length, metadata.x_offset, metadata.chr_bank, metadata.y_offset, 0x0])) #Metadata first.
+            x_offset_for_file = abs(metadata.x_offset) | (0x80 if metadata.x_offset >= 0 else 0x00) #We do need to perform a conversion. It is convenient for editing, but then when we save the file, we do need to convert it back.
+            y_offset_for_file = abs(metadata.y_offset) | (0x20 if metadata.y_offset >= 0 else 0x00)
+            frame_file.write(bytearray([metadata.x_length, metadata.y_length, x_offset_for_file, metadata.chr_bank, y_offset_for_file, 0x0])) #Metadata first.
             frame_file.write(bytearray(frame.tiles)) #And now the tiles.
 
     def save_anim(self):

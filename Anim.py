@@ -279,7 +279,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 return False
         if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.physics_dialog.attributes('-disabled', 1)
             messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to teleport? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -128. Also, even if you enter say, 32... that's pretty high, it won't look very smooth. But well, maybe it's what you want. I won't stop you there :) .")
+            self.createanims.physics_dialog.attributes('-disabled', 0)
+            self.createanims.physics_dialog.focus_force()
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -474,7 +477,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if len(physics) == 1: #Then there's only an 0x80 left. Not possible. Every physics needs to have at least 1 pair.
             physics.insert(0, 0x00)
             physics.insert(0, 0x00)
+            self.createanims.physics_window.attributes('-disabled', 1)
             messagebox.showinfo(title="Physics Automatic Addition", message=f"Physics ID {self.createanims.current_physics_id} was found to be empty (just an $80 byte). This means the physics is UNUSED. You can use it, but it must have at least one pair of X and Y 00. Therefore, those were added automatically. You will not find them in the original binary.")
+            self.createanims.physics_window.attributes('-disabled', 0)
+            self.createanims.physics_window.focus_force()
         for n in range(len(physics) // 2):
             label = tkinter.Label(self.createanims.frame_physics, text=f"{n:02d}")
             PhysicsLabel(self.createanims, label, n)

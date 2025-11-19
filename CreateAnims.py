@@ -197,6 +197,19 @@ class CreateAnims:
         self.x_offset_right_arrow = ttk.Button(frame_x_offset_field, text="", style="Right.TButton", command=self.button.x_offset_right_arrow_button)
         self.x_offset_right_arrow.pack(side="left")
 
+        frame_y_offset_field = tkinter.Frame(frame_dimensions)
+        frame_y_offset_field.grid(row=6, column=0, sticky="nw", padx=5, pady=5)
+        self.y_offset_label = tkinter.Label(frame_y_offset_field, text="Y Offset:", anchor="w", font=FONT, width=9)
+        self.y_offset_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_y_offset_entry), "%P")
+        self.y_offset_entry = tkinter.Entry(frame_y_offset_field, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.y_offset_entry.bind("<Return>", self.entry_return.y_offset_entry)
+        self.y_offset_entry.pack(side="left")
+        self.y_offset_left_arrow = ttk.Button(frame_y_offset_field, text="", style="Left.TButton", command=self.button.y_offset_left_arrow_button)
+        self.y_offset_left_arrow.pack(side="left", padx=(5, 2))
+        self.y_offset_right_arrow = ttk.Button(frame_y_offset_field, text="", style="Right.TButton", command=self.button.y_offset_right_arrow_button)
+        self.y_offset_right_arrow.pack(side="left")
+
         frame_character = tkinter.Frame(frame_command_base)
         frame_character.pack(side="left", anchor="nw")
 

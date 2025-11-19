@@ -70,6 +70,14 @@ class EntryReturn:
         new_x_offset = int(x_offset_value)
         self.createanims.anim.load_new_x_offset(new_x_offset)
 
+    def y_offset_entry(self, event=None):
+        y_offset_value = self.createanims.y_offset_entry.get()
+        if not y_offset_value or y_offset_value == "-": #Same.
+            self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_y_offset = int(y_offset_value)
+        self.createanims.anim.load_new_y_offset(new_y_offset)
+
     def character_entry(self, event=None):
         character_entry_value = self.createanims.character_entry.get()
         if not character_entry_value:

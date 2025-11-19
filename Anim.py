@@ -313,6 +313,29 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.x_offset_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def validate_y_offset_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        if (new_value.startswith("-") and len(new_value) > 1) or not new_value.startswith("-"): #This time we admit negatives. This is why, while duplicated a lot, I like having different validations for each entry. #If we're just typing the -, leave it be. Skip it.
+            try: #Validation 1: value must be an integer number, including zero and negative.
+                new_value_int = int(new_value) #Ah but come to think of it, if it has a - and then a number, the int does work. So this logic can be simplified to just one try block. #Everything that comes afterwards must be a number. #If starts with "-" and has length 1, don't do any validation at all here.
+                if new_value.startswith("-") and new_value_int == 0: #Don't do that. You'll break the tool. Stop trolling the tool.
+                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly google searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
+                    return False
+            except ValueError:
+                self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+                return False
+        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
+            self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to give a really generous hitbox? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -128. Also, even if you enter say, 32... that's pretty high, the drawing will look really far from the actual position in-game. But well, maybe it's what you want. I won't stop you there :) .")
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+        return True
+
     def validate_character_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -337,6 +360,15 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.x_offset_entry.delete(0, "end")
         self.createanims.x_offset_entry.insert(0, str(new_x_offset))
         self.decide_arrow_buttons_status(new_x_offset, 127, self.createanims.x_offset_left_arrow, self.createanims.x_offset_right_arrow, lower_boundary=-128)
+        if refresh_UI_flag:
+            self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
+
+    def load_new_y_offset(self, new_y_offset, refresh_UI_flag=True): #I'm also still thinking about the proposal of removing refresh_UI_flag. Considering that we may come from different sources, I'm thinking it might not be as good of an idea and maybe this will do. #I was a bit hesistant to do this, but hey, it will do undo/redo a lot more convenient. Pretty much every load has this benefit, I mean yeah every load.
+        self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_offset = new_y_offset
+        self.createanims.y_offset_entry.delete(0, "end")
+        self.createanims.y_offset_entry.insert(0, str(new_y_offset))
+        self.decide_arrow_buttons_status(new_y_offset, 127, self.createanims.y_offset_left_arrow, self.createanims.y_offset_right_arrow, lower_boundary=-128)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
@@ -398,6 +430,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.current_frame_id = new_frame_id
         frame = character.frames[new_frame_id]
         self.load_new_x_offset(frame.metadata.x_offset, refresh_UI_flag=False)
+        self.load_new_y_offset(frame.metadata.y_offset, refresh_UI_flag=False)
         self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
         self.createanims.current_anim_image_rectangle = None
@@ -430,6 +463,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.x_offset_entry.configure(state="disabled")
         self.createanims.x_offset_left_arrow.configure(state="disabled")
         self.createanims.x_offset_right_arrow.configure(state="disabled")
+        self.createanims.y_offset_entry.configure(state="disabled")
+        self.createanims.y_offset_left_arrow.configure(state="disabled")
+        self.createanims.y_offset_right_arrow.configure(state="disabled")
         self.createanims.character_entry.configure(state="disabled")
         self.createanims.character_left_arrow.configure(state="disabled")
         self.createanims.character_right_arrow.configure(state="disabled")
@@ -454,6 +490,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.x_offset_entry.configure(state="normal")
         self.createanims.x_offset_left_arrow.configure(state="normal")
         self.createanims.x_offset_right_arrow.configure(state="normal")
+        self.createanims.y_offset_entry.configure(state="normal")
+        self.createanims.y_offset_left_arrow.configure(state="normal")
+        self.createanims.y_offset_right_arrow.configure(state="normal")
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")

@@ -53,6 +53,16 @@ class CreateAnimsButton:
         new_x_offset = current_x_offset + 1
         self.createanims.anim.load_new_x_offset(new_x_offset)
 
+    def y_offset_left_arrow_button(self, event=None):
+        current_y_offset = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_offset #This will be different.
+        new_y_offset = current_y_offset - 1
+        self.createanims.anim.load_new_y_offset(new_y_offset)
+
+    def y_offset_right_arrow_button(self, event=None):
+        current_y_offset = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_offset
+        new_y_offset = current_y_offset + 1
+        self.createanims.anim.load_new_y_offset(new_y_offset)
+
     def character_left_arrow_button(self, event=None):
         new_character = self.createanims.current_character - 1
         self.createanims.anim.load_new_character(new_character)

@@ -22,6 +22,9 @@ class UndoRedo:
         self.decide_undo_redo_status()
 
     def undo_redo(self, undo, redo): #When you perform an action... ah right, the same function is going to be called. So there are a few details to keep in mind. I got this. #Yeah maybe, the function that we pass is not recursive, that is, we create an additional layer. Looks like huge work, but it could work pretty good. It seems reasonable yet at this stage. And if not, perhaps it could be automated somehow. You know, like moving directories and stuff like that. I don't see it very often but that doesn't mean it can't be done. I think it works very well in a lot of situations. Let's do this.
+        self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
+        if len(self.stack[self.stack_ptr]) == 2: #Oh well whatever. Pop only returns default None for dictionaries, not for lists.
+            self.stack[self.stack_ptr].pop(1) #If there is currently a redo, remove it. There are no more references to old data.
         self.stack[self.stack_ptr].append(redo) #Here we do want an append. #Where we are, add the redo.
         redo[0](*redo[1:]) #And, very important, do perform the action.
         self.stack_ptr += 1

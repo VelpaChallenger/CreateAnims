@@ -104,6 +104,10 @@ class CreateAnims:
         file_menu.add_command(label="Save anim", command=self.command.save_anim)
         file_menu.add_command(label="Save physics", command=self.command.save_physics)
         self.menu_bar.add_cascade(label="File", menu=file_menu)
+        self.edit_menu = tkinter.Menu(self.menu_bar, tearoff=0)
+        self.edit_menu.add_command(label="Undo", command=self.undo_redo.undo, accelerator="Ctrl+Z", state="disabled")
+        self.edit_menu.add_command(label="Redo", command=self.undo_redo.redo, accelerator="Ctrl+Y", state="disabled")
+        self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         anim_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
         self.root.bind("<Shift-T>", self.command.toggle_anim_transparency)

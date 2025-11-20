@@ -336,6 +336,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def validate_width_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if int(new_value) > 60: #Validation 2: value must not be greater than 60 (technically possible to enter something greater but, way too big.)
+            self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if int(new_value) == 0: #Validation 3: Number cannot be zero. Another particularity.
+            self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
+        return True
+
     def validate_character_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -369,6 +387,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.y_offset_entry.delete(0, "end")
         self.createanims.y_offset_entry.insert(0, str(new_y_offset))
         self.decide_arrow_buttons_status(new_y_offset, 127, self.createanims.y_offset_left_arrow, self.createanims.y_offset_right_arrow, lower_boundary=-128)
+        if refresh_UI_flag:
+            self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
+
+    def load_new_width(self, new_width, refresh_UI_flag=True): #Yes... I don't really like that now we have two names for the same thing, width and x_length. But, I don't really like X length on the front end. So yes.
+        self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        aux_width = frame.metadata.x_length #We'll need this to know the step, every how many tiles we'll do 0xFF insertion. We cannot use the new one as that'll give different stepping (we'll land elsewhere). We could also make this update later. But I like it more this way.
+        frame.metadata.x_length = new_width
+        difference_width = new_width - aux_width
+        #if not difference_width:
+            #return #Like, what do you mean.
+        if difference_width >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
+            frame.tiles = [tile for row in (frame.tiles[i:i+aux_width] + [0xFF]*difference_width for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain.
+        else: #Negative.
+            frame.tiles = [tile for row in (frame.tiles[i:i+new_width] for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain.
+        self.createanims.width_entry.delete(0, "end")
+        self.createanims.width_entry.insert(0, str(new_width))
+        self.decide_arrow_buttons_status(new_width, 60, self.createanims.width_left_arrow, self.createanims.width_right_arrow, lower_boundary=1)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
@@ -431,6 +467,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         frame = character.frames[new_frame_id]
         self.load_new_x_offset(frame.metadata.x_offset, refresh_UI_flag=False)
         self.load_new_y_offset(frame.metadata.y_offset, refresh_UI_flag=False)
+        self.load_new_width(frame.metadata.x_length, refresh_UI_flag=False)
         self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
         self.createanims.current_anim_image_rectangle = None
@@ -466,6 +503,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.y_offset_entry.configure(state="disabled")
         self.createanims.y_offset_left_arrow.configure(state="disabled")
         self.createanims.y_offset_right_arrow.configure(state="disabled")
+        self.createanims.width_entry.configure(state="disabled")
+        self.createanims.width_left_arrow.configure(state="disabled")
+        self.createanims.width_right_arrow.configure(state="disabled")
         self.createanims.character_entry.configure(state="disabled")
         self.createanims.character_left_arrow.configure(state="disabled")
         self.createanims.character_right_arrow.configure(state="disabled")
@@ -493,6 +533,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.y_offset_entry.configure(state="normal")
         self.createanims.y_offset_left_arrow.configure(state="normal")
         self.createanims.y_offset_right_arrow.configure(state="normal")
+        self.createanims.width_entry.configure(state="normal")
+        self.createanims.width_left_arrow.configure(state="normal")
+        self.createanims.width_right_arrow.configure(state="normal")
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")

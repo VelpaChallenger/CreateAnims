@@ -63,6 +63,16 @@ class CreateAnimsButton:
         new_y_offset = current_y_offset + 1
         self.createanims.anim.load_new_y_offset(new_y_offset)
 
+    def width_left_arrow_button(self, event=None):
+        current_width = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.x_length #This will be different.
+        new_width = current_width - 1
+        self.createanims.anim.load_new_width(new_width)
+
+    def width_right_arrow_button(self, event=None):
+        current_width = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.x_length
+        new_width = current_width + 1
+        self.createanims.anim.load_new_width(new_width)
+
     def character_left_arrow_button(self, event=None):
         new_character = self.createanims.current_character - 1
         self.createanims.anim.load_new_character(new_character)

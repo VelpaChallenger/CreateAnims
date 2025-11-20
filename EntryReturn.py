@@ -78,6 +78,14 @@ class EntryReturn:
         new_y_offset = int(y_offset_value)
         self.createanims.anim.load_new_y_offset(new_y_offset)
 
+    def width_entry(self, event=None):
+        width_value = self.createanims.width_entry.get()
+        if not width_value:
+            self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_width = int(width_value)
+        self.createanims.anim.load_new_width(new_width)
+
     def character_entry(self, event=None):
         character_entry_value = self.createanims.character_entry.get()
         if not character_entry_value:

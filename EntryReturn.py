@@ -86,6 +86,14 @@ class EntryReturn:
         new_width = int(width_value)
         self.createanims.anim.load_new_width(new_width)
 
+    def height_entry(self, event=None):
+        height_value = self.createanims.height_entry.get()
+        if not height_value:
+            self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_height = int(height_value)
+        self.createanims.anim.load_new_height(new_height)
+
     def character_entry(self, event=None):
         character_entry_value = self.createanims.character_entry.get()
         if not character_entry_value:

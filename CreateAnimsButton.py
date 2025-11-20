@@ -73,6 +73,16 @@ class CreateAnimsButton:
         new_width = current_width + 1
         self.createanims.anim.load_new_width(new_width)
 
+    def height_left_arrow_button(self, event=None):
+        current_height = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_length #This will be different.
+        new_height = current_height - 1
+        self.createanims.anim.load_new_height(new_height)
+
+    def height_right_arrow_button(self, event=None):
+        current_height = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_length
+        new_height = current_height + 1
+        self.createanims.anim.load_new_height(new_height)
+
     def character_left_arrow_button(self, event=None):
         new_character = self.createanims.current_character - 1
         self.createanims.anim.load_new_character(new_character)

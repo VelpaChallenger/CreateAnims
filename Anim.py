@@ -354,6 +354,24 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def validate_height_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive.
+            int(new_value)
+        except ValueError:
+            self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if int(new_value) > 60: #Validation 2: value must not be greater than 60 (technically possible to enter something greater but, way too big.)
+            self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if int(new_value) == 0: #Validation 3: Number cannot be zero. Another particularity.
+            self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
+        return True
+
     def validate_character_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -396,15 +414,29 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         aux_width = frame.metadata.x_length #We'll need this to know the step, every how many tiles we'll do 0xFF insertion. We cannot use the new one as that'll give different stepping (we'll land elsewhere). We could also make this update later. But I like it more this way.
         frame.metadata.x_length = new_width
         difference_width = new_width - aux_width
-        #if not difference_width:
-            #return #Like, what do you mean.
         if difference_width >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
-            frame.tiles = [tile for row in (frame.tiles[i:i+aux_width] + [0xFF]*difference_width for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain.
+            frame.tiles = [tile for row in (frame.tiles[i:i+aux_width] + [0xFF]*difference_width for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain. #Ok I'll explain now in this commit. We're going every width elements, adding as many 0xFF as per new width. That's what the frame.tiles[i:i+aux_width] + [0xFF]*difference_width means. And then we're increasing i at steps of aux_width to make sure we make the insertions at that pace. And finally, we're adding the tiles (otherwise we get list of lists).
         else: #Negative.
             frame.tiles = [tile for row in (frame.tiles[i:i+new_width] for i in range(0, len(frame.tiles), aux_width)) for tile in row] #Complex, but give me a moment and I'll explain.
         self.createanims.width_entry.delete(0, "end")
         self.createanims.width_entry.insert(0, str(new_width))
         self.decide_arrow_buttons_status(new_width, 60, self.createanims.width_left_arrow, self.createanims.width_right_arrow, lower_boundary=1)
+        if refresh_UI_flag:
+            self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
+
+    def load_new_height(self, new_height, refresh_UI_flag=True):
+        self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        aux_height = frame.metadata.y_length #We'll need this to know the step, every how many tiles we'll do 0xFF insertion. We cannot use the new one as that'll give different stepping (we'll land elsewhere). We could also make this update later. But I like it more this way.
+        frame.metadata.y_length = new_height
+        difference_height = new_height - aux_height
+        if difference_height >= 0: #Positive. #Changed my mind. Even if difference is zero, do perform updates. Helpful for the first time (it will still run and do the right thing).
+            frame.tiles.extend(([0xFF]*frame.metadata.x_length)*difference_height) #As many rows of 0xFF as per new height (and each row as long as per width).
+        else: #Negative.
+            frame.tiles = [tile for tile in frame.tiles[0:(len(frame.tiles) - (frame.metadata.x_length*abs(difference_height)))]] #Details details. difference_height is negative here, so we need the abs for this trick to work. #So I was going to read everything row per row and stop at the new dimensions. Well I'm still doing that but now with just one for instead of two. I don't need the for i in this case. (so I was going to do something like for i in range(0, new_dimensions, width)).
+        self.createanims.height_entry.delete(0, "end")
+        self.createanims.height_entry.insert(0, str(new_height))
+        self.decide_arrow_buttons_status(new_height, 60, self.createanims.height_left_arrow, self.createanims.height_right_arrow, lower_boundary=1)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
@@ -468,6 +500,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.load_new_x_offset(frame.metadata.x_offset, refresh_UI_flag=False)
         self.load_new_y_offset(frame.metadata.y_offset, refresh_UI_flag=False)
         self.load_new_width(frame.metadata.x_length, refresh_UI_flag=False)
+        self.load_new_height(frame.metadata.y_length, refresh_UI_flag=False)
         self.createanims.tile_utils.load_new_chr_bank(frame.metadata.chr_bank, refresh_UI_flag=False)
         self.decide_arrow_buttons_status(new_frame_id, len(character.frames) - 1, self.createanims.frame_id_left_arrow, self.createanims.frame_id_right_arrow)
         self.createanims.current_anim_image_rectangle = None
@@ -506,6 +539,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.width_entry.configure(state="disabled")
         self.createanims.width_left_arrow.configure(state="disabled")
         self.createanims.width_right_arrow.configure(state="disabled")
+        self.createanims.height_entry.configure(state="disabled")
+        self.createanims.height_left_arrow.configure(state="disabled")
+        self.createanims.height_right_arrow.configure(state="disabled")
         self.createanims.character_entry.configure(state="disabled")
         self.createanims.character_left_arrow.configure(state="disabled")
         self.createanims.character_right_arrow.configure(state="disabled")
@@ -536,6 +572,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.width_entry.configure(state="normal")
         self.createanims.width_left_arrow.configure(state="normal")
         self.createanims.width_right_arrow.configure(state="normal")
+        self.createanims.height_entry.configure(state="normal")
+        self.createanims.height_left_arrow.configure(state="normal")
+        self.createanims.height_right_arrow.configure(state="normal")
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")

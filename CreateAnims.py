@@ -223,6 +223,19 @@ class CreateAnims:
         self.width_right_arrow = ttk.Button(frame_width_field, text="", style="Right.TButton", command=self.button.width_right_arrow_button)
         self.width_right_arrow.pack(side="left")
 
+        frame_height_field = tkinter.Frame(frame_dimensions)
+        frame_height_field.grid(row=8, column=0, sticky="nw", padx=5, pady=5)
+        self.height_label = tkinter.Label(frame_height_field, text="Height:", anchor="w", font=FONT, width=9)
+        self.height_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_height_entry), "%P")
+        self.height_entry = tkinter.Entry(frame_height_field, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.height_entry.bind("<Return>", self.entry_return.height_entry)
+        self.height_entry.pack(side="left")
+        self.height_left_arrow = ttk.Button(frame_height_field, text="", style="Left.TButton", command=self.button.height_left_arrow_button)
+        self.height_left_arrow.pack(side="left", padx=(5, 2))
+        self.height_right_arrow = ttk.Button(frame_height_field, text="", style="Right.TButton", command=self.button.height_right_arrow_button)
+        self.height_right_arrow.pack(side="left")
+
         frame_character = tkinter.Frame(frame_command_base)
         frame_character.pack(side="left", anchor="nw")
 

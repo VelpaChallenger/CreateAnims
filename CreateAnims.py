@@ -39,6 +39,7 @@ class CreateAnims:
         self.undo_redo = UndoRedo(self)
         self.characters = []
         self.current_pal_rectangle = None
+        self.current_character_pal_index = None #Similarly, we'll need it for the relationship/associations between a PalRectangle and a ColorPickerRectangle.
         self.current_color_picker_rectangle = None
         self.current_tile_image_rectangle = None
         self.current_chr_tile_index = None #We will need it to update anim's image.
@@ -69,7 +70,7 @@ class CreateAnims:
         self.pal_label.grid(row=0, column=0, sticky="w")
         self.character_palette_canvas = tkinter.Canvas(frame_palette, width=256, height=32, bg="#808080", borderwidth=0, highlightthickness=0)
         self.character_palette_canvas.grid(row=1, column=0)
-        self.color_picker_canvas = tkinter.Canvas(frame_palette, width=256, height=69, bg="#808080", borderwidth=0, highlightthickness=0)
+        self.color_picker_canvas = tkinter.Canvas(frame_palette, width=256, height=64, bg="#808080", borderwidth=0, highlightthickness=0)
         self.color_picker_canvas.grid(row=2, column=0, pady=30)
         self.create_color_picker()
 
@@ -307,12 +308,12 @@ class CreateAnims:
         initial_y = -16 #The trick of starting with a negative so that it works also the first iteration. Great awesome.
         for row in range(4):
             initial_x = 0
-            initial_y += 17
+            initial_y += 16
             for col in range(16):
                 rgb_triplet = SYSTEM_PALETTE[pal_index]
                 r, g, b = rgb_triplet[0], rgb_triplet[1], rgb_triplet[2]
                 rgb = f"#{r:02X}{g:02X}{b:02X}"
-                color_picker_rectangle = self.color_picker_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 16, fill=rgb, outline=rgb, width=1)
+                color_picker_rectangle = self.color_picker_canvas.create_rectangle(initial_x, initial_y, initial_x + 16, initial_y + 16, fill=rgb, outline=rgb, width=1)
                 self.color_picker_rectangles.append(ColorPickerRectangle(self, self.color_picker_canvas, color_picker_rectangle, pal_index, rgb, self.pal_label))
                 initial_x += 16
                 pal_index += 1

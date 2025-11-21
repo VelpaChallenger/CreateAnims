@@ -154,6 +154,7 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         if self.createanims.current_pal_rectangle is None:
             return #Nothing to do then. This logic only applies if there is a pal rectangle selected.
         pal_rectangle_object = self.createanims.pal_rectangles[self.createanims.current_pal_rectangle]
+        pal_rectangle_object.pal = self.pal
         character_palette = self.createanims.characters[self.createanims.current_character].palette
         character_palette[pal_rectangle_object.character_pal_index] = self.pal #Now the character palette is updated and will be picked by refresh_palette.
         pal_rectangle_object.palette_canvas.itemconfig(pal_rectangle_object.pal_rectangle, fill=self.rgb)

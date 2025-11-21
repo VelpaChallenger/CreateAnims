@@ -66,9 +66,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             self.tile_image_object.update_tile_label()
 
     def on_double_right_click(self, event=None):
-        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
-        frame.tiles[self.anim_index] = 0xFF
-        self.createanims.anim.refresh()
+        self.clear()
 
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)
@@ -90,6 +88,14 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             if old_tile == self.createanims.current_chr_tile_index:
                 return
             self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, self.createanims.current_chr_tile_index])
+
+    def clear(self): #So here's a difference with for example select_and_update scenarios: naming was relatively simple because we could say select_and_update. But here there's no select. There's only an update but it doesn't feel right to say update, it's like, update in those cases meant to tie so to speak two images, like AnimImage and TileImage or ColorPickerRectangle and PalRectangle. But that's not the case here. And at the same time, we'll also need a second function from Anim in this case (TileUtils in others) because, well, that's the approach I'm taking now and I do think it saves memory maybe I could run a test but either way I like it more. So there'll be clear, and then another name for the function more specific.
+        old_index = self.anim_index #Copypasted from select_and_update. It's very very similar.
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        old_tile = frame.tiles[self.anim_index] #I usually leave only old lines but... let's make an exception here for the sake of clarity.
+        if old_tile == 0xFF: #Nothing to do then.
+            return
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, 0xFF])
 
 class PhysicsLabel:
 

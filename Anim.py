@@ -537,6 +537,13 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         physics.insert((2*frame_index), x_physics) #What, inverted? Yes. I think you could also do +1 first and it would work? But I like more this.
         self.fill_physics_grid()
 
+    def load_new_physics_value(self, physics_dialog_current_frame, new_x_physics, new_y_physics):
+        physics = self.createanims.physics_list[self.createanims.current_physics_id]
+        physics[2*physics_dialog_current_frame] = new_x_physics
+        physics[(2*physics_dialog_current_frame) + 1] = new_y_physics
+        self.fill_physics_grid() #If we made it this far, for sure there is a fill.
+        self.createanims.physics_dialog.destroy() #As always, if it doesn't exist (was already destroyed), it just won't do anything. #This has to happen last. If fill_physics_grid happens after this, both things try to happen at the same time and it gets really messy, like literally the screen flashes for a second it's really like what.
+
     def load_new_character(self, new_character, new_frame=0):
         old_character = self.createanims.current_character
         if old_character == new_character:

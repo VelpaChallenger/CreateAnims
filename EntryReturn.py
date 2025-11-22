@@ -57,10 +57,12 @@ class EntryReturn:
         new_x_physics = (0x100 - abs(int(physics_dialog_x_value))) if physics_dialog_x_value.startswith("-") else int(physics_dialog_x_value) #Well it could also be + int, but, yeah. Also it looks like no need to abs of an int, can apply abs directly yey. Yay or yey was typo but yey. Ah actually no you can't, it's just I wasn't entering a negative so it never ran :p There now. #Oh wait. Not that simple you're right. I need to apply the inverse.
         new_y_physics = (0x100 - abs(int(physics_dialog_y_value))) if physics_dialog_y_value.startswith("-") else int(physics_dialog_y_value) #Aaaaaand, in case you're wondering! If you enter -0, it still works! Why? 0x100 - 0 will give 0x100. But then, in the physics grid, 0x100 - 0x100 = 0. Then -0. And it becomes just 0! But actually, it doesn't work! Because internally 0x100 is saved, so when you try to save the physics, it breaks.
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
-        physics[2*self.createanims.physics_dialog_current_frame] = new_x_physics
-        physics[(2*self.createanims.physics_dialog_current_frame) + 1] = new_y_physics
-        self.createanims.physics_dialog_refresh = True #Shared state approach.
-        self.createanims.physics_dialog.destroy()
+        old_x_physics = physics[2*self.createanims.physics_dialog_current_frame]
+        old_y_physics = physics[(2*self.createanims.physics_dialog_current_frame) + 1]
+        if (new_x_physics, new_y_physics) == (old_x_physics, old_y_physics): #Has to be exact match. If one of them is different, that's alright, it does count as UndoRedo.
+            self.createanims.physics_dialog.destroy()
+            return
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_physics_value, self.createanims.physics_dialog_current_frame, old_x_physics, old_y_physics], [self.createanims.anim.load_new_physics_value, self.createanims.physics_dialog_current_frame, new_x_physics, new_y_physics])
 
     def x_offset_entry(self, event=None):
         x_offset_value = self.createanims.x_offset_entry.get()

@@ -1,3 +1,9 @@
+function_name_translation_dict = { #Given a function name, what will we show in the UI?
+    "load_new_anim_value": ("Navigated anim", "Navigation"), #I like the idea. Have a setting that shows both navigation and changes, and another that shows only changes, stuff like that.
+    "load_new_frame_value": ("Navigated frame in anim", "Navigation"),
+    "load_new_frame_id_value": ("Changed frame ID in frame in anim", "Change"), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
+}
+
 class UndoRedo:
 
     def __init__(self, createanims): #The classics. Every component always has access to CreateAnims.
@@ -6,6 +12,10 @@ class UndoRedo:
         self.stack_ptr = 0 #Our index. Where are we in the stack?
         self.stack_copy = None #We'll use this to know whether we can actually switch branches.
         self.stack_copy_ptr = 0
+        self.last_saved_ptr = 0
+        self.trace = []
+        self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
+        self.saved = False #True, I agree. Those are different things. self.strack_ptr I mean self.stack_ptr == 0 doesn't imply not saved, and != 0 doesn't imply saved. Saved is something that literally means that: a save happened. It is not related to the stack_ptr. In other words, yes, after you save, you can have either Unsaved changes or Saved, meaning there was at least one save.
 
     def switch_branch_undo_redo(self, event=None):
         if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Won't use it after all. It still works. #If in physics_window, we won't care about that status. #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.
@@ -27,6 +37,10 @@ class UndoRedo:
             else:
                 undo[0](*undo[1:])
             self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
+            function_undo = undo[0]
+            undo_type = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
+            if undo_type == "Change":
+                self.amount_changes -= 1
         if self.createanims.in_physics_window:
             init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
         self.createanims.refresh_UI = aux_refresh_UI #Sweet, smooth like cheese! Am I hungry maybe?
@@ -53,6 +67,10 @@ class UndoRedo:
         if self.createanims.edit_menu.entrycget(0, 'state') == "disabled": #I prefer it this way really. If you can't do it from the UI, you shouldn't be able to do it with a keyboard shortcut either. This will be our common source in our case. #self.stack_ptr == 0: #Nothing to undo.
             return
         undo = self.stack[self.stack_ptr][0] #node = stack[stack_ptr] #This was the thing. This doesn't return the undo per se, it returns the node.
+        function_undo = undo[0]
+        undo_type = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
+        if undo_type == "Change":
+            self.amount_changes -= 1
         self.stack_ptr -= 1 #We went backwards one step.
         self.decide_undo_redo_status()
         undo[0](*undo[1:]) #So now, node[0] is undo data. Therefore node[0][0] is func, node[0][1] is args. #And the args.
@@ -61,6 +79,10 @@ class UndoRedo:
         if self.createanims.edit_menu.entrycget(1, 'state') == "disabled":
             return
         redo = self.stack[self.stack_ptr][1] #Funny. For redo I had indeed done it this way. Though it's 1 (there was 0 zero).
+        function_redo = redo[0]
+        redo_type = self.get_function_type(function_redo)
+        if redo_type == "Change":
+            self.amount_changes += 1
         self.stack_ptr += 1 #We advanced one step.
         self.decide_undo_redo_status()
         redo[0](*redo[1:])
@@ -70,6 +92,10 @@ class UndoRedo:
             self.stack_copy = self.copy_undo_redo() #self.stack[:] #And this also needs to happen first, before we pop. #We'll need this for the switch_branch_undo_redo functionality feature. #But only do it if a different branch was created. Seems clearer to me that way (I don't think there are performance differences).
             self.stack_copy_ptr = self.stack_ptr
             self.stack[self.stack_ptr].pop(1) #If there is currently a redo, remove it. There are no more references to old data.
+        function_redo = redo[0]
+        function_type = self.get_function_type(function_redo)
+        if function_type == "Change": #I love this.
+            self.amount_changes += 1
         self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
         self.stack[self.stack_ptr].append(redo) #Here we do want an append. #Where we are, add the redo.
         self.stack_ptr += 1
@@ -91,3 +117,19 @@ class UndoRedo:
             self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
         else:
             self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="normal")
+        if self.amount_changes: # != 0. The beauty that negative numbers are also considered True.
+            self.createanims.root.title("Create Anims - Unsaved changes") #print(self.createanims.root.title()) I was going to use .title() to get the current title and then append to that, I could also use a constant but, let's go with this. I will tell if the title at some point changes to maybe CreateAnims and after redoing something or undoing it won't match so I'll just come update it here.
+        elif not self.saved:
+            self.createanims.root.title("Create Anims")
+        else:
+            self.createanims.root.title("Create Anims - Saved")
+
+    def get_function_type(self, function):
+        name_UI = function_name_translation_dict.get(function.__name__, function.__name__)
+        if name_UI == function.__name__:
+            function_type = "Unknown"
+        elif name_UI[1] == "Navigation":
+            function_type = "Navigation"
+        elif name_UI[1] == "Change": #I know, those could be constants.
+            function_type = "Change"
+        return function_type #I know, there's no else. In this case, the only way this would break is if instead of Navigation we typed Navigationn for example, or if we forgot to add a new type. But it will break immediately due to function_type not defined. I will tell right away. That is exactly what I want.

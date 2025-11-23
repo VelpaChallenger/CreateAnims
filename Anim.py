@@ -34,6 +34,12 @@ class FrameMetaData: #To make it clear that it's not the frame itself.
         self.y_offset = (frame_bytes[4] & 0x1F) * (1 if (frame_bytes[4] & 0x20) else -1) #I don't usually use ternary in Python but here it is pretty convenient.
         self.special_palette_id = 0 #Unused, but we may give it an use later on.
 
+    def get_bytes(self): #Ok let's do this instead.
+        x_offset_for_file = abs(self.x_offset) | (0x80 if self.x_offset > 0 else 0x00) #From save_frame.
+        y_offset_for_file = abs(self.y_offset) | (0x20 if self.y_offset > 0 else 0x00)
+        metadata_bytes = [self.x_length, self.y_length, x_offset_for_file, self.chr_bank, y_offset_for_file, self.special_palette_id]
+        return metadata_bytes
+
 class CharacterAnim: #Yeah I know. Maybe it was better to say AnimUtils from the beginning. Meh. This works.
 
     def __init__(self, anim_bytes):

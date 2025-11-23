@@ -3,6 +3,8 @@
 import tkinter
 from tkinter import Tk
 from tkinter import ttk
+import traceback
+import sys
 
 from TileUtils import *
 from Command import *
@@ -280,6 +282,8 @@ class CreateAnims:
         self.root.bind("<Control-y>", self.undo_redo.redo)
         self.root.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo) #What? Control-Z? Don't you mean Control-Shift-z? Actually yes. But Shift-z means Z, so if you put Control-shift-z, it won't work.
 
+        self.root.report_callback_exception = self.self_destruct
+
     def make_styles(self):
         style = ttk.Style()
         style.layout(
@@ -408,3 +412,13 @@ class CreateAnims:
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
         self.tile_utils.refresh_chr()
         self.anim.refresh()
+
+    def self_destruct(self, *args):
+        from tkinter import messagebox
+        error_message = "".join(traceback.format_exception(*args)) #*args here is arguably and maybe even the same as sys.exception(). #Changed order, do it here so that I don't even have to click on the messagebox, I can see the error right away when debugging in my computer. Beautiful.
+        print(error_message) #Yeah whatever. I was going to add a flag but this is fine. I think I can understand when I saw this in other contexts. It will work in my local, with the executable it just won't do anything. No errors exceptions anything.
+        messagebox.showerror(title="Unhandled exception", message="Sorry, there was a problem while running CreateAnims. Please see crash_log.txt for details. (and please report the bug!)")
+        crash_log = "crash_log.txt"
+        with open(crash_log, "w") as crash_log_file:
+            crash_log_file.write(error_message)
+        sys.exit(999)

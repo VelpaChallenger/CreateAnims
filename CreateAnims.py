@@ -444,7 +444,7 @@ class CreateAnims:
         self.log_history_command_base = tkinter.Frame(self.log_history_window, bd=0)
         self.log_history_command_base.pack()
 
-        self.log_history_copy_button = ttk.Button(self.log_history_command_base, text="Copy", takefocus=0) #Copy log, copy to clipboard.
+        self.log_history_copy_button = ttk.Button(self.log_history_command_base, text="Copy", takefocus=0, command=self.copy_to_clipboard) #Copy log, copy to clipboard.
         self.log_history_copy_button.pack(side="left", padx=15, pady=15)
         self.log_history_OK_button = ttk.Button(self.log_history_command_base, text="OK", takefocus=0, command=self.log_history_window.destroy)
         self.log_history_OK_button.pack(side="left", padx=15, pady=15)
@@ -453,6 +453,9 @@ class CreateAnims:
         self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
         self.root.attributes('-disabled', 0)
         self.root.focus_force()
+
+    def copy_to_clipboard(self):
+        self.root.clipboard_append(self.undo_redo.log_history.rstrip())
 
     def disable_undo_redo(self): #Also, I understand it may be counterintuitive for this to be in CreateAnims but status to be in UndoRedo? But it makes sense to me. Here we're plain disabling for the init of a window which is part of CreateAnims.
         self.edit_menu.entryconfigure("Undo", state="disabled") #Ya know what, yes, I'll make it a method and I just call the method. #You cannot undo or redo anything here. Not until you enter your values or close the window without any ado.

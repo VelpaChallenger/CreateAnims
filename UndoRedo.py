@@ -74,6 +74,7 @@ class UndoRedo:
             self.createanims.anim.fill_physics_grid() #So, don't draw it (don't init) but do update it because we're currently there. And well actually, to avoid doing it twice, only do it if flag was False.
         if destroy_physics_window_flag:
             self.createanims.destroy_physics_window()
+        self.log_history += "- Repoint successful.\n" #Let's do it here. Too high in the code and it's like, but wait, you didn't even start. But has to be here, cannot be last due to init_physics_window, that has to be last always.
         if init_physics_window_flag:
             self.createanims.init_physics_window() #Always, always at the end.
 
@@ -143,7 +144,7 @@ class UndoRedo:
             self.createanims.edit_menu.entryconfigure("Undo", state="disabled")
         else:
             self.createanims.edit_menu.entryconfigure("Undo", state="normal")
-        if self.stack_copy is None or self.stack_ptr < self.stack_copy_ptr: #If we're behind, we don't have any common base. Yeah like merge base. Technically the merge base would be the very start but that's not point of the feature. The point is, I was redoing stuff, and accidentally clicked something, pressed something. Oh no! I lost my work! Nope, don't panic! Switch branches. There you go! You've recovered your work!
+        if self.stack_copy is None or self.stack_ptr < self.stack_copy_ptr: #And actually, also disable it if it's equal. Otherwise, it messes the Log History. I mean I get the appeal and I've used it that way in the past. But. I think overall it's better this way. If you want to go back, you'll have to Redo at least once, and then switch. Will take note for docs as well. Scenario: you're on common, hit Ctrl+Shift+Z, won't generate any logs but will still repoint. Actually that gives me an idea. #If we're behind, we don't have any common base. Yeah like merge base. Technically the merge base would be the very start but that's not point of the feature. The point is, I was redoing stuff, and accidentally clicked something, pressed something. Oh no! I lost my work! Nope, don't panic! Switch branches. There you go! You've recovered your work!
             self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="disabled")
         else:
             self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="normal")

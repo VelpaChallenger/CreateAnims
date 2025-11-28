@@ -2,6 +2,7 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_anim_value": ("Character {0}. Navigated from anim {1:02d} to anim {2:02d}.", "Navigation", ("character_name", "undo:0", "redo:0")), #I like the idea. Have a setting that shows both navigation and changes, and another that shows only changes, stuff like that.
     "load_new_frame_value": ("Character {0}. Navigated from frame {1:02d} to frame {2:02d} in anim {3:02d}.", "Navigation", ("character_name", "undo:0", "redo:0", "anim")),
     "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
+    "load_new_character_value": ("Navigated from character {0} to character {1}.", "Navigation", ("convert_character:undo:0", "convert_character:redo:0"))
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
@@ -161,7 +162,18 @@ class UndoRedo:
         parameters = name_UI[2]
         list_format = [] #Right, it can't be a tuple, since it's immutable.
         for parameter in parameters:
-            if parameter.startswith("undo"):
+            if parameter.startswith("convert"):
+                parameter = parameter.split(":", 1)[1]
+                argument_position = int(parameter.split(":")[1])
+                if parameter.startswith("undo"):
+                    character = undo_params[argument_position] #In this context, character is not the object, but the ID. I know, can be confusing but it's all on context. Here's the context of new_character_value, and then new_character is always the int.
+                else: #There aren't other sorts of conversions in this case.
+                    character = redo_params[argument_position]
+                character_name = self.createanims.characters[character].name #This can be changed/accommodated to use display_name for example or something of the sort to display a different name than the one for the folder.
+                list_format.append(f"{character:02d} ({character_name})") #Yeah, a format inside another format. Even if one f string and the other... some other format.
+                #undo_or_redo = parameter.split(":", 1)[1] #Only on the first occurrence and treat the rest exactly the same. Here a function could do wonders but, whatever. Or... actually...
+                #character_name = self.#Assume always character. The other potential candidate for a name (and therefore a conversion) is anim, but not for now.
+            elif parameter.startswith("undo"):
                 argument_position = int(parameter.split(":")[1])
                 list_format.append(undo_params[argument_position])
             elif parameter.startswith("redo"):

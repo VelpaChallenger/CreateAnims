@@ -8,6 +8,7 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_y_offset_value": ("Character {0}. Changed Y Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "load_new_width_value": ("Character {0}. Changed width from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "load_new_height_value": ("Character {0}. Changed height from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
+    "load_new_chr_bank_value": ("Character {0}. Changed CHR bank from {1:03d} to {2:03d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
     "init_physics_window": ("Opened physics window.", "Navigation", ()),
     "destroy_physics_window": ("Closed physics window.", "Navigation", ()), #Funny how it's init and destroy for programmers, but open and close for users. Sharing some thoughts here. I could have called it open and close maybe?
     "load_new_physics_value": ("Changed physics from {0:02d} {1:02d} to {2:02d} {3:02d} for frame and physics ID {4:02d} {5:02d}.", "Change", ("undo:3", "undo:4", "redo:3", "redo:4", "undo:0", "physics_id")), #I liked more updated here but okay let's keep the consistency.
@@ -19,6 +20,9 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_frame_imported_value": ("Imported frame for character {0} for frame ID {1}. Filename: {2}", "Change", ("character_name", "frame_id", "redo:1")),
     "load_new_anim_imported_value": ("Imported anim for character {0}. Filename: {1}", "Change", ("character_name", "redo:1")),
     "load_new_physics_imported_value": ("Imported physics for character anim physics ID {0} {1} {2}. Filename: {3}", "Change", ("character_name", "anim", "physics_id", "redo:1")),
+    "load_new_character_palette_for_index_value": ("Character {0}. Changed pal index {1:02X} from {2:02X} to {3:02X}", "Change", ("character_name", "undo:0", "undo:1", "redo:1")), #Let's use hex here, more friendly for palettes. I mean, don't everyone use hex for pale'? Thinking...
+    "toggle_palette_for_tile_index_value": ("Character {0}. Toggled CHR pal for bank {1:03d} for tile index {2:02X}.", "Change", ("character_name", "chr_bank", "undo:0")),
+    "load_new_tile_for_index_value": ("Character {0}. Changed anim index {1:02X} from {2:02X} to {3:02X}", "Change", ("character_name", "undo:0", "undo:1", "redo:1")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.

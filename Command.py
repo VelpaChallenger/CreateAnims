@@ -138,7 +138,7 @@ class Command:
     def load_new_character_palette_imported_value(self, new_palette): #Similar to for index, but this loads the entire palette all at once. #And as always, value at the end to identify that this is part of UndoRedo.
         character = self.createanims.characters[self.createanims.current_character]
         character.palette = new_palette[:] #Same, if one changes, I don't want the other to change too.
-        self.createanims.refresh_UI() #We always do that here inside the value.
+        self.createanims.refresh_UI() #We always do that here inside the value. #This is the only exception, there's nothing affected by this. The hovers, the entries, a refresh_UI is enough to show updates.
 
     def import_chr(self):
         initial_directory = self.createanims.chr_directory
@@ -165,7 +165,7 @@ class Command:
     def load_new_chr_imported_value(self, new_chr):
         character = self.createanims.characters[self.createanims.current_character]
         character.chrs[self.createanims.current_chr_bank] = new_chr[:]
-        self.createanims.refresh_UI()
+        self.createanims.tile_utils.load_new_chr_bank_value(self.createanims.current_chr_bank) #Yes I do have to do it always. There are always checks I need to run when importing new stuff. Like clearing or leaving the entry in white if it was red also stuff like that all sorts of stuff.
 
     def import_chr_palette(self):
         initial_directory = self.createanims.chr_palette_directory
@@ -192,7 +192,7 @@ class Command:
     def load_new_chr_palette_imported_value(self, new_chr_palette):
         character = self.createanims.characters[self.createanims.current_character]
         character.chr_palettes[self.createanims.current_chr_bank] = new_chr_palette[:]
-        self.createanims.refresh_UI()
+        self.createanims.tile_utils.load_new_chr_bank_value(self.createanims.current_chr_bank)
 
     def import_frame(self):
         initial_directory = self.createanims.frames_directory
@@ -220,7 +220,7 @@ class Command:
     def load_new_frame_imported_value(self, new_frame_bytes):
         character = self.createanims.characters[self.createanims.current_character]
         character.frames[self.createanims.current_frame_id] = Frame(new_frame_bytes) #At this point, the old Frame will be garbage collected and the memory freed.
-        self.createanims.refresh_UI()
+        self.createanims.anim.load_new_frame_value(self.createanims.current_frame) #Same logic as anim. This was causing bugs in UndoRedo. This has to update CHR bank and a bunch of other stuff.
 
     def import_anim(self): #On second thought, maybe I'll let it be. Sometimes anim before frame, sometimes frame after anim.
         initial_directory = self.createanims.anims_directory

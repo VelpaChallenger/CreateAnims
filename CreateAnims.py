@@ -441,7 +441,7 @@ class CreateAnims:
 
         self.log_history_frame = tkinter.LabelFrame(self.frame_log_history, text="LOG HISTORY", bd=2, width=460)
         self.log_history_frame.pack(anchor="nw", padx=15)
-        self.log_history_label = tkinter.Label(self.log_history_frame, text=self.undo_redo.log_history.rstrip(), justify="left", wraplength=500)
+        self.log_history_label = tkinter.Label(self.log_history_frame, text=self.undo_redo.log_history.rstrip(), justify="left", wraplength=440)
         self.log_history_label.place(x=5, y=5)
         self.log_history_window.update() #Updates log_history_label height (well everything but I care about height in this case).
         log_history_label_height = self.log_history_label.winfo_height() + 25 #25 seems like the right number to make all look cool.

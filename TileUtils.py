@@ -420,6 +420,10 @@ class TileUtils:
             self.createanims.chr_entry.configure(highlightcolor="red", highlightbackground="red")
             self.createanims.chr_info_text.configure(text="CHR Bank cannot start with zero.", fg="red")
             return False
+        if new_value.startswith("-"): #Validation 4: number cannot be negative.
+            self.createanims.chr_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.chr_info_text.configure(text="CHR Bank cannot be negative.", fg="red")
+            return False
         self.createanims.chr_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.chr_info_text.configure(text="")
         return True

@@ -229,6 +229,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
+        if new_value.startswith("-"): #Validation 4: number cannot be negative. Will copypaste this to all entries, they all have this bug. Started with height, then checked with all. X Offset and Y Offset are the only ones exempt since they can be negative.
+            self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
         self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
@@ -246,6 +249,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("-"): #Validation 4: number cannot be negative.
             self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -267,6 +273,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
+        if new_value.startswith("-"): #Validation 4: number cannot be negative.
+            self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
@@ -283,6 +292,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("-"): #Validation 4: number cannot be negative.
             self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -375,7 +387,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if int(new_value) > 60: #Validation 2: value must not be greater than 60 (technically possible to enter something greater but, way too big.)
             self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
-        if int(new_value) == 0: #Validation 3: Number cannot be zero. Another particularity.
+        if int(new_value) <= 0: #Validation 3: Number cannot be zero (or negative). Another particularity.
             self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -393,7 +405,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if int(new_value) > 60: #Validation 2: value must not be greater than 60 (technically possible to enter something greater but, way too big.)
             self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
-        if int(new_value) == 0: #Validation 3: Number cannot be zero. Another particularity.
+        if int(new_value) <= 0: #Validation 3: Number cannot be zero. Another particularity. #And cannot be negative either. Yes, you would think the try int(new_value) is enough, but it's not. If you enter first 5, then -, it will let you. You press Enter, and it processes. Nothing breaks but well kinda actually because frame is empty and I'm not sure what would happen on Save... so yeah.
             self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
@@ -412,6 +424,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        if new_value.startswith("-"): #Validation 4: number cannot be negative. #Updated from int(new_value) < 0 because I don't want -0 being possible either, might be confusing? I could leave it but whatever I don't like it, not right now.
             self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")

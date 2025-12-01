@@ -1,7 +1,7 @@
 function_name_translation_dict = { #Given a function name, what will we show in the UI?
     "load_new_anim_value": ("Character {0}. Navigated from anim {1:02d} to anim {2:02d}.", "Navigation", ("character_name", "undo:0", "redo:0")), #I like the idea. Have a setting that shows both navigation and changes, and another that shows only changes, stuff like that.
     "load_new_frame_value": ("Character {0}. Navigated from frame {1:02d} to frame {2:02d} in anim {3:02d}.", "Navigation", ("character_name", "undo:0", "redo:0", "anim")),
-    "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
+    "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim"), ("anims", "anim", "anim", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
     "load_new_character_value": ("Navigated from character {0} to character {1}.", "Navigation", ("convert_character:undo:0", "convert_character:redo:0")),
     "load_new_physics_id_value": ("Character {0}. Changed physics ID from {1:02d} to {2:02d} for anim {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "anim")), #Turns out I do care about character, because it's the physics ID for this anim, and what character? There you go.
     "load_new_x_offset_value": ("Character {0}. Changed X Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
@@ -47,6 +47,7 @@ class UndoRedo:
         self.last_saved_ptr = 0
         self.trace = [] #This needs to be a list, will make pop and append easier. So how do we log then? "".join. Of course could have done same for log_history but makes it clearer on the intent. Since I don't intend to add remove and such, well, let it be a text. (moved comment) #self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
         self.trace_append_or_pop_flag = False #Means, don't append, pop. True means, append, don't pop. Based on undo logic because I started thinking about it first. So undo is usually pop and that's what False means but when it's True, it's the other way around. Reason why it's a flag and not a string or anything is because it's more intuitive to me. It's a switch. It's one mode or the other.
+        self.affected_files = [] #Will work similarly to trace but for filenames. This separation will make it easier to read and easier on the "".join. To avoid duplicates, we'll do a set() before displaying. And, when performing the saves, we'll work with that filtered list. Then the rest can be handled with the same method of append and pop that we use for trace.
         self.saved = False #True, I agree. Those are different things. self.strack_ptr I mean self.stack_ptr == 0 doesn't imply not saved, and != 0 doesn't imply saved. Saved is something that literally means that: a save happened. It is not related to the stack_ptr. In other words, yes, after you save, you can have either Unsaved changes or Saved, meaning there was at least one save.
         self.log_history = "" #Will have to be a text. Will make it easier to generate the corresponding label.
 
@@ -76,7 +77,8 @@ class UndoRedo:
             log_text = "- Switch Branch: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
             self.log_history += log_text
             if undo_type == "Change":
-                self.decide_trace_append_or_pop("undo", log_text) #Technically, those are undo, even if we're in a Switch Branch. #or pop_or_append. Was also going to call it decide direction but in this specific, it doesn't make it as clear to me, other times I like to use like names but here I'll let it like that.
+                affected_file = self.get_affected_file(snapshot, name_UI)
+                self.decide_trace_append_or_pop("undo", log_text, affected_file) #Technically, those are undo, even if we're in a Switch Branch. #or pop_or_append. Was also going to call it decide direction but in this specific, it doesn't make it as clear to me, other times I like to use like names but here I'll let it like that.
             self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
         if self.createanims.in_physics_window:
             init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
@@ -112,7 +114,8 @@ class UndoRedo:
         log_text = "- Undo: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
         self.log_history += log_text
         if undo_type == "Change":
-            self.decide_trace_append_or_pop("undo", log_text)
+            affected_file = self.get_affected_file(snapshot, name_UI)
+            self.decide_trace_append_or_pop("undo", log_text, affected_file)
         self.stack_ptr -= 1 #We went backwards one step.
         self.decide_undo_redo_status()
         undo[0](*undo[1:]) #So now, node[0] is undo data. Therefore node[0][0] is func, node[0][1] is args. #And the args.
@@ -128,7 +131,8 @@ class UndoRedo:
         log_text = "- Redo: " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
         self.log_history += log_text
         if redo_type == "Change":
-            self.decide_trace_append_or_pop("redo", log_text)
+            affected_file = self.get_affected_file(snapshot, name_UI)
+            self.decide_trace_append_or_pop("redo", log_text, affected_file)
         self.stack_ptr += 1 #We advanced one step.
         self.decide_undo_redo_status()
         redo[0](*redo[1:])
@@ -145,7 +149,9 @@ class UndoRedo:
         log_text = "- " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
         self.log_history += log_text
         if function_type == "Change": #I love this.
+            affected_file = self.get_affected_file(snapshot, name_UI)
             self.trace.append(log_text)
+            self.affected_files.append(affected_file)
         self.stack = self.stack[:self.stack_ptr+1] #Clear all the redo.
         self.stack[self.stack_ptr].append(redo) #Here we do want an append. #Where we are, add the redo.
         self.stack[self.stack_ptr].append(snapshot) #And, add the Snapshot.
@@ -210,7 +216,7 @@ class UndoRedo:
         log_formatted = text_to_format.format(*list_format) + "\n"
         return log_formatted
 
-    def decide_trace_append_or_pop(self, change_type, log_text): #Change type can be one of two: redo or undo. Could say undo_or_redo but here I prefer change_type. It's about a change.
+    def decide_trace_append_or_pop(self, change_type, log_text, affected_file): #Change type can be one of two: redo or undo. Could say undo_or_redo but here I prefer change_type. It's about a change.
         if not self.trace:
             if change_type == "undo":
                 self.trace_append_or_pop_flag = True
@@ -219,13 +225,29 @@ class UndoRedo:
         if self.trace_append_or_pop_flag:
             if change_type == "undo":
                 self.trace.append(log_text)
+                self.affected_files.append(affected_file)
             else:
                 self.trace.pop()
+                self.affected_files.pop()
         else:
             if change_type == "undo": #Inverted.
                 self.trace.pop()
+                self.affected_files.pop()
             else:
                 self.trace.append(log_text)
+                self.affected_files.append(affected_file)
+
+    def get_affected_file(self, snapshot, name_UI):
+        character_name = snapshot.character_name #Won't have to worry about navigation of character, those don't affect any files.
+        file_type = name_UI[-1][0] #Last element will tell us. But its first element specifically.
+        if file_type != "pal": #Pal is an exception.
+            file_character_type = name_UI[-1][1] #So structure is, first the folder (file_type), then the file_character_type (how it is referred to inside the folder, in the filename), then the corresponding attribute in the snapshot, then the file_extension.
+            file_type_ID = snapshot.__dict__[name_UI[-1][2]] #So inside this folder, what's the exact file? Now last element and second element will tell us specifically.
+            file_extension = name_UI[-1][3]
+            affected_file = f"- {character_name}/{file_type}/{character_name}_{file_character_type}_{file_type_ID:03d}.{file_extension}\n"
+        else:
+            affected_file = f"- {character_name}/pal/{character_name}_usual.pal\n"
+        return affected_file
 
     def tracer(self, event=None): #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.
         from tkinter import messagebox #It's so beautiful to have a file with no imports at the top, don't you think?

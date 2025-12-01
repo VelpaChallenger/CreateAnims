@@ -535,7 +535,7 @@ class CreateAnims:
 
         self.save_changes_affected_files_frame = tkinter.LabelFrame(self.frame_save_changes_affected_files, text="", bd=2, width=460) #Changes to be saved. But I'd like to experiment with just a container. We know those are the changes to be saved, the label above says so.
         self.save_changes_affected_files_frame.pack(anchor="nw", padx=15)
-        self.save_changes_affected_files_label = tkinter.Label(self.save_changes_affected_files_frame, text="- File", justify="left", wraplength=440)
+        self.save_changes_affected_files_label = tkinter.Label(self.save_changes_affected_files_frame, text="".join(list(set(self.undo_redo.affected_files))).rstrip(), justify="left", wraplength=440)
         self.save_changes_affected_files_label.place(x=5, y=5)
         self.save_changes_window.update() #Updates save_changes_affected_files_label height (well everything but I care about height in this case).
         save_changes_affected_files_label_height = self.save_changes_affected_files_label.winfo_height() + 25 #25 seems like the right number to make all look cool.

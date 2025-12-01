@@ -275,6 +275,10 @@ class Command:
         self.createanims.physics_list[self.createanims.current_physics_id] = new_physics[:] #Analogous to chr_palette. Has to be copy otherwise when we modify them in Edit physics for example they'll both get modified. For frames and anims it's different because we don't use the bytes themselves, we use the attributes which were filled based on those bytes. Not the same.
         self.createanims.anim.load_new_physics_id_value(self.createanims.current_physics_id) #I was going to add a messagebox but... I think it'll be enough with the potential physics ID mismatch and if not, you can still use Edit physics, like, I don't want it to be too annoying, I know what it feels like. But if I'm asked to add it, I will. #Similar logic to why loading new anim when importing an anim. There are some updates that need to run. Like for example, if the new physics has a mismatch, that has to run. And has to set the flag.
 
+    def save_changes(self):
+        self.createanims.undo_redo.trace.clear()
+        self.createanims.save_changes_window.destroy() #For now this. Will then implement the full logic based on affected files and such.
+
     def open_docs_in_browser(self):
         import webbrowser
         readme_path = os.path.abspath("README.html")

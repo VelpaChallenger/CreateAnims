@@ -288,6 +288,7 @@ class CreateAnims:
         self.root.bind("<Control-z>", self.undo_redo.undo)
         self.root.bind("<Control-y>", self.undo_redo.redo)
         self.root.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo) #What? Control-Z? Don't you mean Control-Shift-z? Actually yes. But Shift-z means Z, so if you put Control-shift-z, it won't work.
+        self.root.bind("<Control-s>", self.undo_redo.tracer)
         self.root.bind("<Control-l>", self.init_log_history_window)
 
         self.root.report_callback_exception = self.self_destruct

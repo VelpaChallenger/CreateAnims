@@ -46,6 +46,7 @@ class UndoRedo:
         self.stack_copy_ptr = 0
         self.last_saved_ptr = 0
         self.trace = [] #This needs to be a list, will make pop and append easier. So how do we log then? "".join. Of course could have done same for log_history but makes it clearer on the intent. Since I don't intend to add remove and such, well, let it be a text. (moved comment) #self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
+        self.trace_append_or_pop_flag = False #Means, don't append, pop. True means, append, don't pop. Based on undo logic because I started thinking about it first. So undo is usually pop and that's what False means but when it's True, it's the other way around. Reason why it's a flag and not a string or anything is because it's more intuitive to me. It's a switch. It's one mode or the other.
         self.saved = False #True, I agree. Those are different things. self.strack_ptr I mean self.stack_ptr == 0 doesn't imply not saved, and != 0 doesn't imply saved. Saved is something that literally means that: a save happened. It is not related to the stack_ptr. In other words, yes, after you save, you can have either Unsaved changes or Saved, meaning there was at least one save.
         self.log_history = "" #Will have to be a text. Will make it easier to generate the corresponding label.
 
@@ -72,9 +73,10 @@ class UndoRedo:
             undo_type, name_UI = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
             snapshot = self.stack[self.stack_ptr - 1][2]
             redo = self.stack[self.stack_ptr - 1][1]
-            self.log_history += "- Switch Branch: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
+            log_text = "- Switch Branch: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
+            self.log_history += log_text
             if undo_type == "Change":
-                self.trace.pop()
+                self.decide_trace_append_or_pop("undo", log_text) #Technically, those are undo, even if we're in a Switch Branch. #or pop_or_append. Was also going to call it decide direction but in this specific, it doesn't make it as clear to me, other times I like to use like names but here I'll let it like that.
             self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
         if self.createanims.in_physics_window:
             init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
@@ -107,9 +109,10 @@ class UndoRedo:
         undo_type, name_UI = self.get_function_type(function_undo) #Done, I love it. #I might encapsulate this in a method yeah. get_function_type. It can Unknown, Navigation or Change. Beautiful.
         snapshot = self.stack[self.stack_ptr - 1][2] #We want the snapshot taken at the previous step. #self.stack[self.stack_ptr][2] #Oh right, it's actually this. #More like an undo_redo technically speaking.
         redo = self.stack[self.stack_ptr - 1][1]
-        self.log_history += "- Undo: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
+        log_text = "- Undo: " + self.generate_log(snapshot, redo[1:], undo[1:], name_UI)
+        self.log_history += log_text
         if undo_type == "Change":
-            self.trace.pop()
+            self.decide_trace_append_or_pop("undo", log_text)
         self.stack_ptr -= 1 #We went backwards one step.
         self.decide_undo_redo_status()
         undo[0](*undo[1:]) #So now, node[0] is undo data. Therefore node[0][0] is func, node[0][1] is args. #And the args.
@@ -125,7 +128,7 @@ class UndoRedo:
         log_text = "- Redo: " + self.generate_log(snapshot, undo[1:], redo[1:], name_UI)
         self.log_history += log_text
         if redo_type == "Change":
-            self.trace.append(log_text)
+            self.decide_trace_append_or_pop("redo", log_text)
         self.stack_ptr += 1 #We advanced one step.
         self.decide_undo_redo_status()
         redo[0](*redo[1:])
@@ -206,3 +209,27 @@ class UndoRedo:
                 list_format.append(snapshot.__dict__[parameter])
         log_formatted = text_to_format.format(*list_format) + "\n"
         return log_formatted
+
+    def decide_trace_append_or_pop(self, change_type, log_text): #Change type can be one of two: redo or undo. Could say undo_or_redo but here I prefer change_type. It's about a change.
+        if not self.trace:
+            if change_type == "undo":
+                self.trace_append_or_pop_flag = True
+            else:
+                self.trace_append_or_pop_flag = False
+        if self.trace_append_or_pop_flag:
+            if change_type == "undo":
+                self.trace.append(log_text)
+            else:
+                self.trace.pop()
+        else:
+            if change_type == "undo": #Inverted.
+                self.trace.pop()
+            else:
+                self.trace.append(log_text)
+
+    def tracer(self, event=None): #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.
+        from tkinter import messagebox #It's so beautiful to have a file with no imports at the top, don't you think?
+        if not self.trace:
+            messagebox.showinfo(title="No unsaved changes", message="You don't have any changes to save.")
+            return False
+        self.createanims.init_save_changes_window()

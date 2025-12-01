@@ -44,7 +44,6 @@ class UndoRedo:
         self.stack_ptr = 0 #Our index. Where are we in the stack?
         self.stack_copy = None #We'll use this to know whether we can actually switch branches.
         self.stack_copy_ptr = 0
-        self.last_saved_ptr = 0
         self.trace = [] #This needs to be a list, will make pop and append easier. So how do we log then? "".join. Of course could have done same for log_history but makes it clearer on the intent. Since I don't intend to add remove and such, well, let it be a text. (moved comment) #self.amount_changes = 0 #Also, to understand why/how it works, think of it as a ptr of sorts. It makes it a lot easier to understand. #Not anymore! I never liked it in the first place. I like this a lot more. #self.unsaved_changes = False #We'll use this instead because we need to differentiate changes from navigation. I still think that, maybe, it would be better to have two completely different implementations, and that UndoRedo only refers to changes. But I'm not fully convinced of the implications at UI level, experience and whatnot. So I'm giving a try to this approach.
         self.trace_append_or_pop_flag = False #Means, don't append, pop. True means, append, don't pop. Based on undo logic because I started thinking about it first. So undo is usually pop and that's what False means but when it's True, it's the other way around. Reason why it's a flag and not a string or anything is because it's more intuitive to me. It's a switch. It's one mode or the other.
         self.affected_files = [] #Will work similarly to trace but for filenames. This separation will make it easier to read and easier on the "".join. To avoid duplicates, we'll do a set() before displaying. And, when performing the saves, we'll work with that filtered list. Then the rest can be handled with the same method of append and pop that we use for trace.
@@ -203,8 +202,6 @@ class UndoRedo:
                     character = redo_params[argument_position]
                 character_name = self.createanims.characters[character].name #This can be changed/accommodated to use display_name for example or something of the sort to display a different name than the one for the folder.
                 list_format.append(f"{character:02d} ({character_name})") #Yeah, a format inside another format. Even if one f string and the other... some other format.
-                #undo_or_redo = parameter.split(":", 1)[1] #Only on the first occurrence and treat the rest exactly the same. Here a function could do wonders but, whatever. Or... actually...
-                #character_name = self.#Assume always character. The other potential candidate for a name (and therefore a conversion) is anim, but not for now.
             elif parameter.startswith("undo"):
                 argument_position = int(parameter.split(":")[1])
                 list_format.append(undo_params[argument_position])
@@ -249,7 +246,7 @@ class UndoRedo:
             affected_file = f"- {character_name}/pal/{character_name}_usual.pal\n"
         return affected_file
 
-    def tracer(self, event=None): #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.
+    def tracer(self, event=None): #Not anymore. Brought some complications with navigations. #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.
         from tkinter import messagebox #It's so beautiful to have a file with no imports at the top, don't you think?
         if not self.trace:
             messagebox.showinfo(title="No unsaved changes", message="You don't have any changes to save.")

@@ -277,6 +277,21 @@ class Command:
 
     def save_changes(self):
         self.createanims.undo_redo.trace.clear()
+        self.createanims.undo_redo.saved = True
+        for affected_file in list(set(self.createanims.undo_redo.affected_files)):
+            filename = affected_file[2:].rstrip() #Let's not forget the newline. #Remove the - used for displaying purposes.
+            filename_split = filename.split("/") #This might be more friendly for performance?
+            file_type = filename_split[1] #Careful, if we ever write code that runs in Linux as well and MacOS and other operating systems, we might have to change this.
+            if file_type == "anims":
+                with open(f"{self.createanims.root_dir}/{filename}", "wb") as anim_file: #Same as save_anim, could encapsulate in same function. Well actually no, there are many differences. And the with can maybe be moved to the top? But I kinda like it this way here. Not a difference with performance no, it will have to run either way.
+                    character_name = filename_split[0]
+                    character_ID = self.createanims.characters_dict[character_name] #And yes, I could use character but... again it's all on context?
+                    anim_ID = int(affected_file.split(".")[0][-3:]) #Could also use offset but, split with period makes it easier to copypaste. And to read too. Alhough I liked more -1:-4, but yes, it has to be -4 for the behavior I want. Technically the way to say last 3 digits though. But yeah, I won't contradict. -1:-4 is the right way.
+                    anim = self.createanims.characters[character_ID].anims[anim_ID]
+                    anim_file.write(bytearray([anim.physics_id]))
+                    anim_file.write(bytearray(anim.frame_ids))
+            else:
+                raise ValueError(f"Could not find file_type for {affected_file}") #Yes, let's be explicit about it this time around, I wouldn't want the file_type to be skipped and just not saved or something.
         self.createanims.save_changes_window.destroy() #For now this. Will then implement the full logic based on affected files and such.
 
     def open_docs_in_browser(self):

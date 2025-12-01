@@ -476,6 +476,88 @@ class CreateAnims:
         self.root.clipboard_append(self.undo_redo.log_history.rstrip())
         self.log_history_label_copy_ok.configure(text="Copied!", fg="green")
 
+    def init_save_changes_window(self):
+        self.disable_undo_redo()
+        self.save_changes_window = tkinter.Toplevel(self.root)
+        self.save_changes_window.title(f"Save changes")
+        self.save_changes_window.geometry(f"500x500+715+250")
+        self.root.attributes('-disabled', 1)
+        self.save_changes_window.transient(self.root)
+        self.save_changes_window.grab_set()
+        self.save_changes_window.focus_force()
+
+        self.save_changes_label = tkinter.Label(self.save_changes_window, text="You are about to save the following changes:\n", anchor="nw", justify="left") #save_changes_text = f #And again, we'll move it somewhere else. #Changed my mind, let's encapsulate the logic here instead of in the label.
+        self.save_changes_label.pack(anchor="nw")
+
+        self.save_changes_canvas_frame = tkinter.Frame(self.save_changes_window, bd=0)
+        self.save_changes_canvas_frame.pack(anchor="nw")
+
+        self.save_changes_canvas_frame.bind_all("<MouseWheel>", lambda event: self.save_changes_canvas.yview_scroll(int(-1*(event.delta/120)), "units")) #On second thought... I think I'm creating a function for this. Hmmmmmmm...
+        self.save_changes_canvas_frame.bind_all("<Up>", lambda event: self.save_changes_canvas.yview_scroll(-1, "units"))
+        self.save_changes_canvas_frame.bind_all("<Down>", lambda event: self.save_changes_canvas.yview_scroll(1, "units"))
+
+        save_changes_canvas_height = 140 #Will be smaller for these scrolls than it is for Log History. #Should always be this value and will use it several times so I'm defining it here.
+        self.save_changes_canvas = tkinter.Canvas(self.save_changes_canvas_frame, bd=0, highlightthickness=0, height=save_changes_canvas_height, width=480)
+        self.save_changes_canvas.pack(side="left", fill="both", expand=True)
+        self.frame_save_changes = tkinter.Frame(self.save_changes_canvas, border=0) #This one is the scrollable. save_changes_frame is the LabelFrame.
+        self.frame_save_changes.bind("<Configure>", lambda event: self.save_changes_canvas.configure(scrollregion=self.save_changes_canvas.bbox('all'))) #Let's please verify that this bind doesn't mess up memory.
+        self.save_changes_canvas.create_window((0, 0), window=self.frame_save_changes, anchor="nw")
+        vbar = tkinter.Scrollbar(self.save_changes_canvas_frame, orient="vertical", command=self.save_changes_canvas.yview, takefocus=1)
+        self.save_changes_canvas.configure(yscrollcommand=vbar.set) #One will always have a configure. canvas needs hbar for the scrollcommand. hbar needs the canvas for the command.
+        vbar.pack(side="left", fill="y")
+
+        self.save_changes_frame = tkinter.LabelFrame(self.frame_save_changes, text="", bd=2, width=460) #Changes to be saved. But I'd like to experiment with just a container. We know those are the changes to be saved, the label above says so.
+        self.save_changes_frame.pack(anchor="nw", padx=15)
+        self.save_changes_label = tkinter.Label(self.save_changes_frame, text="".join(self.undo_redo.trace).rstrip(), justify="left", wraplength=440)
+        self.save_changes_label.place(x=5, y=5)
+        self.save_changes_window.update() #Updates save_changes_label height (well everything but I care about height in this case).
+        save_changes_label_height = self.save_changes_label.winfo_height() + 25 #25 seems like the right number to make all look cool.
+        if save_changes_label_height < save_changes_canvas_height: #I don't usually put logic in CreateAnims but yes.
+            save_changes_label_height = save_changes_canvas_height
+        self.save_changes_frame.configure(height=save_changes_label_height) #So the frame will be as high as the frame. Excellent.
+
+        self.save_changes_affected_files_label = tkinter.Label(self.save_changes_window, text="\nAffected files:\n", anchor="nw", justify="left")
+        self.save_changes_affected_files_label.pack(anchor="nw")
+
+        self.save_changes_affected_files_canvas_frame = tkinter.Frame(self.save_changes_window, bd=0)
+        self.save_changes_affected_files_canvas_frame.pack(anchor="nw")
+
+        save_changes_affected_files_canvas_height = 140 #Will be smaller for these scrolls than it is for Log History. #Should always be this value and will use it several times so I'm defining it here.
+        self.save_changes_affected_files_canvas = tkinter.Canvas(self.save_changes_affected_files_canvas_frame, bd=0, highlightthickness=0, height=save_changes_affected_files_canvas_height, width=480)
+        self.save_changes_affected_files_canvas.pack(side="left", fill="both", expand=True)
+        self.frame_save_changes_affected_files = tkinter.Frame(self.save_changes_affected_files_canvas, border=0) #This one is the scrollable. save_changes_affected_files_frame is the LabelFrame.
+        self.frame_save_changes_affected_files.bind("<Configure>", lambda event: self.save_changes_affected_files_canvas.configure(scrollregion=self.save_changes_affected_files_canvas.bbox('all'))) #Let's please verify that this bind doesn't mess up memory.
+        self.save_changes_affected_files_canvas.create_window((0, 0), window=self.frame_save_changes_affected_files, anchor="nw")
+        vbar = tkinter.Scrollbar(self.save_changes_affected_files_canvas_frame, orient="vertical", command=self.save_changes_affected_files_canvas.yview, takefocus=1)
+        self.save_changes_affected_files_canvas.configure(yscrollcommand=vbar.set) #One will always have a configure. canvas needs hbar for the scrollcommand. hbar needs the canvas for the command.
+        vbar.pack(side="left", fill="y")
+
+        self.save_changes_affected_files_frame = tkinter.LabelFrame(self.frame_save_changes_affected_files, text="", bd=2, width=460) #Changes to be saved. But I'd like to experiment with just a container. We know those are the changes to be saved, the label above says so.
+        self.save_changes_affected_files_frame.pack(anchor="nw", padx=15)
+        self.save_changes_affected_files_label = tkinter.Label(self.save_changes_affected_files_frame, text="- File", justify="left", wraplength=440)
+        self.save_changes_affected_files_label.place(x=5, y=5)
+        self.save_changes_window.update() #Updates save_changes_affected_files_label height (well everything but I care about height in this case).
+        save_changes_affected_files_label_height = self.save_changes_affected_files_label.winfo_height() + 25 #25 seems like the right number to make all look cool.
+        if save_changes_affected_files_label_height < save_changes_affected_files_canvas_height: #I don't usually put logic in CreateAnims but yes.
+            save_changes_affected_files_label_height = save_changes_affected_files_canvas_height
+        self.save_changes_affected_files_frame.configure(height=save_changes_affected_files_label_height) #So the frame will be as high as the frame. Excellent.
+
+        self.save_changes_confirmation_label = tkinter.Label(self.save_changes_window, text="\nFiles will be overwritten. Do you wish to continue?", anchor="nw", justify="left") #save_changes_text = f #And again, we'll move it somewhere else. #Changed my mind, let's encapsulate the logic here instead of in the label.
+        self.save_changes_confirmation_label.pack(anchor="nw")
+
+        self.save_changes_command_base = tkinter.Frame(self.save_changes_window, bd=0)
+        self.save_changes_command_base.pack()
+
+        self.save_changes_yes_button = ttk.Button(self.save_changes_command_base, text="Yes", takefocus=0, command=self.command.save_changes) #Copy log, copy to clipboard.
+        self.save_changes_yes_button.pack(side="left", padx=(8, 15), pady=15)
+        self.save_changes_no_button = ttk.Button(self.save_changes_command_base, text="No", takefocus=0, command=self.save_changes_window.destroy)
+        self.save_changes_no_button.pack(side="left", padx=15, pady=15)
+
+        self.root.wait_window(self.save_changes_window)
+        self.undo_redo.decide_undo_redo_status() #Actually, only if they should be reenabled. Leave them at the state they should. Presumably, Undo should be enabled and Redo not, but, this logic will decide. #You can undo and redo again.
+        self.root.attributes('-disabled', 0)
+        self.root.focus_force()
+
     def init_about_window(self):
         self.disable_undo_redo()
         self.about_window = tkinter.Toplevel(self.root)

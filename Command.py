@@ -25,6 +25,23 @@ class Command:
         with open(pal_filename, "wb") as pal_file:
             pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].palette))
 
+    def save_chr(self): #Let's add it after all. There's no CHR editor (for now), there might be one in the future but even if there isn't, you might want to import and then save that only.
+        initial_directory = self.createanims.chr_directory
+        if initial_directory is None:
+            initial_directory = os.getcwd()
+        chr_filename = filedialog.asksaveasfilename(
+            defaultextension=".chr",
+            filetypes=[("CHR files", ".chr"), ("All files", "*.*")],
+            initialdir=initial_directory,
+            title="Save CHR",
+            parent=self.createanims.root
+        )
+        if not chr_filename: #Then save was aborted.
+            return
+        self.createanims.chr_directory = os.path.dirname(chr_filename) #Directory where the file selected is.
+        with open(chr_filename, "wb") as chr_file:
+            chr_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]))
+
     def save_chr_palette(self):
         initial_directory = self.createanims.chr_palette_directory
         if initial_directory is None:

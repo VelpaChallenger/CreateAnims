@@ -103,6 +103,7 @@ class CreateAnims:
         self.menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="Save palette", command=self.command.save_palette)
+        file_menu.add_command(label="Save CHR", command=self.command.save_chr)
         file_menu.add_command(label="Save CHR palette", command=self.command.save_chr_palette)
         file_menu.add_command(labe="Save frame", command=self.command.save_frame)
         file_menu.add_command(label="Save anim", command=self.command.save_anim)

@@ -298,7 +298,12 @@ class Command:
         for affected_file in list(set(self.createanims.undo_redo.affected_files)):
             filename = affected_file[2:].rstrip() #Let's not forget the newline. #Remove the - used for displaying purposes.
             filename_split = filename.split("/") #This might be more friendly for performance?
-            file_type = filename_split[1] #Careful, if we ever write code that runs in Linux as well and MacOS and other operating systems, we might have to change this.
+            if filename_split[0] != "physics":
+                file_type = filename_split[1] #Careful, if we ever write code that runs in Linux as well and MacOS and other operating systems, we might have to change this.
+            else:
+                file_type = filename_split[0]
+            if filename[-7:] == "chr.pal": #Come to think of it, maybe I could have used file extension from the beginning and the logic was simplified. Whatever.
+                file_type = "chr_pal"
             if file_type == "anims":
                 with open(f"{self.createanims.root_dir}/{filename}", "wb") as anim_file: #Same as save_anim, could encapsulate in same function. Well actually no, there are many differences. And the with can maybe be moved to the top? But I kinda like it this way here. Not a difference with performance no, it will have to run either way.
                     character_name = filename_split[0]
@@ -307,6 +312,39 @@ class Command:
                     anim = self.createanims.characters[character_ID].anims[anim_ID]
                     anim_file.write(bytearray([anim.physics_id]))
                     anim_file.write(bytearray(anim.frame_ids))
+            elif file_type == "frames":
+                with open(f"{self.createanims.root_dir}/{filename}", "wb") as frame_file:
+                    character_name = filename_split[0]
+                    character_ID = self.createanims.characters_dict[character_name]
+                    frame_ID = int(affected_file.split(".")[0][-3:])
+                    frame = self.createanims.characters[character_ID].frames[frame_ID]
+                    metadata = frame.metadata
+                    x_offset_for_file = abs(metadata.x_offset) | (0x80 if metadata.x_offset > 0 else 0x00)
+                    y_offset_for_file = abs(metadata.y_offset) | (0x20 if metadata.y_offset > 0 else 0x00)
+                    frame_file.write(bytearray([metadata.x_length, metadata.y_length, x_offset_for_file, metadata.chr_bank, y_offset_for_file, 0x0])) #Metadata first.
+                    frame_file.write(bytearray(frame.tiles)) #And now the tiles.
+            elif file_type == "physics":
+                with open(f"{self.createanims.root_dir}/{filename}", "wb") as physics_file:
+                    physics_ID = int(affected_file.split(".")[0][-3:])
+                    physics = self.createanims.physics_list[physics_ID]
+                    physics_file.write(bytearray(physics))
+            elif file_type == "pal":
+                with open(f"{self.createanims.root_dir}/{filename}", "wb") as pal_file:
+                    character_name = filename_split[0]
+                    character_ID = self.createanims.characters_dict[character_name]
+                    pal_file.write(bytearray(self.createanims.characters[character_ID].palette))
+            elif file_type == "chr":
+                with open(f"{self.createanims.root_dir}/{filename}", "wb") as chr_file:
+                    character_name = filename_split[0]
+                    character_ID = self.createanims.characters_dict[character_name]
+                    chr_bank = int(affected_file.split(".")[0][-3:])
+                    chr_file.write(bytearray(self.createanims.characters[character_ID].chrs[chr_bank]))
+            elif file_type == "chr_pal":
+                with open(f"{self.createanims.root_dir}/{filename}", "wb") as chr_pal_file:
+                    character_name = filename_split[0]
+                    character_ID = self.createanims.characters_dict[character_name]
+                    chr_bank = int(affected_file.split(".")[0][-3:])
+                    chr_pal_file.write(bytearray(self.createanims.characters[character_ID].chr_palettes[chr_bank]))
             else:
                 raise ValueError(f"Could not find file_type for {affected_file}") #Yes, let's be explicit about it this time around, I wouldn't want the file_type to be skipped and just not saved or something.
         self.createanims.undo_redo.affected_files.clear() #Has to happen at the end. Otherwise the for loop will not run.

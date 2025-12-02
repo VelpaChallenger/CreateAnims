@@ -3,26 +3,26 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_frame_value": ("Character {0}. Navigated from frame {1:02d} to frame {2:02d} in anim {3:02d}.", "Navigation", ("character_name", "undo:0", "redo:0", "anim")),
     "load_new_frame_id_value": ("Character {0}. Changed frame ID from {1:02d} to {2:02d} for frame {3:02d} in anim {4:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame", "anim"), ("anims", "anim", "anim", "anim")), #This could be a nice scenario for format strings but not the f ones, the ones that allow for replacing/formatting later on.
     "load_new_character_value": ("Navigated from character {0} to character {1}.", "Navigation", ("convert_character:undo:0", "convert_character:redo:0")),
-    "load_new_physics_id_value": ("Character {0}. Changed physics ID from {1:02d} to {2:02d} for anim {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "anim")), #Turns out I do care about character, because it's the physics ID for this anim, and what character? There you go.
-    "load_new_x_offset_value": ("Character {0}. Changed X Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
-    "load_new_y_offset_value": ("Character {0}. Changed Y Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
-    "load_new_width_value": ("Character {0}. Changed width from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
-    "load_new_height_value": ("Character {0}. Changed height from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
-    "load_new_chr_bank_value": ("Character {0}. Changed CHR bank from {1:03d} to {2:03d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id")),
+    "load_new_physics_id_value": ("Character {0}. Changed physics ID from {1:02d} to {2:02d} for anim {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "anim"), ("anims", "anim", "anim", "anim")), #Turns out I do care about character, because it's the physics ID for this anim, and what character? There you go.
+    "load_new_x_offset_value": ("Character {0}. Changed X Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_y_offset_value": ("Character {0}. Changed Y Offset from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_width_value": ("Character {0}. Changed width from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_height_value": ("Character {0}. Changed height from {1:02d} to {2:02d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_chr_bank_value": ("Character {0}. Changed CHR bank from {1:03d} to {2:03d} for frame ID {3:02d}.", "Change", ("character_name", "undo:0", "redo:0", "frame_id"), ("frames", "frame", "frame_id", "frame")),
     "init_physics_window": ("Opened physics window.", "Navigation", ()),
     "destroy_physics_window": ("Closed physics window.", "Navigation", ()), #Funny how it's init and destroy for programmers, but open and close for users. Sharing some thoughts here. I could have called it open and close maybe?
-    "load_new_physics_value": ("Changed physics from {0:02d} {1:02d} to {2:02d} {3:02d} for frame and physics ID {4:02d} {5:02d}.", "Change", ("undo:3", "undo:4", "redo:3", "redo:4", "undo:0", "physics_id")), #I liked more updated here but okay let's keep the consistency.
-    "insert_physics_column_value": ("Inserted physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("redo:3", "redo:4", "undo:0", "physics_id")),
-    "remove_physics_column_value": ("Removed physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("undo:3", "undo:4", "undo:0", "physics_id")),
-    "load_new_character_palette_imported_value": ("Imported palette for character {0}. Filename: {1}", "Change", ("character_name", "redo:1")), #Updated palette for character. #Updated {character_name}'s palette.
-    "load_new_chr_imported_value": ("Imported CHR for character {0} for CHR bank {1}. Filename: {2}", "Change", ("character_name", "chr_bank", "redo:1")),
-    "load_new_chr_palette_imported_value": ("Imported CHR pal for character {0} for CHR bank {1}. Filename: {2}", "Change", ("character_name", "chr_bank", "redo:1")),
-    "load_new_frame_imported_value": ("Imported frame for character {0} for frame ID {1}. Filename: {2}", "Change", ("character_name", "frame_id", "redo:1")),
-    "load_new_anim_imported_value": ("Imported anim for character {0}. Filename: {1}", "Change", ("character_name", "redo:1")),
-    "load_new_physics_imported_value": ("Imported physics for character anim physics ID {0} {1} {2}. Filename: {3}", "Change", ("character_name", "anim", "physics_id", "redo:1")),
-    "load_new_character_palette_for_index_value": ("Character {0}. Changed pal index {1:02X} from {2:02X} to {3:02X}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1")), #Let's use hex here, more friendly for palettes. I mean, don't everyone use hex for pale'? Thinking...
-    "toggle_palette_for_tile_index_value": ("Character {0}. Toggled CHR pal for bank {1:03d} for tile index {2:02X}.", "Change", ("character_name", "chr_bank", "undo:0")),
-    "load_new_tile_for_index_value": ("Character {0}. Changed anim index {1:02X} from {2:02X} to {3:02X}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1")),
+    "load_new_physics_value": ("Changed physics from {0:02d} {1:02d} to {2:02d} {3:02d} for frame and physics ID {4:02d} {5:02d}.", "Change", ("undo:3", "undo:4", "redo:3", "redo:4", "undo:0", "physics_id"), ("physics",)), #I liked more updated here but okay let's keep the consistency.
+    "insert_physics_column_value": ("Inserted physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("redo:3", "redo:4", "undo:0", "physics_id"), ("physics",)),
+    "remove_physics_column_value": ("Removed physics {0:02d} {1:02d} at position (frame) {2:02d} for physics ID {3:02d}.", "Change", ("undo:3", "undo:4", "undo:0", "physics_id"), ("physics",)),
+    "load_new_character_palette_imported_value": ("Imported palette for character {0}. Filename: {1}", "Change", ("character_name", "redo:1"), ("pal",)), #Updated palette for character. #Updated {character_name}'s palette.
+    "load_new_chr_imported_value": ("Imported CHR for character {0} for CHR bank {1}. Filename: {2}", "Change", ("character_name", "chr_bank", "redo:1"), ("chr", "chr", "chr_bank", "chr")),
+    "load_new_chr_palette_imported_value": ("Imported CHR pal for character {0} for CHR bank {1}. Filename: {2}", "Change", ("character_name", "chr_bank", "redo:1"), ("chr", "chr_pal", "chr_bank", "chr.pal")),
+    "load_new_frame_imported_value": ("Imported frame for character {0} for frame ID {1}. Filename: {2}", "Change", ("character_name", "frame_id", "redo:1"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_anim_imported_value": ("Imported anim for character {0}. Filename: {1}", "Change", ("character_name", "redo:1"), ("anims", "anim", "anim", "anim")),
+    "load_new_physics_imported_value": ("Imported physics for character anim physics ID {0} {1} {2}. Filename: {3}", "Change", ("character_name", "anim", "physics_id", "redo:1"), ("physics",)),
+    "load_new_character_palette_for_index_value": ("Character {0}. Changed pal index {1:02X} from {2:02X} to {3:02X}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1"), ("pal",)), #Let's use hex here, more friendly for palettes. I mean, don't everyone use hex for pale'? Thinking...
+    "toggle_palette_for_tile_index_value": ("Character {0}. Toggled CHR pal for bank {1:03d} for tile index {2:02X}.", "Change", ("character_name", "chr_bank", "undo:0"), ("chr", "chr_pal", "chr_bank", "chr.pal")),
+    "load_new_tile_for_index_value": ("Character {0}. Changed anim index {1:02X} from {2:02X} to {3:02X}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1"), ("frames", "frame", "frame_id", "frame")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
@@ -237,13 +237,15 @@ class UndoRedo:
     def get_affected_file(self, snapshot, name_UI):
         character_name = snapshot.character_name #Won't have to worry about navigation of character, those don't affect any files.
         file_type = name_UI[-1][0] #Last element will tell us. But its first element specifically.
-        if file_type != "pal": #Pal is an exception.
+        if file_type == "pal": #Pal is an exception. #As I kinda thought, we have more exceptions, like physics. Now I have a reason for the == "pal" and else.
+            affected_file = f"- {character_name}/pal/{character_name}_usual.pal\n"
+        elif file_type == "physics":
+            affected_file = f"- physics/physics_{snapshot.physics_id:03d}.physics\n"
+        else:
             file_character_type = name_UI[-1][1] #So structure is, first the folder (file_type), then the file_character_type (how it is referred to inside the folder, in the filename), then the corresponding attribute in the snapshot, then the file_extension.
             file_type_ID = snapshot.__dict__[name_UI[-1][2]] #So inside this folder, what's the exact file? Now last element and second element will tell us specifically.
             file_extension = name_UI[-1][3]
             affected_file = f"- {character_name}/{file_type}/{character_name}_{file_character_type}_{file_type_ID:03d}.{file_extension}\n"
-        else:
-            affected_file = f"- {character_name}/pal/{character_name}_usual.pal\n"
         return affected_file
 
     def tracer(self, event=None): #Not anymore. Brought some complications with navigations. #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.

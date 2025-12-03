@@ -55,6 +55,7 @@ class CreateAnims:
         self.png_img = []
         self.in_play_anim = False
         self.in_physics_window = False
+        self.in_exception = False
         self.physics_list = []
 
     def init_anim_window(self):
@@ -610,6 +611,9 @@ class CreateAnims:
 
     def self_destruct(self, *args):
         from tkinter import messagebox
+        if self.in_exception:
+            return #Let the main one take care of it. Don't keep spamming messageboxes and stuff. Happens particularly with tooltips like when hovering there's an error then you keep hovering it keeps going.
+        self.in_exception = True #in_self_destruct.
         error_message = "".join(traceback.format_exception(*args)) #*args here is arguably and maybe even the same as sys.exception(). #Changed order, do it here so that I don't even have to click on the messagebox, I can see the error right away when debugging in my computer. Beautiful.
         print(error_message, end="") #Yeah whatever. I was going to add a flag but this is fine. I think I can understand when I saw this in other contexts. It will work in my local, with the executable it just won't do anything. No errors exceptions anything.
         messagebox.showerror(title="Unhandled exception", message="Sorry, there was a problem while running CreateAnims. Please see crash_log.txt for details. (and please report the bug!)")

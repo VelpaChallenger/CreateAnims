@@ -37,3 +37,6 @@ CreateAnims_buf[i+2] = f"        COMMIT_ID = \"{git_short_hash}\"\n"
 
 with open("CreateAnims.py", "w") as CreateAnims_file: #Yes whatever, let's use same method.
     CreateAnims_file.write("".join(CreateAnims_buf))
+
+#And finally, create executable.
+subprocess.run("PyInstaller --onefile --noconsole create_anims.py") #Run is better in this case. It waits, so otherwise we get an "empty console" of sorts where I have to manually press Enter (return) to continue using cmd.

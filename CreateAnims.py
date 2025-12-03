@@ -584,13 +584,17 @@ class CreateAnims:
         self.about_title.pack()
         self.about_version = tkinter.Label(self.about_window, text=f"Version: {CREATEANIMS_VERSION} {CREATEANIMS_VERSION_DATE}", anchor="nw") #Okay, let's put it here, the date.
         self.about_version.pack(anchor="nw", pady=(120, 0))
-        self.about_commit = tkinter.Label(self.about_window, text=f"Commit: {COMMIT_ID}", anchor="nw", fg="blue", cursor="hand2")
-        hyperlink_font = font.Font(self.about_commit, self.about_commit.cget('font'))
+        self.about_commit_frame = tkinter.Frame(self.about_window, bd=0)
+        self.about_commit_frame.pack(anchor="nw")
+        self.about_commit_text = tkinter.Label(self.about_commit_frame, text=f"Commit:", anchor="nw", padx=0)
+        self.about_commit_text.pack(side="left")
+        self.about_commit_id = tkinter.Label(self.about_commit_frame, text=f"{COMMIT_ID}", anchor="nw", fg="blue", cursor="hand2", padx=0)
+        hyperlink_font = font.Font(self.about_commit_id, self.about_commit_id.cget('font'))
         hyperlink_font.configure(underline=True)
-        self.about_commit.configure(font=hyperlink_font)
+        self.about_commit_id.configure(font=hyperlink_font)
         commit_url = f"https://github.com/VelpaChallenger/Create-Anims/commit/{COMMIT_ID}" #Technically you can use the short version as well but... well yeah whatever. Let's do use the short one.
-        self.about_commit.bind("<Button-1>", lambda event: self.open_url_in_browser(commit_url)) #Might be good idea to have a general CreateAnims method to open URLs in the browser. In fact, I'll do just that.
-        self.about_commit.pack(anchor="nw")
+        self.about_commit_id.bind("<Button-1>", lambda event: self.open_url_in_browser(commit_url)) #Might be good idea to have a general CreateAnims method to open URLs in the browser. In fact, I'll do just that.
+        self.about_commit_id.pack(side="left")
         thanks_text = (
         "Thanks to the following people for their contributions in one way or another!\n\n" #My personality, with exclamation and all. #Be it testing, suggestions, moral support, giving the idea etc. etc.
         "\t-\n"

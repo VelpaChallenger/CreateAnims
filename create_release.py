@@ -46,5 +46,5 @@ with open("CreateAnims.py", "w") as CreateAnims_file: #Yes whatever, let's use s
     CreateAnims_file.write("".join(CreateAnims_buf))
 
 #And finally, create executable.
-subprocess.run("PyInstaller --onefile --noconsole create_anims.py") #Run is better in this case. It waits, so otherwise we get an "empty console" of sorts where I have to manually press Enter (return) to continue using cmd.
+subprocess.run("PyInstaller create_anims.spec") #Run is better in this case. It waits, so otherwise we get an "empty console" of sorts where I have to manually press Enter (return) to continue using cmd.
 subprocess.run("git restore .") #Working tree is supposed to be clean at this point except for the CreateAnims.py updates, but we don't want those in our local. It's only for the executable.

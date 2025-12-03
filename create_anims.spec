@@ -36,3 +36,6 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
+
+import shutil
+shutil.copyfile('README.html', '{0}/README.html'.format(DISTPATH))

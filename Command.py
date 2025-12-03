@@ -355,3 +355,34 @@ class Command:
         readme_path = os.path.abspath("README.html")
         url = "file://" + readme_path
         webbrowser.open(url, new=2)
+
+    def check_for_updates(self):
+        import requests
+        import webbrowser
+        import json
+        import re
+        from tkinter import messagebox
+
+        try: #Yes, I could encapsulate this but whatever. If I ever do, will use CreateAnims which... I mean... it's like open_url, I consider it still part of CreateAnims' core.
+            request_response = requests.get("https://api.github.com/repos/VelpaChallenger/CreateAnims/branches/main")
+        except requests.exceptions.ConnectionError:
+            messagebox.showerror(title="Unable to check for updates", message="Unable to check for updates. Please confirm you have an stable internet connection.") #I remember all the times I read stuff like this, what do you mean I don't have an STABLE internet connection, it's more stable than you are you...!! lol. Oh this is a comment right? Which means other people are gonna read it? I mean. Whatever.
+            return
+        commit_id_main = json.loads(request_response.text)["commit"]["sha"] #Found a super use case for json and parsing and such.
+        try:
+            request_response = requests.get(f"https://github.com/VelpaChallenger/Create-Anims/blob/{commit_id_main}/CreateAnims.py?raw=True") #Yes that's it. If you send main, it's going to use the cached version which might take long to update. But if you use the commit, it's going to be the latest right away. Exactly what we want. #Ohhh that might be it. I remember I saw something about the cache!
+        except requests.exceptions.ConnectionError:
+            messagebox.showerror(title="Unable to check for updates", message="Unable to check for updates. Please confirm you have an stable internet connection.")
+            return
+        CreateAnims_buf = request_response.text.split("\n") #Let's do it exactly the same way as forward, now backwards or... well you get what I mean.
+        for i, line in enumerate(CreateAnims_buf):
+            if line.strip().startswith("CREATEANIMS_VERSION_DATE"):
+                break
+        version_from_remote = re.findall('"(.*)"', CreateAnims_buf[i+1])[0]
+        from CreateAnims import CREATEANIMS_VERSION
+        if version_from_remote != CREATEANIMS_VERSION:
+            response = messagebox.askyesno(title="Update available!", message="There's an update available. Do you wish to download and restart with the updated version?")
+            if response:
+                pass #Do the download. Well actually, call CreateAnimsUpdater.exe which will be included in the zip (and if it doesn't exist, raise another error) and then close this instance of Tkinter, like fully close it. Then CreateAnimsUpdater.exe will show the progress bar and when it ends, the new instance will be up and running. Awesome.
+        else:
+            messagebox.showinfo(title="Up to date!", message="You're already up-to-date! :) .")

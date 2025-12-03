@@ -24,6 +24,10 @@ PHYSICS_HEIGHT = 310
 PHYSICS_INITIAL_X = 600
 PHYSICS_INITIAL_Y = 250
 
+CREATEANIMS_VERSION_DATE = "Local test"
+CREATEANIMS_VERSION = "v1.0.1" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
+COMMIT_ID = "Local test"
+
 class CreateAnims:
 
     def __init__(self):
@@ -138,6 +142,8 @@ class CreateAnims:
         help_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         help_menu.add_command(label="About", command=self.init_about_window)
         help_menu.add_command(label="Docs", command=self.command.open_docs_in_browser)
+        help_menu.add_separator()
+        help_menu.add_command(label="Check for Updates", command=self.command.check_for_updates)
         self.menu_bar.add_cascade(label="Help", menu=help_menu)
         self.root.config(menu=self.menu_bar)
 
@@ -577,10 +583,6 @@ class CreateAnims:
         self.about_window.transient(self.root)
         self.about_window.grab_set()
         self.about_window.focus_force()
-
-        CREATEANIMS_VERSION_DATE = "Dec 03, 2025"
-        CREATEANIMS_VERSION = "pre-release"
-        COMMIT_ID = "2aa5ddff"
 
         self.about_title = tkinter.Label(self.about_window, text="CreateAnims VelpaChallenger") #My idea is once I have the icon, to put the date below the icon.
         self.about_title.pack()

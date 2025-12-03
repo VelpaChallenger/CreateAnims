@@ -1,4 +1,5 @@
 import subprocess
+import re #For validation 3, newly added after final touches to the feature.
 
 #Validation 1: Working tree must be clean. #(I'm really liking this format of validations via comments.)
 git_status_porcelain_subprocess = subprocess.Popen("git status --porcelain", shell=True, stdout=subprocess.PIPE) #Exactly, exactly what we need.
@@ -31,12 +32,19 @@ for i, line in enumerate(CreateAnims_buf):
     if line.strip().startswith("CREATEANIMS_VERSION_DATE"):
         break
 
-CreateAnims_buf[i]   = f"        CREATEANIMS_VERSION_DATE = \"{version_date}\"\n"
-CreateAnims_buf[i+1] = f"        CREATEANIMS_VERSION = \"{version}\"\n"
-CreateAnims_buf[i+2] = f"        COMMIT_ID = \"{git_short_hash}\"\n"
+#Validation 3: version in source must match tag.
+current_version_in_source = re.findall('"(.*)"', CreateAnims_buf[i+1])[0] #Not current version as in last published or anything like that, version as in source, the one I have put manually after changes and all that. Should be updated along with final commit.
+if current_version_in_source != version:
+    print("Version in source doesn't match tag.")
+    exit(999)
+
+CreateAnims_buf[i]   = f"CREATEANIMS_VERSION_DATE = \"{version_date}\"\n" #I knew the change wasn't going to be free. My goodness. Well solved (you know, the indentation, I knew it would come to haunt me and it did).
+CreateAnims_buf[i+1] = f"CREATEANIMS_VERSION = \"{version}\"\n" #So right now this isn't necessary, but whatever.
+CreateAnims_buf[i+2] = f"COMMIT_ID = \"{git_short_hash}\"\n"
 
 with open("CreateAnims.py", "w") as CreateAnims_file: #Yes whatever, let's use same method.
     CreateAnims_file.write("".join(CreateAnims_buf))
 
 #And finally, create executable.
 subprocess.run("PyInstaller --onefile --noconsole create_anims.py") #Run is better in this case. It waits, so otherwise we get an "empty console" of sorts where I have to manually press Enter (return) to continue using cmd.
+subprocess.run("git restore .") #Working tree is supposed to be clean at this point except for the CreateAnims.py updates, but we don't want those in our local. It's only for the executable.

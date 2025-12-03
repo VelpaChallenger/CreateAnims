@@ -614,6 +614,9 @@ class CreateAnims:
         if self.in_exception:
             return #Let the main one take care of it. Don't keep spamming messageboxes and stuff. Happens particularly with tooltips like when hovering there's an error then you keep hovering it keeps going.
         self.in_exception = True #in_self_destruct.
+        for widget in self.root.winfo_children(): #Physics Window might be open, or not, Physics Dialog might be open, Log History window, Trace, etc. etc... so with this code, we make sure that those windows are destroyed if they exist and CreateAnims can close. And go to sleep and rest.
+            if isinstance(widget, tkinter.Toplevel):
+                widget.attributes("-disabled", 1) #Block every window active. You're unable to do anything. It's unstable status. Just see the error. Take a screenshot if you want. And please, close it.
         error_message = "".join(traceback.format_exception(*args)) #*args here is arguably and maybe even the same as sys.exception(). #Changed order, do it here so that I don't even have to click on the messagebox, I can see the error right away when debugging in my computer. Beautiful.
         print(error_message, end="") #Yeah whatever. I was going to add a flag but this is fine. I think I can understand when I saw this in other contexts. It will work in my local, with the executable it just won't do anything. No errors exceptions anything.
         messagebox.showerror(title="Unhandled exception", message="Sorry, there was a problem while running CreateAnims. Please see crash_log.txt for details. (and please report the bug!)")

@@ -382,7 +382,10 @@ class Command:
         version_from_remote = re.findall('"(.*)"', CreateAnims_buf[i+1])[0]
         from CreateAnims import CREATEANIMS_VERSION
         if version_from_remote != CREATEANIMS_VERSION:
-            response = messagebox.askyesno(title="Update available!", message="There's an update available. Do you wish to download and restart with the updated version?")
+            if self.createanims.undo_redo.trace: #But wait! There might be unsaved changes.
+                response = messagebox.askyesno(title="Update available but...", message="There's an update available, but you have unsaved changes. Do you still wish to download and restart with the updated version?")
+            else:
+                response = messagebox.askyesno(title="Update available!", message="There's an update available. Do you wish to download and restart with the updated version?")
             if response:
                 subprocess.Popen("CreateAnimsUpdater.exe") #Again, Popen so that CreateAnims can gracefully close and CreateAnimsUpdater will take it from there.
                 self.createanims.root.destroy()

@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='create_anims',
+    name='CreateAnims',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

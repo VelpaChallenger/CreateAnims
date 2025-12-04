@@ -361,6 +361,7 @@ class Command:
         import webbrowser
         import json
         import re
+        import subprocess
         from tkinter import messagebox
 
         try: #Yes, I could encapsulate this but whatever. If I ever do, will use CreateAnims which... I mean... it's like open_url, I consider it still part of CreateAnims' core.
@@ -383,6 +384,9 @@ class Command:
         if version_from_remote != CREATEANIMS_VERSION:
             response = messagebox.askyesno(title="Update available!", message="There's an update available. Do you wish to download and restart with the updated version?")
             if response:
-                pass #Do the download. Well actually, call CreateAnimsUpdater.exe which will be included in the zip (and if it doesn't exist, raise another error) and then close this instance of Tkinter, like fully close it. Then CreateAnimsUpdater.exe will show the progress bar and when it ends, the new instance will be up and running. Awesome.
+                subprocess.Popen("CreateAnimsUpdater.exe") #Again, Popen so that CreateAnims can gracefully close and CreateAnimsUpdater will take it from there.
+                self.createanims.root.destroy()
+                return
+                #pass #Do the download. Well actually, call CreateAnimsUpdater.exe which will be included in the zip (and if it doesn't exist, raise another error) and then close this instance of Tkinter, like fully close it. Then CreateAnimsUpdater.exe will show the progress bar and when it ends, the new instance will be up and running. Awesome.
         else:
             messagebox.showinfo(title="Up to date!", message="You're already up-to-date! :) .")

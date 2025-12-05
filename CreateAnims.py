@@ -14,7 +14,7 @@ from UndoRedo import *
 
 FONT = ("TkDefaultFont", 16)
 
-WIDTH = 860
+WIDTH = 872
 HEIGHT = 620
 INITIAL_X = 500
 INITIAL_Y = 200
@@ -25,7 +25,7 @@ PHYSICS_INITIAL_X = 600
 PHYSICS_INITIAL_Y = 250
 
 CREATEANIMS_VERSION_DATE = "Local test"
-CREATEANIMS_VERSION = "v1.0.4" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
+CREATEANIMS_VERSION = "v1.0.5" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
 COMMIT_ID = "Local test"
 
 class CreateAnims:
@@ -68,7 +68,7 @@ class CreateAnims:
 
         frame_stage = tkinter.Frame(self.root, border=0) #Scenario also. But I like more stage. It's where the action happens.
         frame_stage.grid(row=0, column=0, columnspan=3, sticky="w")
-        self.anim_canvas = tkinter.Canvas(frame_stage, width=860, height=256, bg="#E0E0E0", borderwidth=0, highlightthickness=0)
+        self.anim_canvas = tkinter.Canvas(frame_stage, width=WIDTH, height=256, bg="#E0E0E0", borderwidth=0, highlightthickness=0)
         self.anim_canvas.grid(row=0, column=0)
 
         frame_palette = tkinter.Frame(self.root, border=0)
@@ -80,6 +80,10 @@ class CreateAnims:
         self.color_picker_canvas = tkinter.Canvas(frame_palette, width=256, height=64, bg="#808080", borderwidth=0, highlightthickness=0)
         self.color_picker_canvas.grid(row=2, column=0, pady=30)
         self.create_color_picker()
+        self.palette_info = tkinter.LabelFrame(frame_palette, text="PALETTE INFO", bd=2, width=150, height=160)
+        self.palette_info.grid(row=0, column=1, rowspan=3, padx=15, sticky="nw")
+        self.palette_info_text = tkinter.Label(self.palette_info, text="", justify="left", wraplength=142)
+        self.palette_info_text.place(x=5, y=5)
 
         frame_chr = tkinter.Frame(self.root, border=0)
         frame_chr.grid(row=1, column=1, rowspan=3, columnspan=2, sticky="nw")

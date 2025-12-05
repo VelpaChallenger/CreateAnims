@@ -2,6 +2,7 @@ import os
 
 from CreateAnims import *
 from Character import *
+#random commit
 
 def load_game_anims(createanims): #Another idea was to have a call to this in init_state, which makes sense considering we're initializing values. But then I would sort of have a circular dependency. I would have to put that stuff in yet another file, and I kinda like it here in the main file, so to speak. So that's why I ended up doing this way. It still makes sense: all the data has to go to createanims.
     get_physics(createanims) #Could use return but... meh, this will do.

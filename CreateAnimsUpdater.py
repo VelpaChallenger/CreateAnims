@@ -20,7 +20,7 @@ def thread_download():
 
 def post_download():
     with zipfile.ZipFile("new_create_anims.zip", 'r') as zip_file:
-        zip_file.extractall(".")
+        zip_file.extractall(".", members=(member for member in zip_file.namelist() if member != "CreateAnimsUpdater.exe")) #CreateAnimsUpdater is running. Don't extract it, you won't be able to.
     os.remove("new_create_anims.zip")
     subprocess.Popen("CreateAnims.exe") #With this, the updater closes and ends. #Also it has to be in this order, if you run destroy first, this never runs. Like priorities and such. #Nah it can happen in any order the important part is that the destroy doesn't happen in a thread.
     root.destroy()

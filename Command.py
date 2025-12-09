@@ -350,6 +350,10 @@ class Command:
         self.createanims.undo_redo.affected_files.clear() #Has to happen at the end. Otherwise the for loop will not run.
         self.createanims.save_changes_window.destroy() #For now this. Will then implement the full logic based on affected files and such.
 
+    def clear_all_selections(self, event=None):
+        self.createanims.tile_utils.clear_selections()
+        self.createanims.anim.clear_selections()
+
     def open_docs_in_browser(self):
         import webbrowser
         readme_path = os.path.abspath("README.html")

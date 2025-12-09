@@ -77,9 +77,9 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)
         if self.createanims.current_anim_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
-            self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white") #Let's give white a try. Maybe after you're reading this it's a different color.
-            self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-            self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black") #And now outer, helps a lot too.
+            self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+            self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+            self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
         else:
             self.anim_canvas.moveto(self.createanims.current_anim_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
             self.anim_canvas.moveto(self.createanims.current_anim_image_inner_rectangle, x, y)
@@ -207,11 +207,50 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def regenerate_anim_image_rectangles(self): #Yes, regenerate. For anims, and well could replicate for CHR as well, it's nice to still keep the selection.
         x1, y1, x2, y2 = self.x1, self.y1, self.x2, self.y2
-        self.createanims.current_anim_image_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="white")
+        self.createanims.current_anim_image_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="white", tag="AnimImageRectangle")
         x1, y1, x2, y2 = self.x1_inner, self.y1_inner, self.x2_inner, self.y2_inner
-        self.createanims.current_anim_image_inner_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
+        self.createanims.current_anim_image_inner_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black", tag="AnimImageRectangle")
         x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
-        self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black")
+        self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black", tag="AnimImageRectangle")
+
+    def clear_selections(self):
+        #Anim fields
+        self.createanims.anim_canvas.delete('AnimImageRectangle')
+        self.createanims.current_anim_image_rectangle = None #The rest don't really matter, they were already deleted and will be overwritten with next selection.
+        self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_entry.delete(0, "end")
+        self.createanims.anim_entry.insert(0, str(self.createanims.current_anim))
+        self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.frame_entry.delete(0, "end")
+        self.createanims.frame_entry.insert(0, str(self.createanims.current_frame))
+        self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.frame_id_entry.delete(0, "end")
+        self.createanims.frame_id_entry.insert(0, str(self.createanims.current_frame_id))
+        self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.physics_id_entry.delete(0, "end")
+        self.createanims.physics_id_entry.insert(0, str(self.createanims.current_physics_id))
+
+        #Frame fields
+        frame_metadata = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata
+        self.createanims.x_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.x_offset_entry.delete(0, "end")
+        self.createanims.x_offset_entry.insert(0, str(frame_metadata.x_offset))
+        self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.y_offset_entry.delete(0, "end")
+        self.createanims.y_offset_entry.insert(0, str(frame_metadata.y_offset))
+        self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.width_entry.delete(0, "end")
+        self.createanims.width_entry.insert(0, str(frame_metadata.x_length))
+        self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.height_entry.delete(0, "end")
+        self.createanims.height_entry.insert(0, str(frame_metadata.y_length))
+
+        #Additional fields
+        self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.character_entry.delete(0, "end")
+        self.createanims.character_entry.insert(0, str(self.createanims.current_character))
+
+        #self.createanims.chr_info_text.configure(text="")
 
     def validate_anim_entry(self, new_value):
         if not new_value: #Empty value is always welcome.

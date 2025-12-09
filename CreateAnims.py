@@ -123,6 +123,8 @@ class CreateAnims:
         self.edit_menu.add_command(label="Undo", command=self.undo_redo.undo, accelerator="Ctrl+Z", state="disabled")
         self.edit_menu.add_command(label="Redo", command=self.undo_redo.redo, accelerator="Ctrl+Y", state="disabled")
         self.edit_menu.add_command(label="Switch UndoRedo branch", command=self.undo_redo.switch_branch_undo_redo, accelerator="Ctrl+Shift+Z", state="disabled")
+        self.edit_menu.add_separator()
+        self.edit_menu.add_command(label="Clear all selections", command=self.command.clear_all_selections, accelerator="Ctrl+D")
         self.menu_bar.add_cascade(label="Edit", menu=self.edit_menu)
         anim_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         anim_menu.add_command(label="Toggle transparency", command=self.command.toggle_anim_transparency, accelerator="Shift+T") #We'll add a little 'anim' in the name for me. Yay.
@@ -303,6 +305,7 @@ class CreateAnims:
         self.root.bind("<Control-Z>", self.undo_redo.switch_branch_undo_redo) #What? Control-Z? Don't you mean Control-Shift-z? Actually yes. But Shift-z means Z, so if you put Control-shift-z, it won't work.
         self.root.bind("<Control-s>", self.undo_redo.tracer)
         self.root.bind("<Control-l>", self.init_log_history_window)
+        self.root.bind("<Control-d>", self.command.clear_all_selections)
 
         self.root.report_callback_exception = self.self_destruct
 

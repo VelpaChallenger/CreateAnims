@@ -726,9 +726,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.edit_physics_button.configure(state="normal")
         self.createanims.menu_bar.entryconfigure("File", state="normal")
         self.createanims.menu_bar.entryconfigure("Edit", state="normal")
-        self.createanims.edit_menu.entryconfigure("Undo", state="normal") #I need to disable and reenable those on-demand. Mainly because the logic depends on the status of those, but honestly, I still prefer it this way.
-        self.createanims.edit_menu.entryconfigure("Redo", state="normal")
-        self.createanims.edit_menu.entryconfigure("Switch UndoRedo branch", state="normal")
+        self.createanims.undo_redo.decide_undo_redo_status() #But similar to what I do in the top level windows, I need to let undo_redo decide. Otherwise, you play anim, stop anim, undo, plash, error because there's nothing to undo. Same for redo and everything else. #I need to disable and reenable those on-demand. Mainly because the logic depends on the status of those, but honestly, I still prefer it this way.
         self.createanims.menu_bar.entryconfigure("Anim", state="normal")
         self.createanims.menu_bar.entryconfigure("Tools", state="normal")
         self.createanims.menu_bar.entryconfigure("Import", state="normal")

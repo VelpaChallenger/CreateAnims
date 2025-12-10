@@ -50,6 +50,15 @@ class UndoRedo:
         self.saved = False #True, I agree. Those are different things. self.strack_ptr I mean self.stack_ptr == 0 doesn't imply not saved, and != 0 doesn't imply saved. Saved is something that literally means that: a save happened. It is not related to the stack_ptr. In other words, yes, after you save, you can have either Unsaved changes or Saved, meaning there was at least one save.
         self.log_history = "" #Will have to be a text. Will make it easier to generate the corresponding label.
 
+    def restart_for_refresh_to_last_saved(self): #And also don't restart saved. Yes, confirmed I like this method a lot more. #Yes, let's keep it separate after all, in this case do not restart log_history. #self.init_state() #This will be helpful for the Refresh to Last Saved. In this case, I do want to restart everything. Oh! Wait... everything except for log_history, come to think of it.
+        self.stack = [[None]]
+        self.stack_ptr = 0
+        self.stack_copy = None
+        self.stack_copy_ptr = 0
+        self.trace = []
+        self.trace_append_or_pop_flag = False
+        self.affected_files = []
+
     def switch_branch_undo_redo(self, event=None):
         if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Won't use it after all. It still works. #If in physics_window, we won't care about that status. #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.
             return

@@ -1,4 +1,4 @@
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import os
 
 from Anim import Frame, CharacterAnim
@@ -350,6 +350,22 @@ class Command:
         self.createanims.undo_redo.affected_files.clear() #Has to happen at the end. Otherwise the for loop will not run.
         self.createanims.save_changes_window.destroy() #For now this. Will then implement the full logic based on affected files and such.
 
+    def refresh_to_last_saved(self, event=None):
+        if not self.createanims.undo_redo.trace:
+            messagebox.showinfo(title="Already at Last Saved", message="You're already at the last saved point. The change would have no effect (if you believe this is wrong, please report it).")
+            return
+        response = messagebox.askyesno(title="Do you really wish to Refresh to Last Saved?", message="Refresh to Last Saved is IRREVERSIBLE. Remember that if you accidentally did something after undoing, you can Switch Branch to go back to the previous branch. It is also highly recommended to make a copy of the Log History to make sure that you will be able to redo the changes you want to redo. Otherwise, if you already overwrote the branch too many times and/or if you're really ok with discarding your unsaved changes and going back to the last saved point, confirm with Yes.", icon="warning") #Do you really wish to do this? #if you really wish #Maybe they don't want to but they're forced to. Maybe they won't see this detail but I want it to be there. Sometimes, you're just forced. Like redid too many times.
+        if not response: #Could also do a Toplevel window but, I mean to make the IRREVERSIBLE bold and all but yeah this will do.
+            return
+        from create_anims import load_game_anims #I would usually avoid this but... here it's fine. I'm not making create_anims a class or something just for this. Or adding it to a helper of sorts and whatever. No, this is still better and preferable. Not perfect, not what I want or what I'd like, but better and preferable.
+        self.createanims.characters.clear()
+        self.createanims.characters_dict.clear() #= {}
+        self.createanims.physics_list.clear()
+        self.createanims.undo_redo.restart_for_refresh_to_last_saved()
+        self.createanims.undo_redo.log_history += "- Refreshed to Last Saved.\n" #self.createanims.undo_redo.add_refresh_to_last_saved_to_log_history() #self.createanims.undo_redo.trace.clear() #self.createanims.undo_redo.affected_files.clear()
+        self.createanims.undo_redo.decide_undo_redo_status() #This will restart to disabled, but I prefer this rather than explicitly saying disabled. I mean yeah.
+        load_game_anims(self.createanims)
+
     def clear_all_selections(self, event=None):
         self.createanims.tile_utils.clear_selections()
         self.createanims.anim.clear_selections()
@@ -366,7 +382,6 @@ class Command:
         import json
         import re
         import subprocess
-        from tkinter import messagebox
 
         try: #Yes, I could encapsulate this but whatever. If I ever do, will use CreateAnims which... I mean... it's like open_url, I consider it still part of CreateAnims' core.
             request_response = requests.get("https://api.github.com/repos/VelpaChallenger/CreateAnims/releases/latest")

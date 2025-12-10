@@ -234,7 +234,7 @@
                     <ul>
                         <li><b><em>Ctrl+Z</em></b>: Undo the last operation. You can also go to Edit menu and then click on Undo.</li>
                         <li><b><em>Ctrl+Y</em></b>: Redo the last operation. You can also go to Edit menu and then click on Redo.</li>
-                        <li><b><em>Ctrl+Shift+Z</em></b>: Switch branches.</li>
+                        <li><b><em>Ctrl+Shift+Z</em></b>: Switch branches. You can also go to Edit menu and then click on Switch Branch.</li>
                     </ul>
                 <p>
                     For physics specifically, sometimes it might feel like the Undo or the Redo didn't do anything if you imported a physics file (I couldn't find an usecase for this but hey, you can still do it). This is expected and to see the changes you need to go into Edit physics. The reason why it happens is because when you do the import, the physics file is internally modified but it's not visible in any way. I could add a messagebox if people wanted it but I thought it shouldn't happen very often (key word shouldn't) and in a lot of cases you'll probably get the warning which will let you know there was a change in physics. But still, I'm putting it here as a heads up.
@@ -248,6 +248,8 @@
                     <br><br>You can only Switch Branch if there actually is another branch. So you need to be in a situation like the one I described. You make some changes, you go back, and now you do other changes, then you have two branches: one with your original changes, another with your new changes, and, you also have a common point: the point where they diverged. The point where the two branches were created. So, if there are 2 branches, and you Switch Branch, you will be taken back to the common point. If you again Switch Branch, you will remain in the common point but CreateAnims will now be pointing at the other branch, meaning that a Redo will take you through the other branch. Because of the nature of the Switch Branch, you can only actually do it if you're at the common point or after. You cannot do it from before that.
 
                     <br><br>Also please keep in mind you can have a maximum of 2 branches at a time. If you again make some other changes after Switch Branch'ing, your changes will be lost. In this sense, do keep in mind that if you save changes, you go back say 2 steps, and do new changes, and then Switch Branch and do more changes, you will be unable to go back to the last saved point! And also to any intermediary step, like if you went 2 steps backwards originally, you'll be unable to go to the 1 step previous to the saved point. This is the same way that pretty much every tool with UndoRedo works, but, in CreateAnims you have the Switch Branch which makes it harder for you to end up in a situation like that. I wish this feature was more popular.
+
+                    <br><br>You can click on <b><em>Switch Branch</em></b> in the Edit menu or use keyboard shortcut <b><em>Ctrl+Shift+Z</em></b>.
                 </p>
                 <h3 id="Import">Import</h3>
                 <p>
@@ -267,6 +269,20 @@
                 <p>
                     When you first start CreateAnims, the title will be Create Anims, but will expand to Create Anims - Saved when you save and don't make any other changes. If you do changes (including Undo/Redo if applicable), you'll see Create Anims - Unsaved changes.
                 </p>
+                <h4>Refresh to Last Saved</h4>
+                <p>
+                    This is meant for situations like the one I described in Switch Branch section (I think it was there), but taken one step further, you could say.
+
+                    <br><br>Suppose you changed 5 frames for one anim, saved the changes, then undid 3 of those, and now did another, a 6th frame change. At this point, you could Switch Branch to go back to the 5 frames change branch. And you could go back and forth to either include the 6th change in the 5 frames branch, or maybe copy the 6th frame change to a modified 5th, or simply go back if it was an accident, and potentially other uses, but those two are the ones for what Switch Branch is there (specially the accidental one, had that happen a bunch of times with other programs and I wish, I deeply, heartedly wish more programs had this feature, so here I made it). At this point, a Switch Branch has you covered.
+
+                    <br><br>But suppose now that you made yet another change. Suppose that you went back to the 3rd frame, and changed another frame, a 7th frame. Now, you absolutely <em>cannot</em> go back, no matter how hard you wish for it. You can, however, copy the Log History (highly, highly recommended, it's there for debugging and scenarios like this) and then... walá, you guessed it. Refresh to Last Saved.
+
+                    <br><br>Refresh to Last Saved will reload <em><strong>all</strong></em> characters and <em><strong>clear</strong></em> the UndoRedo. What this means is that Refresh to Last Saved is <em><strong>IRREVERSIBLE</strong></em>. You will get a log though, saying that a Refresh was done, and you will still be able to access the rest of the history, but I still recommend it copying it before, but yeah you can also do it later if you wanted and needed it. Perhaps, you just regret your latest changes and really want to start again from a blank page. You could of course just restart CreateAnims, but why when you can just refresh? So that's the other scenario where it's pretty cool.
+
+                    <br><br>Do note, however, that Refresh to Last Saved doesn't apply for navigations. What this means is that if you navigated from a character to another character for example, and you hit Refresh to Last Saved, you will see a popup telling you the changes wouldn't have any effect. What this means is that there won't be any effects from changes perspective, which is what the Refresh to Last Saved is meant for. If you wish to return to that state, you can Undo until that point. Though, you can still end up in a situation like the one I described with only navigations. So, if you would prefer to have Refresh to Last Saved enabled also in these cases, do let me know and I'll modify it. For now I like that it tells you all from changes perspective.
+
+                    <br><br>To use, click on <b><em>Edit->Refresh to Last Saved</em></b>, or do <b><em>Ctrl+R</em></b>.
+                </p>
                 <h3 id="Tools">Tools</h3>
                 <h4>Log History</h4>
                 <p>
@@ -281,7 +297,7 @@
                 <p>
                     Sometimes, maybe you just want to see everything as it is without any selections. Or maybe, you were playing an anim, you tried making an edit and got a text in blue saying you can't do that while playing an anim, and now you can't remove it. Well, for those cases, you can select clear all selections (pun... intended?) and the texts will disappear and you'll be able to keep looking at the beautiful animation. You can also still make new selections, now only the ones you actually want. It also helps for example when you were trying to enter new values for maybe CHR fields, or palette, or anim fields, and you want the red to go away and go back to the current value. Clear all selections helps at this too.
 
-                    <br><br>You can find it in Edit -> Clear all selections, and you can also use it via keyboard shortcut Ctrl+D. It is not added to UndoRedo (not considered a change nor a navigation command, rather it is of the same type that the toggles in Anim menu, but applies for all selections in general).
+                    <br><br>You can find it in <b><em>Edit->Clear all selections</em></b>, and you can also use it via keyboard shortcut <b><em>Ctrl+D</em></b>. It is not added to UndoRedo (not considered a change nor a navigation command, rather it is of the same type that the toggles in Anim menu, but applies for all selections in general).
                 </p>
             </div>
             <div class="banner-divider"></div>

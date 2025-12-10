@@ -16,15 +16,6 @@ def load_game_anims(createanims): #Another idea was to have a call to this in in
     thread_download_object = threading.Thread(target=thread_load_game_anims, args=(createanims, loading_bar, loading_bar_label, root)) #No need to use lambda here, can use args. And yes, root will be the load_game_anims UI for tracking progress.
     thread_download_object.start()
 
-    #root.destroy()
-
-    #root.mainloop()
-
-    #createanims.init_anim_window() #Makes a lot of sense! The loading finished, now we're ready to display the UI. Let's do this! Althoooough... yes, it breaks a bit for the Refresh to Last Saved... didn't test it yet but it will break. Damn. Okay maybe I will have to make two separate approaches there after all. And maybe in that case, it will be a Toplevel.
-    #createanims.anim.load_new_character_value(0)
-
-    #print("I refuse to go out")
-
 def thread_load_game_anims(createanims, loading_bar, loading_bar_label, root):
     loading_bar['maximum'] = sum([len(files) for r, d, files in os.walk(createanims.root_dir) if "images" not in r]) #Exclude images which is used for play anim.
     get_physics(createanims, loading_bar, loading_bar_label) #Could use return but... meh, this will do.
@@ -33,8 +24,6 @@ def thread_load_game_anims(createanims, loading_bar, loading_bar_label, root):
     character_ID = 0
     total_characters = len(characters_name_list)
     for character_name in characters_name_list:
-        #if character_name == "physics": #Not a character actually!
-            #continue
         character_text = f"Loading characters. {character_ID+1}/{total_characters} {character_name}" #No period here, will add later.
         loading_bar_label.configure(text=f"{character_text}") #In this case, we will do +1. Easier.
         character = Character(createanims.root_dir, character_name, loading_bar, loading_bar_label, character_text)
@@ -44,7 +33,7 @@ def thread_load_game_anims(createanims, loading_bar, loading_bar_label, root):
     createanims.current_anim = 0x00 #Nah we need everything, whatever. Maybe current_frame no but at that point meh. Comment back to where it was, now in load_new_character_value, was in anim. #And yes, you're absolutely right. This already includes setting all the current_anim, current... oh wait, current_anim is the one we do need. Alright. #This will make the refresh to last saved simpler. Thing is, what if you added new character, new frame and such and now you load back with those values, error, because they don't exist. So, we return to values we know that exist. Might add some errors though if you try to load a folder with missing stuff and such, but it will be the same code so it will validate on both startup and then refresh.
     createanims.current_frame = 0x00
     createanims.current_frame_id = 0x01
-    root.after(10, post_load, root, createanims, loading_bar)
+    root.after(10, post_load, root, createanims, loading_bar) #My approach for destroying in main thread. I've seen other options like the classical and typical have main thread asking or polling about a flag, and then as soon as it sees it complete, it means the other thread finished, and then you keep doing your thing. But honestly, I find this a lot cleaner. So I'll do it this way, my own way or at least I haven't seen it.
 
 def post_load(root, createanims, loading_bar):
     if loading_bar['value'] != loading_bar['maximum']: #I need to do this here, in main thread, to be able to exit gracefully.
@@ -52,8 +41,7 @@ def post_load(root, createanims, loading_bar):
         createanims.close() #Maybe could call it exit too? Could do it here too but, yeah I really don't want to import sys just because of this.
     root.destroy()
     createanims.anim.load_new_character_value(0) #Let's do this here, in main thread.
-    createanims.root.deiconify() #Let's hope it works.
-    #print("I'm a frozen code.")
+    createanims.root.deiconify() #Let's hope it works. #It does! Also, for when you Refresh to Last Saved, this doesn't do anything. Now I'm thankful that there aren't errors or anything for things that you might expect an error for. Though, maybe that would still be better and I could try-except, but in any case, no, it doesn't throw any error. It just doesn't do anything if the window is already displaying.
 
 def get_physics(createanims, loading_bar, loading_bar_label): #Yup. This will happen here. #Also yeah, CreateAnims can run without physics. I was going to add get_physics_if_any but, considering I may extend this to other kind of elements... for now I'll leave it as it is.
     physics_path = f"{createanims.root_dir}/physics"
@@ -73,12 +61,7 @@ def main():
     createanims = CreateAnims()
     createanims.root_dir = "../characters"
     createanims.root.withdraw()
-
     load_game_anims(createanims)
-
-    #load_game_anims(createanims)
-    #print("Come on, don't jerk around")
-    #createanims.root.focus_force()
     createanims.root.mainloop()
 
 if __name__ == "__main__": #Who would have thought! We will need this after all. I mean again, it's either that, or we create a new file helpers or something like that, and then we import from there and... no this, I don't like but I like that other even less. Let's go with this.

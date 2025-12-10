@@ -35,7 +35,7 @@ class CreateAnims:
         self.init_anim_window()
 
     def init_state(self):
-        self.root = Tk()
+        #self.root = Tk()
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
         self.entry_return = EntryReturn(self)
@@ -62,6 +62,7 @@ class CreateAnims:
         self.physics_list = []
 
     def init_anim_window(self):
+        self.root = Tk() #Yes, this makes more sense when I think about it. And will make things smoother for the loading bar.
         self.root.title("Create Anims") #Sometimes dreams come true! Believe in them!
         self.root.geometry(f"{WIDTH}x{HEIGHT}+{INITIAL_X}+{INITIAL_Y}") #It's how my mind sees things. It's the initial, you might drag the window around and stuff. #Window x/y could be alternative name.
         self.make_styles()
@@ -649,6 +650,9 @@ class CreateAnims:
         self.tile_utils.refresh_palette() #Changed my mind, will be part of a refresh/update UI.
         self.tile_utils.refresh_chr()
         self.anim.refresh()
+
+    def close(self): #exit
+        sys.exit(999)
 
     def self_destruct(self, *args):
         from tkinter import messagebox

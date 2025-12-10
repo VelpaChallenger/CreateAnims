@@ -357,7 +357,7 @@ class Command:
         response = messagebox.askyesno(title="Do you really wish to Refresh to Last Saved?", message="Refresh to Last Saved is IRREVERSIBLE. Remember that if you accidentally did something after undoing, you can Switch Branch to go back to the previous branch. It is also highly recommended to make a copy of the Log History to make sure that you will be able to redo the changes you want to redo. Otherwise, if you already overwrote the branch too many times and/or if you're really ok with discarding your unsaved changes and going back to the last saved point, confirm with Yes.", icon="warning") #Do you really wish to do this? #if you really wish #Maybe they don't want to but they're forced to. Maybe they won't see this detail but I want it to be there. Sometimes, you're just forced. Like redid too many times.
         if not response: #Could also do a Toplevel window but, I mean to make the IRREVERSIBLE bold and all but yeah this will do.
             return
-        from create_anims import load_game_anims #I would usually avoid this but... here it's fine. I'm not making create_anims a class or something just for this. Or adding it to a helper of sorts and whatever. No, this is still better and preferable. Not perfect, not what I want or what I'd like, but better and preferable.
+        from create_anims import load_game_anims, thread_load_game_anims #I would usually avoid this but... here it's fine. I'm not making create_anims a class or something just for this. Or adding it to a helper of sorts and whatever. No, this is still better and preferable. Not perfect, not what I want or what I'd like, but better and preferable.
         self.createanims.characters.clear()
         self.createanims.characters_dict.clear() #= {}
         self.createanims.physics_list.clear()
@@ -365,6 +365,19 @@ class Command:
         self.createanims.undo_redo.log_history += "- Refreshed to Last Saved.\n" #self.createanims.undo_redo.add_refresh_to_last_saved_to_log_history() #self.createanims.undo_redo.trace.clear() #self.createanims.undo_redo.affected_files.clear()
         self.createanims.undo_redo.decide_undo_redo_status() #This will restart to disabled, but I prefer this rather than explicitly saying disabled. I mean yeah.
         load_game_anims(self.createanims)
+
+        #import threading
+        #root = tkinter.Toplevel(createanims.root) #tkinter.Tk() #Copypasted from CreateAnimsUpdater. It will follow the same UI principle, minus with a few differences in logic on how to determine progress and all. Oh and the label will be different too of course.
+        #root.geometry(f"+800+450")
+        #root.wm_overrideredirect(True)
+
+        #loading_bar_label = tkinter.Label(root, text="Initializing load_game_anims...") #text=f"Loading character {character_name}'s {file_type_display}") #Please wait...
+        #loading_bar_label.pack(pady=10, padx=(0, 10), anchor="nw")
+        #loading_bar = ttk.Progressbar(root, orient='horizontal', length=200, mode='determinate', value=0, maximum=0)
+        #loading_bar.pack(pady=(0, 10), anchor="nw")
+        #thread_download_object = threading.Thread(target=thread_load_game_anims, args=(self.createanims, loading_bar, loading_bar_label, root)) #No need to use lambda here, can use args. And yes, root will be the load_game_anims UI for tracking progress.
+        #thread_download_object.start()
+        #thread_download_
 
     def clear_all_selections(self, event=None):
         self.createanims.tile_utils.clear_selections()

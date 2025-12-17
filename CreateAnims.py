@@ -26,7 +26,7 @@ PHYSICS_INITIAL_X = 600
 PHYSICS_INITIAL_Y = 250
 
 CREATEANIMS_VERSION_DATE = "Local test"
-CREATEANIMS_VERSION = "v1.0.5" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
+CREATEANIMS_VERSION = "v1.0.6" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
 COMMIT_ID = "Local test"
 
 class CreateAnims:
@@ -121,6 +121,8 @@ class CreateAnims:
         file_menu.add_command(label="Save physics", command=self.command.save_physics)
         file_menu.add_separator()
         file_menu.add_command(label="Save changes", command=self.undo_redo.tracer)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.on_x)
         self.menu_bar.add_cascade(label="File", menu=file_menu)
         self.edit_menu = tkinter.Menu(self.menu_bar, tearoff=0)
         self.edit_menu.add_command(label="Undo", command=self.undo_redo.undo, accelerator="Ctrl+Z", state="disabled")
@@ -311,6 +313,8 @@ class CreateAnims:
         self.root.bind("<Control-l>", self.init_log_history_window)
         self.root.bind("<Control-r>", self.command.refresh_to_last_saved)
         self.root.bind("<Control-d>", self.command.clear_all_selections)
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_x)
 
         self.root.report_callback_exception = self.self_destruct
 
@@ -654,6 +658,14 @@ class CreateAnims:
         self.anim.refresh()
 
     def close(self): #exit
+        sys.exit(999)
+
+    def on_x(self):
+        if self.undo_redo.trace:
+            self.root.bell()
+            response = messagebox.askyesno(title="Do you really wish to exit?", message="You have pending unsaved changes. Do you really wish to exit?", default="no")
+            if not response:
+                return
         sys.exit(999)
 
     def self_destruct(self, *args):

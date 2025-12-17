@@ -415,7 +415,7 @@ class CreateAnims:
         self.physics_dialog_y_frame.pack(anchor="nw")
         self.physics_dialog_y_label = tkinter.Label(self.physics_dialog_y_frame, text="Y:")
         self.physics_dialog_y_label.pack(side="left")
-        vcmd = (self.physics_dialog.register(self.anim.validate_physics_dialog_x_entry), "%P") #For Y, the function will be the same. A bit confusing maybe for future me, but please read this!
+        vcmd = (self.physics_dialog.register(self.anim.validate_physics_dialog_y_entry), "%P") #There's actually a problem for that. Which is, if you enter invalid value for Y, X entry is still highlighted. So, they do have to be different. #For Y, the function will be the same. A bit confusing maybe for future me, but please read this!
         self.physics_dialog_y_entry = tkinter.Entry(self.physics_dialog_y_frame, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.physics_dialog_y_entry.bind("<Return>", self.entry_return.physics_dialog_x_entry)
         self.physics_dialog_y_entry.pack(side="left", pady=(5, 5))

@@ -368,6 +368,35 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.physics_dialog_x_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 
+    def validate_physics_dialog_y_entry(self, new_value):
+        if not new_value: #Empty value is always welcome.
+            self.createanims.physics_dialog_y_entry.configure(highlightcolor="white", highlightbackground="white")
+            return True
+        if (new_value.startswith("-") and len(new_value) > 1) or not new_value.startswith("-"): #This time we admit negatives. This is why, while duplicated a lot, I like having different validations for each entry. #If we're just typing the -, leave it be. Skip it.
+            try: #Validation 1: value must be an integer number, including zero and negative.
+                new_value_int = int(new_value) #Ah but come to think of it, if it has a - and then a number, the int does work. So this logic can be simplified to just one try block. #Everything that comes afterwards must be a number. #If starts with "-" and has length 1, don't do any validation at all here.
+                if new_value.startswith("-") and new_value_int == 0: #Don't do that. You'll break the tool. Stop trolling the tool.
+                    self.createanims.physics_dialog.attributes('-disabled', 1) #Disabled until you do read the message and reflect on your conduct.
+                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly google searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
+                    self.createanims.physics_dialog.attributes('-disabled', 0)
+                    self.createanims.physics_dialog.focus_force()
+                    return False
+            except ValueError:
+                self.createanims.physics_dialog_y_entry.configure(highlightcolor="red", highlightbackground="red")
+                return False
+        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
+            self.createanims.physics_dialog_y_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.physics_dialog.attributes('-disabled', 1)
+            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to teleport? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -128. Also, even if you enter say, 32... that's pretty high, it won't look very smooth. But well, maybe it's what you want. I won't stop you there :) .")
+            self.createanims.physics_dialog.attributes('-disabled', 0)
+            self.createanims.physics_dialog.focus_force()
+            return False
+        if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
+            self.createanims.physics_dialog_y_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        self.createanims.physics_dialog_y_entry.configure(highlightcolor="white", highlightbackground="white")
+        return True
+
     def validate_x_offset_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.x_offset_entry.configure(highlightcolor="white", highlightbackground="white")

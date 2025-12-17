@@ -11,6 +11,7 @@ from EntryReturn import *
 from Anim import *
 from CreateAnimsButton import *
 from UndoRedo import *
+from FileFormatValidator import *
 
 FONT = ("TkDefaultFont", 16)
 
@@ -42,6 +43,7 @@ class CreateAnims:
         self.anim = Anim(self)
         self.button = CreateAnimsButton(self)
         self.undo_redo = UndoRedo(self)
+        self.file_format_validator = FileFormatValidator(self)
         self.characters = []
         self.current_pal_rectangle = None
         self.current_character_pal_index = None #Similarly, we'll need it for the relationship/associations between a PalRectangle and a ColorPickerRectangle.

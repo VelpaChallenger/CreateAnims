@@ -146,6 +146,9 @@ class Command:
         self.createanims.palette_directory = os.path.dirname(pal_filename)
         with open(pal_filename, "rb") as pal_file:
             new_palette = list(pal_file.read())
+        if not self.createanims.file_format_validator.validate_palette(new_palette): #len(new_palette) != 8:
+            messagebox.showwarning(title="Invalid PAL file format", message="The file you tried to import doesn't follow the format of a PAL file. It isn't exactly 8 bytes long. Each character uses 8 colors (2 groups) out of the 16 available colors (4 groups). Aborting import.") #Not an error in the sense that CreateAnims will continue running. Yeah, that's why, it's better that it's different code. Though, I do agree that the validation itself could be shared code. Meh.
+            return
         character = self.createanims.characters[self.createanims.current_character] #Let's do it here. Let's close the file.
         old_palette = character.palette[:] #Just in case, don't use the exact same list, use a copy. Oh, but to do same thing as with frame_tiles, let's do it... hmmmm... yeah I know, frame_tiles wasn't part of the update so... ok whatever this is ok.
         if old_palette == new_palette: #Same check as always or almost always, it matters in this case.
@@ -173,6 +176,9 @@ class Command:
         self.createanims.chr_directory = os.path.dirname(chr_filename)
         with open(chr_filename, "rb") as chr_file:
             new_chr = list(chr_file.read())
+        if not self.createanims.file_format_validator.validate_chr(new_chr): #len(new_chr) != 2048:
+            messagebox.showwarning(title="Invalid CHR file format", message="The file you tried to import doesn't follow the format of a CHR file. It isn't exactly 2048 bytes long (2K). Each character uses 2K of the total 4K for sprites. Aborting import.") #Not an error in the sense that CreateAnims will continue running. Yeah, that's why, it's better that it's different code. Though, I do agree that the validation itself could be shared code. Meh.
+            return
         character = self.createanims.characters[self.createanims.current_character]
         old_chr = character.chrs[self.createanims.current_chr_bank][:]
         if old_chr == new_chr:
@@ -200,6 +206,9 @@ class Command:
         self.createanims.chr_palette_directory = os.path.dirname(chr_pal_filename)
         with open(chr_pal_filename, "rb") as chr_pal_file:
             new_chr_palette = list(chr_pal_file.read())
+        if not self.createanims.file_format_validator.validate_chr_pal(new_chr_palette): #len(new_chr_palette) != 16:
+            messagebox.showwarning(title="Invalid CHR PAL file format", message="The file you tried to import doesn't follow the format of a CHR PAL file. It isn't exactly 16 bytes long. (1 byte per 8 tiles, 128 tiles per 2K CHR Bank, for a total of 16 bytes). Aborting import.")
+            return
         character = self.createanims.characters[self.createanims.current_character]
         old_chr_palette = character.chr_palettes[self.createanims.current_chr_bank][:]
         if old_chr_palette == new_chr_palette:
@@ -227,6 +236,18 @@ class Command:
         self.createanims.frames_directory = os.path.dirname(frame_filename) #Directory where the file selected is.
         with open(frame_filename, "rb") as frame_file:
             new_frame_bytes = list(frame_file.read()) #Refactor to adapt to UndoRedo. I don't really like assigning to instances. We are referring to the same object in memory, it can cause lots of trouble.
+        if not self.createanims.file_format_validator.validate_frame_minimum_bytes(new_frame_bytes):
+            messagebox.showwarning(title="Invalid frame file format", message="The file you tried to import doesn't follow the format of a frame file. Frame is 6 or less bytes long. Please see format details in the docs (section Internals). Aborting import.")
+            return
+        if not self.createanims.file_format_validator.validate_frame_total_tiles(new_frame_bytes):
+            messagebox.showwarning(title="Invalid frame file format", message="The file you tried to import doesn't follow the format of a frame file. Amount of tiles in frame (from 7th byte onwards) doesn't match width*height (bytes 1 and 2). Please see format details in the docs (section Internals). Aborting import.")
+            return
+        if not self.createanims.file_format_validator.validate_frame_width(new_frame_bytes):
+            messagebox.showwarning(title="Invalid frame file format", message="The file you tried to import doesn't follow the format of a frame file. Width is larger than 60 or less than 1. Please see format details in the docs (section Internals). Aborting import.")
+            return
+        if not self.createanims.file_format_validator.validate_frame_height(new_frame_bytes):
+            messagebox.showwarning(title="Invalid frame file format", message="The file you tried to import doesn't follow the format of a frame file. Height is larger than 60 or less than 1. Please see format details in the docs (section Internals). Aborting import.")
+            return
         character = self.createanims.characters[self.createanims.current_character]
         old_frame = character.frames[self.createanims.current_frame_id]
         old_frame_bytes = old_frame.metadata.get_bytes() + old_frame.tiles #I could also like save an attribute old_frame_bytes or just frame_bytes in the Frame but, I want to save memory? lol it's just a couple of bytes but whatever.
@@ -255,6 +276,9 @@ class Command:
         self.createanims.anims_directory = os.path.dirname(anim_filename) #Directory where the file selected is.
         with open(anim_filename, "rb") as anim_file:
             new_anim_bytes = list(anim_file.read())
+        if not self.createanims.file_format_validator.validate_anim(new_anim_bytes):
+            messagebox.showwarning(title="Invalid anim file format", message="The file you tried to import doesn't follow the format of an anim file. Anim is less than 2 bytes long. Anim must be at least 2 bytes long: first byte is physics ID, second and onwards are the frames to use for the anim. Aborting import.")
+            return
         character = self.createanims.characters[self.createanims.current_character]
         old_anim = character.anims[self.createanims.current_anim]
         old_anim_bytes = [old_anim.physics_id] + old_anim.frame_ids
@@ -283,6 +307,12 @@ class Command:
         self.createanims.physics_directory = os.path.dirname(physics_filename) #Directory where the file selected is.
         with open(physics_filename, "rb") as physics_file:
             new_physics = list(physics_file.read())
+        if not self.createanims.file_format_validator.validate_physics_parity(new_physics):
+            messagebox.showwarning(title="Invalid physics file format", message="The file you tried to import doesn't follow the format of a physics file. Total amount of bytes is not an odd number. For every frame, there's relative X and Y values to add to the current position. The physics terminator is 0x80, for a total of an odd number (2*n + 1). Aborting import.")
+            return
+        if not self.createanims.file_format_validator.validate_physics_terminator(new_physics):
+            messagebox.showwarning(title="Invalid physics file format", message="The file you tried to import doesn't follow the format of a physics file. Terminator is not 0x80. Terminator 0x80 indicates the physics must end at that point and restart to state 0x00.")
+            return
         old_physics = self.createanims.physics_list[self.createanims.current_physics_id]
         if old_physics == new_physics:
             return

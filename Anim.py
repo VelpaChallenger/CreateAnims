@@ -635,6 +635,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.anim_entry.insert(0, str(new_anim))
         character = self.createanims.characters[self.createanims.current_character]
         self.decide_arrow_buttons_status(new_anim, len(character.anims) - 1, self.createanims.anim_left_arrow, self.createanims.anim_right_arrow)
+        if character.anims[self.createanims.current_anim].physics_id > len(self.createanims.physics_list): #I could make it non-critical. Resolve all the calculations in load_new_anim. But. I do prefer for it to be critical. Or...
+            messagebox.showerror(title="Invalid physics ID for anim", message=f"The physics ID of anim {new_anim} is outside the boundaries of the currently loaded physics. Total physics are {len(self.createanims.physics_list)} and physics ID is {character.anims[self.createanims.current_anim].physics_id}. Animation cannot be loaded. This is most likely due to a data error in the anim file (physics ID is the first byte). CreateAnims will stop and a crash_log.txt file will be created with details.")
+            raise ValueError("Invalid physics ID for anim")
         self.load_new_physics_id_value(character.anims[self.createanims.current_anim].physics_id)
         self.load_new_frame_value(new_frame, refresh_UI_flag=False) #We always start at the first frame of the anim. #But can be changed/adjusted. Very useful to keep editing the same frame after stop anim.
         self.createanims.refresh_UI() #Potencial refactor: let load_new_chr_bank do the UI refresh. So don't pass flag anymore. And make sure to decide arrow status and stuff before loading new CHR bank. In theory, it shouldn't affect anything, if load runs last.
@@ -653,6 +656,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.current_frame = new_frame
         character = self.createanims.characters[self.createanims.current_character]
         frame_id = character.anims[self.createanims.current_anim].frame_ids[self.createanims.current_frame]
+        if frame_id > len(character.frames) - 1:
+            messagebox.showerror(title="Invalid frame ID for anim frame", message=f"The frame ID of anim {self.createanims.current_anim} frame {new_frame} is outside the boundaries of the currently loaded frames. Total frames are {len(character.frames)} and frame ID is {frame_id}. Frame cannot be loaded. This is most likely due to a data error in the anim file (frames IDs start from second byte onwards, in this case it would be byte {2+new_frame}). CreateAnims will stop and a crash_log.txt file will be created with details.")
+            raise ValueError("Invalid frame ID for anim frame")
         if frame_id != self.createanims.current_frame_id: #Clear it only if they're actually different. Also has to happen here before load_new_frame_id overwrites it.
             self.createanims.current_anim_image_rectangle = None
         self.load_new_frame_id_value(frame_id, refresh_UI_flag=False)
@@ -799,7 +805,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def generate_png_from_anim_frames(self, character):
         from generate_anim_images import refresh_chr, generate_png
-        for frame_id in character.anims[self.createanims.current_anim].frame_ids:
+        for i, frame_id in enumerate(character.anims[self.createanims.current_anim].frame_ids):
+            if frame_id > len(character.frames) -1:
+                messagebox.showerror(title="Invalid frame ID for anim frame", message=f"The frame ID of anim {self.createanims.current_anim} frame {i} is outside the boundaries of the currently loaded frames. Total frames are {len(character.frames)} and frame ID is {frame_id}. Frame cannot be loaded. This is most likely due to a data error in the anim file (frames IDs start from second byte onwards, in this case it would be byte {2+i}). CreateAnims will stop and a crash_log.txt file will be created with details.")
+                raise ValueError("Invalid frame ID for anim frame")
             frame = character.frames[frame_id]
             current_chr_bank = frame.metadata.chr_bank
             refresh_chr(character, current_chr_bank)

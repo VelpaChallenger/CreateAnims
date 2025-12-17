@@ -20,18 +20,18 @@ def func_AnimImage_on_double_right_click(createanims, anim_index, event=None): #
 
 class Frame:
     
-    def __init__(self, frame_bytes):
-        self.metadata = FrameMetaData(frame_bytes)
-        self.tiles = frame_bytes[6:] #The tiles that give shape to the frame.
+    def __init__(self, file_format_validator, frame_bytes):
+        self.metadata = FrameMetaData(file_format_validator, frame_bytes)
+        self.tiles = frame_bytes[file_format_validator.OFFSET_START_TILES:] #The tiles that give shape to the frame.
 
 class FrameMetaData: #To make it clear that it's not the frame itself.
 
-    def __init__(self, frame_bytes):
-        self.x_length = frame_bytes[0]
-        self.y_length = frame_bytes[1]
-        self.x_offset = (frame_bytes[2] & 0x7F) * (1 if (frame_bytes[2] & 0x80) else -1) #Fun fact: the code is there, but there's no negative X! (that is, there's not any 0x80) At least for characters. There probably is for projectiles. #For flipped, can add + and the same logic. -8 or 0. #Also yes, it's inverted between y offset and x offset. Go ask HT. #Don't get me wrong, it's still opposite. But, I put - y_offset instead of + y_offset to make it closer to what the code does. Who knows? Maybe whatever tool they were using at the time (we're talking the 90s) was doing operations like these, and the consequences of their inner workings are relevant even today, 30+ years later.
-        self.chr_bank = frame_bytes[3]
-        self.y_offset = (frame_bytes[4] & 0x1F) * (1 if (frame_bytes[4] & 0x20) else -1) #I don't usually use ternary in Python but here it is pretty convenient.
+    def __init__(self, file_format_validator, frame_bytes):
+        self.x_length = frame_bytes[file_format_validator.OFFSET_WIDTH]
+        self.y_length = frame_bytes[file_format_validator.OFFSET_HEIGHT]
+        self.x_offset = (frame_bytes[file_format_validator.OFFSET_X_OFFSET] & 0x7F) * (1 if (frame_bytes[file_format_validator.OFFSET_X_OFFSET] & 0x80) else -1) #Fun fact: the code is there, but there's no negative X! (that is, there's not any 0x80) At least for characters. There probably is for projectiles. #For flipped, can add + and the same logic. -8 or 0. #Also yes, it's inverted between y offset and x offset. Go ask HT. #Don't get me wrong, it's still opposite. But, I put - y_offset instead of + y_offset to make it closer to what the code does. Who knows? Maybe whatever tool they were using at the time (we're talking the 90s) was doing operations like these, and the consequences of their inner workings are relevant even today, 30+ years later.
+        self.chr_bank = frame_bytes[file_format_validator.OFFSET_CHR_BANK]
+        self.y_offset = (frame_bytes[file_format_validator.OFFSET_Y_OFFSET] & 0x1F) * (1 if (frame_bytes[file_format_validator.OFFSET_Y_OFFSET] & 0x20) else -1) #I don't usually use ternary in Python but here it is pretty convenient.
         self.special_palette_id = 0 #Unused, but we may give it an use later on.
 
     def get_bytes(self): #Ok let's do this instead.

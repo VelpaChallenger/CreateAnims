@@ -78,7 +78,7 @@ class Character:
             loading_bar_label.configure(text=f"{character_text}. Loading frames. {frame_id+1}/{total_frames}")
             frame_bytes = list(character_frame.read())
             self.validate_frame(file_format_validator, name, frame_id, frame_bytes)
-            frame = Frame(frame_bytes)
+            frame = Frame(file_format_validator, frame_bytes)
             loading_bar['value'] += 1
         return frame
 

@@ -1,7 +1,3 @@
-OFFSET_WIDTH = 0
-OFFSET_HEIGHT = 1
-OFFSET_START_TILES = 6
-
 class FileFormatValidator: #Why a class? At a module level, it feels like it'd complicate imports. Specially when refreshing with a different format. I'm leaving that for far later but I'd still like to write it with that in mind.
 
     def __init__(self, createanims):

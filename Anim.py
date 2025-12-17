@@ -365,6 +365,13 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
             return False
+        if new_value == "-128": #Validation 4 (x_entry only, advantage of separating them! besides being able to highlight the entry): X entry cannot be 0x80. #Also yes, just simpler to check against the string in this case.
+            self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.physics_dialog.attributes('-disabled', 1)
+            messagebox.showwarning(title="Terminator cannot be used", message="0x80 (-128) cannot be used for X since it's the physics terminator. You can use it for Y, although it's still a pretty big number if you ask me. Well, you probably didn't ask me.")
+            self.createanims.physics_dialog.attributes('-disabled', 0)
+            self.createanims.physics_dialog.focus_force()
+            return False
         self.createanims.physics_dialog_x_entry.configure(highlightcolor="white", highlightbackground="white")
         return True
 

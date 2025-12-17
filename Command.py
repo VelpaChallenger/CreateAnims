@@ -8,6 +8,36 @@ class Command:
     def __init__(self, createanims):
         self.createanims = createanims
 
+    def utils_load_game_anims(self, source): #Oh yeah, can be Refreshed to Last Saved, or can be yeah, Opened Characters Directory and then the path. Yes.
+        from create_anims import load_game_anims #I would usually avoid this but... here it's fine. I'm not making create_anims a class or something just for this. Or adding it to a helper of sorts and whatever. No, this is still better and preferable. Not perfect, not what I want or what I'd like, but better and preferable.
+        self.createanims.characters.clear()
+        self.createanims.characters_dict.clear() #= {}
+        self.createanims.physics_list.clear()
+        self.createanims.undo_redo.restart_for_refresh_to_last_saved()
+        self.createanims.undo_redo.log_history += source #"- Refreshed to Last Saved.\n" #self.createanims.undo_redo.add_refresh_to_last_saved_to_log_history() #self.createanims.undo_redo.trace.clear() #self.createanims.undo_redo.affected_files.clear()
+        load_game_anims(self.createanims)
+        self.createanims.undo_redo.decide_undo_redo_status() #This will restart to disabled, but I prefer this rather than explicitly saying disabled. I mean yeah. #Yes I prefer it here. So you will see "Saved" only after it's done. I was kinda avoiding the refactor/update 'cause... oh yeah, I thought, it matters only if I don't crash in case of an error, because there'll be an inconsistency. But if I will crash anyways (which is what I'm sticking for), I said oh whatever. But I mean, it's only this. So yes let's do it.
+
+    def open_characters_directory(self):
+        initial_directory = self.createanims.characters_directory
+        if self.createanims.palette_directory is None:
+            initial_directory = os.getcwd()
+        characters_directory_name = filedialog.askdirectory(
+            initialdir=initial_directory,
+            title="Choose Your Directory", #I hope they catch the reference!
+            mustexist=True, #I mean, it must have content. If it has anything missing, there'll be other errors but you know, layers.
+            parent=self.createanims.root
+        )
+        if not characters_directory_name: #Then save was aborted.
+            return
+        if self.createanims.undo_redo.trace:
+            self.createanims.root.bell()
+            response = messagebox.askyesno(title="Unsaved changes!", message="If you open the new characters directory, you will lose the current unsaved changes. Do you will wish to continue?", default="no")
+            if not response:
+                return
+        self.createanims.characters_directory = self.createanims.root_dir = characters_directory_name #This time we don't want directory where file is, it would give us directory where the directory is, not what we want. #I don't often use multiple assignment in same line, but this is THE usecase!
+        self.utils_load_game_anims(source=f"- Opened Characters Directory {self.createanims.root_dir}.\n")
+
     def save_palette(self):
         initial_directory = self.createanims.palette_directory
         if self.createanims.palette_directory is None:
@@ -420,14 +450,7 @@ class Command:
         response = messagebox.askyesno(title="Do you really wish to Refresh to Last Saved?", message="Refresh to Last Saved is IRREVERSIBLE. Remember that if you accidentally did something after undoing, you can Switch Branch to go back to the previous branch. It is also highly recommended to make a copy of the Log History to make sure that you will be able to redo the changes you want to redo. Otherwise, if you already overwrote the branch too many times and/or if you're really ok with discarding your unsaved changes and going back to the last saved point, confirm with Yes.", icon="warning") #Do you really wish to do this? #if you really wish #Maybe they don't want to but they're forced to. Maybe they won't see this detail but I want it to be there. Sometimes, you're just forced. Like redid too many times.
         if not response: #Could also do a Toplevel window but, I mean to make the IRREVERSIBLE bold and all but yeah this will do.
             return
-        from create_anims import load_game_anims #I would usually avoid this but... here it's fine. I'm not making create_anims a class or something just for this. Or adding it to a helper of sorts and whatever. No, this is still better and preferable. Not perfect, not what I want or what I'd like, but better and preferable.
-        self.createanims.characters.clear()
-        self.createanims.characters_dict.clear() #= {}
-        self.createanims.physics_list.clear()
-        self.createanims.undo_redo.restart_for_refresh_to_last_saved()
-        self.createanims.undo_redo.log_history += "- Refreshed to Last Saved.\n" #self.createanims.undo_redo.add_refresh_to_last_saved_to_log_history() #self.createanims.undo_redo.trace.clear() #self.createanims.undo_redo.affected_files.clear()
-        self.createanims.undo_redo.decide_undo_redo_status() #This will restart to disabled, but I prefer this rather than explicitly saying disabled. I mean yeah.
-        load_game_anims(self.createanims)
+        self.utils_load_game_anims(source="- Refreshed to Last Saved.\n") #Let's encapsulate it all here.
 
     def clear_all_selections(self, event=None):
         self.createanims.tile_utils.clear_selections()

@@ -51,6 +51,7 @@ class CreateAnims:
         self.current_tile_image_rectangle = None
         self.current_chr_tile_index = None #We will need it to update anim's image.
         self.current_anim_image_rectangle = None
+        self.characters_directory = None
         self.palette_directory = None
         self.chr_directory = None
         self.chr_palette_directory = None
@@ -113,6 +114,8 @@ class CreateAnims:
 
         self.menu_bar = tkinter.Menu(self.root)
         file_menu = tkinter.Menu(self.menu_bar, tearoff=0)
+        file_menu.add_command(label="Open Characters Directory", command=self.command.open_characters_directory)
+        file_menu.add_separator()
         file_menu.add_command(label="Save palette", command=self.command.save_palette)
         file_menu.add_command(label="Save CHR", command=self.command.save_chr)
         file_menu.add_command(label="Save CHR palette", command=self.command.save_chr_palette)

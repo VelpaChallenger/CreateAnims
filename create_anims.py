@@ -1,13 +1,17 @@
 import os
+import shutil
 import threading
 
 from CreateAnims import *
 from Character import *
 
-def load_game_anims(createanims): #Another idea was to have a call to this in init_state, which makes sense considering we're initializing values. But then I would sort of have a circular dependency. I would have to put that stuff in yet another file, and I kinda like it here in the main file, so to speak. So that's why I ended up doing this way. It still makes sense: all the data has to go to createanims.
+def load_game_anims(createanims, loading_default_directory=False): #Another idea was to have a call to this in init_state, which makes sense considering we're initializing values. But then I would sort of have a circular dependency. I would have to put that stuff in yet another file, and I kinda like it here in the main file, so to speak. So that's why I ended up doing this way. It still makes sense: all the data has to go to createanims.
     root = tkinter.Toplevel(createanims.root) #tkinter.Tk() #Copypasted from CreateAnimsUpdater. It will follow the same UI principle, minus with a few differences in logic on how to determine progress and all. Oh and the label will be different too of course.
     root.geometry(f"+800+450")
     root.wm_overrideredirect(True)
+
+    if loading_default_directory:
+        root.withdraw() #Doesn't have much of a point. It's just a couple of files and feels like a flashing when you start CreateAnims. So, withdraw in those cases.
 
     loading_bar_label = tkinter.Label(root, text="Initializing load_game_anims...", width=44, justify="left", anchor="nw") #text=f"Loading character {character_name}'s {file_type_display}") #Please wait...
     loading_bar_label.pack(pady=10, padx=(0, 10), anchor="nw")
@@ -79,11 +83,60 @@ def get_physics(createanims, loading_bar, loading_bar_label): #Yup. This will ha
             loading_bar['value'] += 1
         createanims.physics_list.append(physics)
 
+def create_default_directory(root_dir): #Ah no wait, actually no, this is when the program first starts, no cb yet. Well in that case yeah whatever, just don't start lol. Or... #This might throw an exception if you think of opening some file here, but that can happen always, but yeah even if it happens, at this point we already have the tkinter self_destruct cb in place so, all good.
+    try:
+        if os.path.exists(root_dir):
+            shutil.rmtree(root_dir) #Start from scratch.
+        os.makedirs(root_dir)
+        physics_directory = os.path.join(root_dir, "physics")
+        os.makedirs(physics_directory)
+        default_physics_bytes = bytearray([0x00, 0x00, 0x80])
+        default_physics_filename = os.path.join(physics_directory, "physics_000.physics")
+        with open(default_physics_filename, "wb") as default_physics_file:
+            default_physics_file.write(default_physics_bytes)
+        character_x_directory = os.path.join(root_dir, "character_x") #The Character X! Has about 9999HP, 9999MP, the Ultimate attack never seen before... !! ... ok yeah.
+        os.makedirs(character_x_directory)
+        character_x_anims_directory = os.path.join(character_x_directory, "anims")
+        os.makedirs(character_x_anims_directory) #I know, I could have used join from the beginning, it's the whole point and it's abstracted there, but whatever.
+        default_anims_bytes = bytearray([0x00, 0x00])
+        default_anims_filename = os.path.join(character_x_anims_directory, "character_x_anim_000.anim") #Yes, there can be underscore in the name.
+        with open(default_anims_filename, "wb") as default_anims_file:
+            default_anims_file.write(default_anims_bytes)
+        character_x_chr_directory = os.path.join(character_x_directory, "chr")
+        os.makedirs(character_x_chr_directory)
+        default_chr_bytes = bytearray([0x00] * 0x800) #Same as TileUtils code for new CHR.
+        default_chr_filename = os.path.join(character_x_chr_directory, "character_x_chr_000.chr")
+        with open(default_chr_filename, "wb") as default_chr_file:
+            default_chr_file.write(default_chr_bytes)
+        default_chr_pal_bytes = bytearray([0x00] * 0x10) #Also same as TileUtils.
+        default_chr_pal_filename = os.path.join(character_x_chr_directory, "character_x_chr_pal_000.chr.pal")
+        with open(default_chr_pal_filename, "wb") as default_chr_pal_file:
+            default_chr_pal_file.write(default_chr_pal_bytes)
+        character_x_frames_directory = os.path.join(character_x_directory, "frames")
+        os.makedirs(character_x_frames_directory)
+        default_frames_bytes = bytearray([0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0xFF])
+        default_frames_filename = os.path.join(character_x_frames_directory, "character_x_frame_000.frame")
+        with open(default_frames_filename, "wb") as default_frames_file:
+            default_frames_file.write(default_frames_bytes)
+        character_x_pal_directory = os.path.join(character_x_directory, "pal")
+        os.makedirs(character_x_pal_directory)
+        default_pal_bytes = bytearray([0x0E, 0x01, 0x02, 0x03, 0x0E, 0x04, 0x05, 0x08])
+        default_pal_filename = os.path.join(character_x_pal_directory, "character_x_usual.pal")
+        with open(default_pal_filename, "wb") as default_pal_file:
+            default_pal_file.write(default_pal_bytes)
+    except PermissionError as exception_message:
+        tkinter.messagebox.showerror(title="Error creating default directory", message=f"CreateAnims could not create default directory. This can happen if you first let CreateAnims create it (or you created it yourself) and then opened it with some process and why am I even bothering explaining? If you triggered this error, you most likely wanted to make it appear. Anyways! And no, I'm not moving it to a less visible place :p . Programs should be standalone! All in one single place!\n\nHere are the exception details: {exception_message}.") #This does work, actually!
+        sys.exit(999) #Just directly end, no problems here.
+    except Exception as exception_message:
+        tkinter.messagebox.showerror(title="Unknown error creating default directory", message=f"CreateAnims could not create default directory due to an unknown exception. Here are the details: {exception_message}.")
+        sys.exit(999)
+
 def main():
     createanims = CreateAnims()
-    createanims.root_dir = "../characters"
-    createanims.root.withdraw()
-    load_game_anims(createanims)
+    createanims.root_dir = "CreateAnims_DefaultCharacters" #"../characters"
+    create_default_directory(createanims.root_dir)
+    createanims.root.withdraw() #I was going to say, for the default don't load anything but turns out it's a lot more complicated lol so yeah, do load even if it's just one character with the bare minimum. Simplifies things not just a lot, but quite, quite a lot.
+    load_game_anims(createanims, loading_default_directory=True)
     createanims.root.mainloop()
 
 if __name__ == "__main__": #Who would have thought! We will need this after all. I mean again, it's either that, or we create a new file helpers or something like that, and then we import from there and... no this, I don't like but I like that other even less. Let's go with this.

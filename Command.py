@@ -22,8 +22,12 @@ class Command:
         if not pal_filename: #Then save was aborted.
             return
         self.createanims.palette_directory = os.path.dirname(pal_filename) #Directory where the file selected is.
-        with open(pal_filename, "wb") as pal_file:
-            pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].palette))
+        try:
+            with open(pal_filename, "wb") as pal_file:
+                pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].palette))
+        except PermissionError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"File {pal_filename} could not be opened for saving, probably because it is being used by another process. If you have the files opened in a hex editor, please close them before trying to save. Here are the details: {exception_message}.")
+            return
 
     def save_chr(self): #Let's add it after all. There's no CHR editor (for now), there might be one in the future but even if there isn't, you might want to import and then save that only.
         initial_directory = self.createanims.chr_directory
@@ -39,8 +43,12 @@ class Command:
         if not chr_filename: #Then save was aborted.
             return
         self.createanims.chr_directory = os.path.dirname(chr_filename) #Directory where the file selected is.
-        with open(chr_filename, "wb") as chr_file:
-            chr_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]))
+        try:
+            with open(chr_filename, "wb") as chr_file:
+                chr_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]))
+        except PermissionError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"File {chr_filename} could not be opened for saving, probably because it is being used by another process. If you have the files opened in a hex editor, please close them before trying to save. Here are the details: {exception_message}.")
+            return
 
     def save_chr_palette(self):
         initial_directory = self.createanims.chr_palette_directory
@@ -56,8 +64,12 @@ class Command:
         if not chr_pal_filename: #Then save was aborted.
             return
         self.createanims.chr_palette_directory = os.path.dirname(chr_pal_filename) #Directory where the file selected is.
-        with open(chr_pal_filename, "wb") as chr_pal_file:
-            chr_pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]))
+        try:
+            with open(chr_pal_filename, "wb") as chr_pal_file:
+                chr_pal_file.write(bytearray(self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank]))
+        except PermissionError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"File {chr_pal_filename} could not be opened for saving, probably because it is being used by another process. If you have the files opened in a hex editor, please close them before trying to save. Here are the details: {exception_message}.")
+            return
 
     def save_frame(self):
         initial_directory = self.createanims.frames_directory
@@ -73,10 +85,14 @@ class Command:
         if not frame_filename: #Then save was aborted.
             return
         self.createanims.frames_directory = os.path.dirname(frame_filename) #Directory where the file selected is.
-        with open(frame_filename, "wb") as frame_file:
-            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
-            frame_file.write(bytearray(frame.metadata.get_bytes())) #Metadata first.
-            frame_file.write(bytearray(frame.tiles)) #And now the tiles.
+        try:
+            with open(frame_filename, "wb") as frame_file:
+                frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+                frame_file.write(bytearray(frame.metadata.get_bytes())) #Metadata first.
+                frame_file.write(bytearray(frame.tiles)) #And now the tiles.
+        except PermissionError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"File {frame_filename} could not be opened for saving, probably because it is being used by another process. If you have the files opened in a hex editor, please close them before trying to save. Here are the details: {exception_message}.")
+            return
 
     def save_anim(self):
         initial_directory = self.createanims.anims_directory
@@ -92,10 +108,14 @@ class Command:
         if not anim_filename: #Then save was aborted.
             return
         self.createanims.anims_directory = os.path.dirname(anim_filename) #Directory where the file selected is.
-        with open(anim_filename, "wb") as anim_file:
-            anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
-            anim_file.write(bytearray([anim.physics_id]))
-            anim_file.write(bytearray(anim.frame_ids))
+        try:
+            with open(anim_filename, "wb") as anim_file:
+                anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
+                anim_file.write(bytearray([anim.physics_id]))
+                anim_file.write(bytearray(anim.frame_ids))
+        except PermissionError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"File {anim_filename} could not be opened for saving, probably because it is being used by another process. If you have the files opened in a hex editor, please close them before trying to save. Here are the details: {exception_message}.")
+            return
 
     def save_physics(self):
         initial_directory = self.createanims.physics_directory
@@ -111,10 +131,13 @@ class Command:
         if not physics_filename: #Then save was aborted.
             return
         self.createanims.physics_directory = os.path.dirname(physics_filename) #Directory where the file selected is.
-        with open(physics_filename, "wb") as physics_file:
-            physics = self.createanims.physics_list[self.createanims.current_physics_id]
-            physics_file.write(bytearray(physics))
-
+        try:
+            with open(physics_filename, "wb") as physics_file:
+                physics = self.createanims.physics_list[self.createanims.current_physics_id]
+                physics_file.write(bytearray(physics))
+        except PermissionError as exception_message: #In this case, if something else breaks, yeah just plain crash.
+            messagebox.showwarning(title="File could not be saved!", message=f"File {physics_filename} could not be opened for saving, probably because it is being used by another process. If you have the files opened in a hex editor, please close them before trying to save. Here are the details: {exception_message}.")
+            return
     def toggle_anim_transparency(self, event=None): #When it's called from keyboard shortcut, event is sent. So we need event=None, we won't use it anyways.
         self.createanims.anim.transparency ^= 1 #Let's make it a literal toggle.
         self.createanims.anim.refresh() #But, as usual, a refresh also.
@@ -323,60 +346,70 @@ class Command:
         self.createanims.anim.load_new_physics_id_value(self.createanims.current_physics_id) #I was going to add a messagebox but... I think it'll be enough with the potential physics ID mismatch and if not, you can still use Edit physics, like, I don't want it to be too annoying, I know what it feels like. But if I'm asked to add it, I will. #Similar logic to why loading new anim when importing an anim. There are some updates that need to run. Like for example, if the new physics has a mismatch, that has to run. And has to set the flag.
 
     def save_changes(self):
-        self.createanims.undo_redo.trace.clear()
+        try:
+            for affected_file in list(set(self.createanims.undo_redo.affected_files)):
+                filename = affected_file[2:].rstrip() #Let's not forget the newline. #Remove the - used for displaying purposes.
+                filename_split = filename.split("/") #This might be more friendly for performance?
+                if filename_split[0] != "physics":
+                    file_type = filename_split[1] #Careful, if we ever write code that runs in Linux as well and MacOS and other operating systems, we might have to change this.
+                else:
+                    file_type = filename_split[0]
+                if filename[-7:] == "chr.pal": #Come to think of it, maybe I could have used file extension from the beginning and the logic was simplified. Whatever.
+                    file_type = "chr_pal"
+                if file_type == "anims":
+                    with open(f"{self.createanims.root_dir}/{filename}", "wb") as anim_file: #Same as save_anim, could encapsulate in same function. Well actually no, there are many differences. And the with can maybe be moved to the top? But I kinda like it this way here. Not a difference with performance no, it will have to run either way.
+                        character_name = filename_split[0]
+                        character_ID = self.createanims.characters_dict[character_name] #And yes, I could use character but... again it's all on context?
+                        anim_ID = int(affected_file.split(".")[0][-3:]) #Could also use offset but, split with period makes it easier to copypaste. And to read too. Alhough I liked more -1:-4, but yes, it has to be -4 for the behavior I want. Technically the way to say last 3 digits though. But yeah, I won't contradict. -1:-4 is the right way.
+                        anim = self.createanims.characters[character_ID].anims[anim_ID]
+                        anim_file.write(bytearray([anim.physics_id]))
+                        anim_file.write(bytearray(anim.frame_ids))
+                elif file_type == "frames":
+                    with open(f"{self.createanims.root_dir}/{filename}", "wb") as frame_file:
+                        character_name = filename_split[0]
+                        character_ID = self.createanims.characters_dict[character_name]
+                        frame_ID = int(affected_file.split(".")[0][-3:])
+                        frame = self.createanims.characters[character_ID].frames[frame_ID]
+                        metadata = frame.metadata
+                        x_offset_for_file = abs(metadata.x_offset) | (0x80 if metadata.x_offset > 0 else 0x00)
+                        y_offset_for_file = abs(metadata.y_offset) | (0x20 if metadata.y_offset > 0 else 0x00)
+                        frame_file.write(bytearray([metadata.x_length, metadata.y_length, x_offset_for_file, metadata.chr_bank, y_offset_for_file, 0x0])) #Metadata first.
+                        frame_file.write(bytearray(frame.tiles)) #And now the tiles.
+                elif file_type == "physics":
+                    with open(f"{self.createanims.root_dir}/{filename}", "wb") as physics_file:
+                        physics_ID = int(affected_file.split(".")[0][-3:])
+                        physics = self.createanims.physics_list[physics_ID]
+                        physics_file.write(bytearray(physics))
+                elif file_type == "pal":
+                    with open(f"{self.createanims.root_dir}/{filename}", "wb") as pal_file:
+                        character_name = filename_split[0]
+                        character_ID = self.createanims.characters_dict[character_name]
+                        pal_file.write(bytearray(self.createanims.characters[character_ID].palette))
+                elif file_type == "chr":
+                    with open(f"{self.createanims.root_dir}/{filename}", "wb") as chr_file:
+                        character_name = filename_split[0]
+                        character_ID = self.createanims.characters_dict[character_name]
+                        chr_bank = int(affected_file.split(".")[0][-3:])
+                        chr_file.write(bytearray(self.createanims.characters[character_ID].chrs[chr_bank]))
+                elif file_type == "chr_pal":
+                    with open(f"{self.createanims.root_dir}/{filename}", "wb") as chr_pal_file:
+                        character_name = filename_split[0]
+                        character_ID = self.createanims.characters_dict[character_name]
+                        chr_bank = int(affected_file.split(".")[0][-3:])
+                        chr_pal_file.write(bytearray(self.createanims.characters[character_ID].chr_palettes[chr_bank]))
+                else:
+                    raise ValueError(f"Could not find file_type for {affected_file}") #Yes, let's be explicit about it this time around, I wouldn't want the file_type to be skipped and just not saved or something.
+        except PermissionError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"One of the files could not be saved, probably because it is in use by another process. If you have the files opened in a hex editor, please close them before trying to save. Keep in mind some files might have been still saved, but to avoid data corruption, it is highly recommended you try to save again (affected files will still be the same). Here are the details: {exception_message}.") #Might, because if it is the first file that gave an error, then no files were saved. Details details.
+            return
+        except FileNotFoundError as exception_message:
+            messagebox.showwarning(title="File could not be saved!", message=f"One of the files could not be saved, probably because a folder is missing. Are you making changes to the directory as you work on your animations? Maybe you're reverse engineering CreateAnims, or trying to find bugs? Well either way, please follow the expected format as documented in the docs :) . Anddd please do report it if you believe it's a bug.")
+            return
+        except Exception as exception_message:
+            messagebox.showwarning(title="File could not be saved! Unknown exception", message=f"One of the files could not be saved, but this time I have no idea why. Here are the details: {exception_message}. Most likely a bug. Kindly report it! =D .")
+            return
+        self.createanims.undo_redo.trace.clear() #Yes, better all the unit in the same place. This should happen only if the save was actually successful, all of those things, four things now.
         self.createanims.undo_redo.saved = True
-        for affected_file in list(set(self.createanims.undo_redo.affected_files)):
-            filename = affected_file[2:].rstrip() #Let's not forget the newline. #Remove the - used for displaying purposes.
-            filename_split = filename.split("/") #This might be more friendly for performance?
-            if filename_split[0] != "physics":
-                file_type = filename_split[1] #Careful, if we ever write code that runs in Linux as well and MacOS and other operating systems, we might have to change this.
-            else:
-                file_type = filename_split[0]
-            if filename[-7:] == "chr.pal": #Come to think of it, maybe I could have used file extension from the beginning and the logic was simplified. Whatever.
-                file_type = "chr_pal"
-            if file_type == "anims":
-                with open(f"{self.createanims.root_dir}/{filename}", "wb") as anim_file: #Same as save_anim, could encapsulate in same function. Well actually no, there are many differences. And the with can maybe be moved to the top? But I kinda like it this way here. Not a difference with performance no, it will have to run either way.
-                    character_name = filename_split[0]
-                    character_ID = self.createanims.characters_dict[character_name] #And yes, I could use character but... again it's all on context?
-                    anim_ID = int(affected_file.split(".")[0][-3:]) #Could also use offset but, split with period makes it easier to copypaste. And to read too. Alhough I liked more -1:-4, but yes, it has to be -4 for the behavior I want. Technically the way to say last 3 digits though. But yeah, I won't contradict. -1:-4 is the right way.
-                    anim = self.createanims.characters[character_ID].anims[anim_ID]
-                    anim_file.write(bytearray([anim.physics_id]))
-                    anim_file.write(bytearray(anim.frame_ids))
-            elif file_type == "frames":
-                with open(f"{self.createanims.root_dir}/{filename}", "wb") as frame_file:
-                    character_name = filename_split[0]
-                    character_ID = self.createanims.characters_dict[character_name]
-                    frame_ID = int(affected_file.split(".")[0][-3:])
-                    frame = self.createanims.characters[character_ID].frames[frame_ID]
-                    metadata = frame.metadata
-                    x_offset_for_file = abs(metadata.x_offset) | (0x80 if metadata.x_offset > 0 else 0x00)
-                    y_offset_for_file = abs(metadata.y_offset) | (0x20 if metadata.y_offset > 0 else 0x00)
-                    frame_file.write(bytearray([metadata.x_length, metadata.y_length, x_offset_for_file, metadata.chr_bank, y_offset_for_file, 0x0])) #Metadata first.
-                    frame_file.write(bytearray(frame.tiles)) #And now the tiles.
-            elif file_type == "physics":
-                with open(f"{self.createanims.root_dir}/{filename}", "wb") as physics_file:
-                    physics_ID = int(affected_file.split(".")[0][-3:])
-                    physics = self.createanims.physics_list[physics_ID]
-                    physics_file.write(bytearray(physics))
-            elif file_type == "pal":
-                with open(f"{self.createanims.root_dir}/{filename}", "wb") as pal_file:
-                    character_name = filename_split[0]
-                    character_ID = self.createanims.characters_dict[character_name]
-                    pal_file.write(bytearray(self.createanims.characters[character_ID].palette))
-            elif file_type == "chr":
-                with open(f"{self.createanims.root_dir}/{filename}", "wb") as chr_file:
-                    character_name = filename_split[0]
-                    character_ID = self.createanims.characters_dict[character_name]
-                    chr_bank = int(affected_file.split(".")[0][-3:])
-                    chr_file.write(bytearray(self.createanims.characters[character_ID].chrs[chr_bank]))
-            elif file_type == "chr_pal":
-                with open(f"{self.createanims.root_dir}/{filename}", "wb") as chr_pal_file:
-                    character_name = filename_split[0]
-                    character_ID = self.createanims.characters_dict[character_name]
-                    chr_bank = int(affected_file.split(".")[0][-3:])
-                    chr_pal_file.write(bytearray(self.createanims.characters[character_ID].chr_palettes[chr_bank]))
-            else:
-                raise ValueError(f"Could not find file_type for {affected_file}") #Yes, let's be explicit about it this time around, I wouldn't want the file_type to be skipped and just not saved or something.
         self.createanims.undo_redo.affected_files.clear() #Has to happen at the end. Otherwise the for loop will not run.
         self.createanims.save_changes_window.destroy() #For now this. Will then implement the full logic based on affected files and such.
 

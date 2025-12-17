@@ -143,8 +143,11 @@ class Command:
         self.createanims.palette_directory = os.path.dirname(pal_filename)
         with open(pal_filename, "rb") as pal_file:
             new_palette = list(pal_file.read())
-        if not self.createanims.file_format_validator.validate_palette(new_palette): #len(new_palette) != 8:
+        if not self.createanims.file_format_validator.validate_palette_length(new_palette): #len(new_palette) != 8:
             messagebox.showwarning(title="Invalid PAL file format", message="The file you tried to import doesn't follow the format of a PAL file. It isn't exactly 8 bytes long. Each character uses 8 colors (2 groups) out of the 16 available colors (4 groups). Aborting import.") #Not an error in the sense that CreateAnims will continue running. Yeah, that's why, it's better that it's different code. Though, I do agree that the validation itself could be shared code. Meh.
+            return
+        if not self.createanims.file_format_validator.validate_palette_values(new_palette):
+            messagebox.showwarning(title="Invalid PAL file format", message="The file you tried to import doesn't follow the format of a PAL file. One or more bytes have a value higher than 0x3F. Aborting import.")
             return
         character = self.createanims.characters[self.createanims.current_character] #Let's do it here. Let's close the file.
         old_palette = character.palette[:] #Just in case, don't use the exact same list, use a copy. Oh, but to do same thing as with frame_tiles, let's do it... hmmmm... yeah I know, frame_tiles wasn't part of the update so... ok whatever this is ok.

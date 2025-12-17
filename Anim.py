@@ -35,7 +35,7 @@ class FrameMetaData: #To make it clear that it's not the frame itself.
         self.special_palette_id = 0 #Unused, but we may give it an use later on.
 
     def get_bytes(self): #Ok let's do this instead.
-        x_offset_for_file = abs(self.x_offset) | (0x80 if self.x_offset > 0 else 0x00) #From save_frame.
+        x_offset_for_file = abs(self.x_offset) | (0x80 if self.x_offset > 0 else 0x00) #From save_frame. #We do need to perform a conversion. It is convenient for editing, but then when we save the file, we do need to convert it back.
         y_offset_for_file = abs(self.y_offset) | (0x20 if self.y_offset > 0 else 0x00)
         metadata_bytes = [self.x_length, self.y_length, x_offset_for_file, self.chr_bank, y_offset_for_file, self.special_palette_id]
         return metadata_bytes

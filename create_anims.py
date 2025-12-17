@@ -21,6 +21,8 @@ def thread_load_game_anims(createanims, loading_bar, loading_bar_label, root):
         loading_bar['maximum'] = sum([len(files) for r, d, files in os.walk(createanims.root_dir) if "images" not in r]) #Exclude images which is used for play anim.
         get_physics(createanims, loading_bar, loading_bar_label) #Could use return but... meh, this will do.
         characters_name_list = [create_anims_dir for create_anims_dir in os.listdir(createanims.root_dir) if create_anims_dir != "physics"]
+        if not characters_name_list:
+            raise CreateAnimsFileNameError(f"Invalid filename: Characters directory doesn't contain any characters (only physics).")
         createanims.characters_dict = {}
         character_ID = 0
         total_characters = len(characters_name_list)
@@ -59,19 +61,21 @@ def show_error_and_close(createanims, exception_type, exception_message):
 
 def get_physics(createanims, loading_bar, loading_bar_label): #Yup. This will happen here. #Also yeah, CreateAnims can run without physics. I was going to add get_physics_if_any but, considering I may extend this to other kind of elements... for now I'll leave it as it is.
     physics_path = f"{createanims.root_dir}/physics"
-    if not os.path.isdir(physics_path): #No or trickery this time around.
-        return
-    physics_name_list = os.listdir(physics_path)
-    physics_ids = [int(physics_filename.split(".physics")[0][-3:]) for physics_filename in physics_name_list] #As always, careful about .bak files and stuff. Will add this to docs.
+    if not os.path.isdir(physics_path): #No or trickery this time around. #To avoid confusions specially for future me: this can be safely removed, the only reason why I don't is because at some point, I miiiight make it such that you can still use CreateAnims without physics. But that will imply quite a few checks here and there so, I'm not including it in the release I'm planning for before 2025 end. You, future me, or future reader, will have the blessing to know what happened. But for me, I leave this note.
+        raise CreateAnimsFileNameError(f"Invalid filename: Directory physics does not exist in Characters directory.")
+    physics_ids = os.listdir(physics_path)
     total_physics = len(physics_ids)
-    for i, physics_id in enumerate(physics_ids, start=1):
-        with open(f"{physics_path}/physics_{physics_id:03d}.physics", "rb") as physics_file:
-            loading_bar_label.configure(text=f"Loading physics. {i}/{total_physics}") #i + 1 because i starts at zero. Although... there, updated start to 1. Doesn't have anything to do with the iteration itself so, awesome.
+    for i in range(total_physics):
+        physics_filename = f"{physics_path}/physics_{i:03d}.physics"
+        if not os.path.exists(physics_filename):
+            raise CreateAnimsFileNameError(f"Invalid filename: File {physics_filename} was not found. This can happen if one of the files doesn't follow the expected format (please see docs for details). Some hex editors also create .bak files on save, there shouldn't be any of those in the directory either.")
+        with open(physics_filename, "rb") as physics_file:
+            loading_bar_label.configure(text=f"Loading physics. {i+1}/{total_physics}") #Back to i+1. Makes it easier on the filename check. #i + 1 because i starts at zero. Although... there, updated start to 1. Doesn't have anything to do with the iteration itself so, awesome.
             physics = list(physics_file.read()) #In this case, we won't use an object. This will do.
             if not createanims.file_format_validator.validate_physics_parity(physics):
-                raise CreateAnimsFileFormatError(f"Invalid physics format for file physics_{physics_id:03d}.physics: total amount of bytes is not an odd number. For every frame, there's relative X and Y values to add to the current position. The physics terminator is 0x80, for a total of an odd number (2*n + 1).")
+                raise CreateAnimsFileFormatError(f"Invalid physics format for file physics_{i:03d}.physics: total amount of bytes is not an odd number. For every frame, there's relative X and Y values to add to the current position. The physics terminator is 0x80, for a total of an odd number (2*n + 1).")
             if not createanims.file_format_validator.validate_physics_terminator(physics):
-                raise CreateAnimsFileFormatError(f"Invalid physics format for file physics_{physics_id:03d}.physics: terminator is not 0x80. Terminator 0x80 indicates the physics must end at that point and restart to state 0x00.")
+                raise CreateAnimsFileFormatError(f"Invalid physics format for file physics_{i:03d}.physics: terminator is not 0x80. Terminator 0x80 indicates the physics must end at that point and restart to state 0x00.")
             loading_bar['value'] += 1
         createanims.physics_list.append(physics)
 

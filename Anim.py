@@ -581,7 +581,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if frame_tiles is None:
             self.load_new_width_value_difference_width(frame, difference_width, aux_width, new_width)
         else:
-            frame.tiles = frame_tiles
+            frame.tiles = frame_tiles[:] #This just fixed a bug that otherwise would have probably gotten me for hours asking myself wt%$#% has this to do with anything. It worked great with the features of the moment, but when adding paste rectangle (tile_image_multiple_tiles_rectangle), if now I do a width update, undo, paste, switch branch, redo, undo, bum, broke. The old_tiles in undo was overwritten with the paste, and never updated back with the undo of the switch branch (unlike what new_tile_index does). This is seriously so messed up, I'm so happy I took my time understanding why I saw different behaviors (why this "worked" so well but it didn't for tile_indexes) and found out about it.
         self.createanims.width_entry.delete(0, "end")
         self.createanims.width_entry.insert(0, str(new_width))
         self.decide_arrow_buttons_status(new_width, 60, self.createanims.width_left_arrow, self.createanims.width_right_arrow, lower_boundary=1)
@@ -610,7 +610,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if frame_tiles is None:
             self.load_new_height_value_difference_height(frame, difference_height)
         else:
-            frame.tiles = frame_tiles
+            frame.tiles = frame_tiles[:] #Obviously, let's not forget about this one (details in width).
         self.createanims.height_entry.delete(0, "end")
         self.createanims.height_entry.insert(0, str(new_height))
         self.decide_arrow_buttons_status(new_height, 60, self.createanims.height_left_arrow, self.createanims.height_right_arrow, lower_boundary=1)

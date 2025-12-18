@@ -61,6 +61,7 @@ class CreateAnims:
         self.in_play_anim = False
         self.in_physics_window = False
         self.in_exception = False
+        self.tile_image_multiple_tiles_rectangle_bool = False
         self.physics_list = []
         self.current_palette_info_text = ""
 

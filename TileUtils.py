@@ -95,6 +95,10 @@ def func_TileImage_on_right_click_release(createanims, tile_index, event=None):
     tile_image_object = createanims.tiles_images[tile_index]
     tile_image_object.on_right_click_release(event)
 
+def func_TileImage_on_shift_left_click_motion(createanims, tile_index, event=None):
+    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object.on_shift_left_click_motion(event)
+
 class PalRectangle: #I usually don't do this, but whatever. The main is TileUtils.
 
     def __init__(self, createanims, palette_canvas, color_picker_rectangle_object, pal_rectangle, character_pal_index, pal, pal_label):
@@ -194,6 +198,7 @@ class TileImage:
         self.chr_canvas.tag_bind(self.tile_image, "<Double-Button-1>", lambda event: func_TileImage_on_double_left_click(createanims, tile_index, event))
         self.chr_canvas.tag_bind(self.tile_image, "<B3-Motion>", lambda event: func_TileImage_on_right_click_motion(createanims, tile_index, event))
         self.chr_canvas.tag_bind(self.tile_image, "<ButtonRelease-3>", lambda event: func_TileImage_on_right_click_release(createanims, tile_index, event))
+        self.chr_canvas.tag_bind(self.tile_image, "<Shift-B1-Motion>", lambda event: func_TileImage_on_shift_left_click_motion(createanims, tile_index, event))
 
     def on_enter(self, event=None):
         self.update_tile_label() #I could also say refresh but refresh gives me more the idea of like, what I do for CHR and anim. It's not exactly that here.
@@ -217,9 +222,7 @@ class TileImage:
             return
         if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
             return
-        tile_row = event.y // 16
-        tile_col = event.x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
-        tile_selected = tile_row*0x10 + tile_col
+        tile_selected = self.get_tile_selected_based_on_coordinates(event.y, event.x)
         tile_image_object = self.createanims.tiles_images[tile_selected]
         if tile_image_object.in_motion or self.createanims.current_tile_image_rectangle is None: #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
             return
@@ -237,7 +240,58 @@ class TileImage:
     def on_right_click_release(self, event=None):
         self.createanims.tile_utils.clear_in_motion() #Do it for aaall tile images.
 
+    def on_shift_left_click_motion(self, event):
+        if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+            return
+        tile_selected = self.get_tile_selected_based_on_coordinates(event.y, event.x)
+        #tile_image_object = self.createanims.tiles_images[tile_selected]
+        if self.createanims.current_tile_image_rectangle is None: #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
+            return
+        tile_image_object, width, height = self.calculate_selection_dimensions(self.tile_index, tile_selected)
+        self.createanims.chr_canvas.delete('TileImageRectangle') #We need to remove it,
+        #if not use_tile_index: #Changed my mind, no more abs in calculate_selection_dimensions. And yes, it is an or. If one fulfills, it doesn't matter what the other gives, we still need to take one.
+            #x, y = self.chr_canvas.coords(tile_image_object.tile_image)
+        #else:
+            #x, y = self.chr_canvas.coords(self.tile_image)
+        x,y = self.chr_canvas.coords(tile_image_object.tile_image)
+        self.create_multiple_tiles_rectangle(x, y, abs(width), abs(height)) #and then create a new one. Because changing width and/or height will not always be enough. Suppose now the rectangle expands to the right, it won't suffice. Plus, makes more sense in my mental model of things.
+        #print(f"selected {tile_image_object.tile_index}! dimensions {width}, {height}")
+
+    def calculate_selection_dimensions(self, tile_index, tile_selected):
+        tile_index_col = tile_index & 0xF #tile_index % 16 #As always, could do and as well, in this case & 0xF. Ehhh... yeah, let's do that, no idea what's more efficient but the and is definitely clearer on the intent.
+        tile_selected_col = tile_selected & 0xF
+        width = abs(tile_index_col - tile_selected_col) #The amount of columns (width) will be difference in the last 16 bits. In other words, divide both values by 16, get the remainder, substract them, and get the abs.
+        #if width == 0: #This is it. If we sum always +1, that is not what we want. I don't think there's a mathematical way? When they're in same position, dimension is 1. But then, to one side, it should be 2 and to the other... -2. If I said -1 instead of 1, it would be the same, either way it has to make a jump.
+            #width = 1
+        tile_index_row = tile_index // 0x10
+        tile_selected_row = tile_selected // 0x10
+        height = abs(tile_index_row - tile_selected_row) #For height, we have a similar situation, but for the second digit. Now dividing will be simpler I think. Might be a way to optimize it... ah whatever, I want to get something working.
+        #use_tile_index = False
+        #if (tile_index_col < tile_selected_col) or (tile_index_row < tile_selected_row):
+            #use_tile_index = True
+        #if height == 0:
+            #height = 1
+        if (tile_index_col < tile_selected_col) and (tile_index_row < tile_selected_row): #It's a table, 4 possibilities. We need to calculate in each possibility, what the top left tile is.
+            tile_top_corner = tile_index
+        elif (tile_index_col < tile_selected_col) and (tile_index_row >= tile_selected_row): #Could apply a not, might be more clear but this works also as a not.
+            tile_top_corner = tile_index - 0x10*height #Same column, just different row.
+        elif (tile_index >= tile_selected_col) and (tile_index_row < tile_selected_row):
+            tile_top_corner = tile_selected - 0x10*height #Same logic, but for tile_selected.
+        elif (tile_index >= tile_selected_col) and (tile_index_row >= tile_selected_row): #And else will of course trigger an error, tile_top_corner not defined. Expected, that shouldn't happen (pun intended?).
+            tile_top_corner = tile_selected
+        tile_image_object = self.createanims.tiles_images[tile_top_corner]
+        return tile_image_object, width+1, height+1 #Now there it is. #Not sure there is a mathematical formula that solves all. But only if they're the same, dimension is 1. Otherwise, do return the difference as it is. #Because suppose they're the same, they're both in same row, then the difference will return 0. But that doesn't mean dimension 0. It means dimension 1. Because it's one rectangle, not zero.
+
+    def create_multiple_tiles_rectangle(self, x, y, width, height): #overwrite, expand, create... many possible verbs here. Let's go with this one.
+        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+(16*width)-1, y+(16*height)-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(16*height)-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(16*height), width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
+        self.createanims.tile_image_multiple_tiles_rectangle_bool = True
+
     def select(self):
+        if self.createanims.tile_image_multiple_tiles_rectangle_bool:
+            self.createanims.chr_canvas.delete('TileImageRectangle')
+            self.createanims.current_tile_image_rectangle = None
         x, y = self.chr_canvas.coords(self.tile_image)
         if self.createanims.current_tile_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
             self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
@@ -251,6 +305,11 @@ class TileImage:
 
     def update_tile_label(self): #I feel more comfortable calling this method from other components rather than on_enter. It will also make it easier if on_enter has to make something additional but from other places it should still be just the label. Very experimental anyways, might change in the future. I already call on_double_click from motion so... yeah.
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
+
+    def get_tile_selected_based_on_coordinates(self, y, x): #Yes, y and x instead of x and y. I'm preserving the original order. It had to do with how it's all arranged. It's actually more intuitive.
+        tile_row = y // 16
+        tile_col = x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
+        return tile_row*0x10 + tile_col
 
 class TileUtils:
 

@@ -120,14 +120,10 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
 
     def select(self):
         x, y, x2, y2 = self.palette_canvas.coords(self.pal_rectangle) #Won't use x2 and y2, but those are rectangles, not images, and I'm gonna leave it that way cause, you know, performance.
-        if self.createanims.current_pal_rectangle is None: #An exception also: I would call this current_pal_rectangle_rectangle following the same format as others but... I'm not sure if I use it in other places too which I won't refactor and well the twice rectangle can be confusing? maybe? So I'm going for this. #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
-            self.createanims.current_pal_rectangle = self.palette_canvas.create_rectangle(x, y, x+30, y+30, width=1, outline="white", tag="PalRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-            self.createanims.current_pal_rectangle_inner_rectangle = self.palette_canvas.create_rectangle(x+1, y+1, x+29, y+29, width=1, outline="black", tag="PalRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-            self.createanims.current_pal_rectangle_outer_rectangle = self.palette_canvas.create_rectangle(x-1, y-1, x+31, y+31, width=1, outline="black", tag="PalRectangle") #And now outer, helps a lot too.
-        else:
-            self.palette_canvas.moveto(self.createanims.current_pal_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
-            self.palette_canvas.moveto(self.createanims.current_pal_rectangle_inner_rectangle, x, y)
-            self.palette_canvas.moveto(self.createanims.current_pal_rectangle_outer_rectangle, x-2, y-2)
+        self.palette_canvas.delete("PalRectangle")
+        self.createanims.current_pal_rectangle = self.palette_canvas.create_rectangle(x, y, x+30, y+30, width=1, outline="white", tag="PalRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_pal_rectangle_inner_rectangle = self.palette_canvas.create_rectangle(x+1, y+1, x+29, y+29, width=1, outline="black", tag="PalRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_pal_rectangle_outer_rectangle = self.palette_canvas.create_rectangle(x-1, y-1, x+31, y+31, width=1, outline="black", tag="PalRectangle") #And now outer, helps a lot too.
         self.createanims.current_character_pal_index = self.character_pal_index #Analogous to current_chr_tile_index.
         self.createanims.pal_label.config(text=f"Palette: {self.pal:02X}")
         self.createanims.current_palette_info_text = f"Selected index: {self.character_pal_index:02d}\nSelected color: {self.pal:02X}\n\n" #We'll need it for the hover. Oh, there are always complications. Whatever.
@@ -154,14 +150,10 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
 
     def select(self): #The common point after all updates is TileUtils.select_color_picker_rectangle_object, the rest of the logic still applies (so keyboard for example can calculate new self.pal). #Now this is the common point. A keyboard shortcut can call this select and it'll get the same behavior. Keyboard arrows could also help navigate between color pickers, so before select, we determine the ColorPickerRectangle, and then we call its select method. It's wonderful, wonderfully beautiful. #Got it now! #Let's follow same approach as Anim and TileUtils I mean we already are in TileUtils, I mean for load_chr_bank specifically.
         x, y, x2, y2 = self.color_picker_canvas.coords(self.color_picker_rectangle) #Won't use x2 and y2, but those are rectangles, not images, and I'm gonna leave it that way cause, you know, performance.
-        if self.createanims.current_color_picker_rectangle is None: #An exception also: I would call this current_pal_rectangle_rectangle following the same format as others but... I'm not sure if I use it in other places too which I won't refactor and well the twice rectangle can be confusing? maybe? So I'm going for this. #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
-            self.createanims.current_color_picker_rectangle = self.color_picker_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="ColorPickerRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-            self.createanims.current_color_picker_rectangle_inner_rectangle = self.color_picker_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="ColorPickerRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-            self.createanims.current_color_picker_rectangle_outer_rectangle = self.color_picker_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="ColorPickerRectangle") #And now outer, helps a lot too.
-        else:
-            self.color_picker_canvas.moveto(self.createanims.current_color_picker_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
-            self.color_picker_canvas.moveto(self.createanims.current_color_picker_rectangle_inner_rectangle, x, y)
-            self.color_picker_canvas.moveto(self.createanims.current_color_picker_rectangle_outer_rectangle, x-2, y-2)
+        self.color_picker_canvas.delete("ColorPickerRectangle")
+        self.createanims.current_color_picker_rectangle = self.color_picker_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="ColorPickerRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_color_picker_rectangle_inner_rectangle = self.color_picker_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="ColorPickerRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_color_picker_rectangle_outer_rectangle = self.color_picker_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="ColorPickerRectangle") #And now outer, helps a lot too.
 
     def select_and_update_pal_rectangle(self): #If we're going to be strict, those are two different things and I think this is going to simplify logic. If I select a PalRectangle, do select the ColorPickerRectangle but don't do anything else, don't try to update the PalRectangle and show the Play Anim warning/info. I could do maybe with a bunch of if and stuff but I think this is cleaner and shows more straight? what I'm trying to say.
         self.select() #select
@@ -289,18 +281,11 @@ class TileImage:
         self.createanims.tile_image_multiple_tiles_rectangle_bool = True
 
     def select(self):
-        if self.createanims.tile_image_multiple_tiles_rectangle_bool:
-            self.createanims.chr_canvas.delete('TileImageRectangle')
-            self.createanims.current_tile_image_rectangle = None
+        self.chr_canvas.delete('TileImageRectangle') #I just realized, you're right. I can also always just delete everything and start again. Which would make the if/else block disappear. Realized because, I'm never clearing the bool come to think of it, but it still works wonders. And it's because, since I never clear it, it keeps deleting and starting again. But it works super well.
         x, y = self.chr_canvas.coords(self.tile_image)
-        if self.createanims.current_tile_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
-            self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-            self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-            self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
-        else:
-            self.chr_canvas.moveto(self.createanims.current_tile_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
-            self.chr_canvas.moveto(self.createanims.current_tile_image_inner_rectangle, x, y)
-            self.chr_canvas.moveto(self.createanims.current_tile_image_outer_rectangle, x-2, y-2)
+        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
         self.createanims.current_chr_tile_index = self.tile_index #So you might think, why not do like PalRectangle, use the IDs. It breaks logic tile_image_object = self.createanims.tiles_images[tile_id & 0x7F] in Anim. It can still work but I prefer to leave that as it is which is already very clear and instead do this. It makes sense that it's a different logic.
 
     def update_tile_label(self): #I feel more comfortable calling this method from other components rather than on_enter. It will also make it easier if on_enter has to make something additional but from other places it should still be just the label. Very experimental anyways, might change in the future. I already call on_double_click from motion so... yeah.

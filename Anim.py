@@ -76,14 +76,10 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
 
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)
-        if self.createanims.current_anim_image_rectangle is None: #Again, similar approach to PalRectangle and ColorPickerRectangle. Though this time I add a suffix _rectangle to make it clear that we're making a rectangle around the tile image. Wonderful awesome.
-            self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-            self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-            self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
-        else:
-            self.anim_canvas.moveto(self.createanims.current_anim_image_rectangle, x-1, y-1) #Nothing to move if it doesn't exist. So that's why the if.
-            self.anim_canvas.moveto(self.createanims.current_anim_image_inner_rectangle, x, y)
-            self.anim_canvas.moveto(self.createanims.current_anim_image_outer_rectangle, x-2, y-2)
+        self.anim_canvas.delete("AnimImageRectangle")
+        self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
 
     def select_and_update(self): #I was going to say select_and_update_anim_image but it's kinda redudant I think? We already are in AnimImage in this context, unlike ColorPickerRectangle which is updating a PalRectangle. This time, the update doesn't happen when you click on the TileImage, but on the AnimImage. That's why the difference. But the rest is the same. We still have both a select and a select_and and all that.
         self.select() #Select

@@ -36,7 +36,6 @@ class CreateAnims:
         self.init_anim_window()
 
     def init_state(self):
-        #self.root = Tk()
         self.tile_utils = TileUtils(self)
         self.command = Command(self)
         self.entry_return = EntryReturn(self)
@@ -63,6 +62,7 @@ class CreateAnims:
         self.in_physics_window = False
         self.in_exception = False
         self.physics_list = []
+        self.current_palette_info_text = ""
 
     def init_anim_window(self):
         self.root = Tk() #Yes, this makes more sense when I think about it. And will make things smoother for the loading bar.

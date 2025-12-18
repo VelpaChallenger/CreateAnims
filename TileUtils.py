@@ -126,7 +126,8 @@ class PalRectangle: #I usually don't do this, but whatever. The main is TileUtil
             self.palette_canvas.moveto(self.createanims.current_pal_rectangle_outer_rectangle, x-2, y-2)
         self.createanims.current_character_pal_index = self.character_pal_index #Analogous to current_chr_tile_index.
         self.createanims.pal_label.config(text=f"Palette: {self.pal:02X}")
-        self.createanims.palette_info_text.configure(text=f"Selected index: {self.character_pal_index:02d}\nSelected color: {self.pal:02X}", fg="blue")
+        self.createanims.current_palette_info_text = f"Selected index: {self.character_pal_index:02d}\nSelected color: {self.pal:02X}\n\n" #We'll need it for the hover. Oh, there are always complications. Whatever.
+        self.createanims.palette_info_text.configure(text=self.createanims.current_palette_info_text, fg="blue")
         self.color_picker_rectangle_object.select()
 
 class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the color picker.
@@ -138,7 +139,11 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
         self.pal = pal
         self.rgb = rgb #We will use it after all, just for something else.
         self.pal_label = pal_label
+        self.color_picker_canvas.tag_bind(self.color_picker_rectangle, "<Enter>", self.on_enter)
         self.color_picker_canvas.tag_bind(self.color_picker_rectangle, "<Button-1>", self.on_left_click)
+
+    def on_enter(self, event=None):
+        self.createanims.palette_info_text.configure(text=f"{self.createanims.current_palette_info_text}Color picker: {self.pal:02X}", fg="blue")
 
     def on_left_click(self, event=None):
         self.select_and_update_pal_rectangle() #So when you click on a PalRectangle, you do a ColorPickerRectangle.select, when you click on a ColorPickerRectangle, you do a select_and_update_pal_rectangle. Love it.
@@ -166,7 +171,8 @@ class ColorPickerRectangle: #So like PalRectangle, but rectangles used for the c
                 return
             self.createanims.undo_redo.undo_redo([self.createanims.tile_utils.load_new_character_palette_for_index_value, old_index, old_pal], [self.createanims.tile_utils.load_new_character_palette_for_index_value, old_index, self.pal]) #I was thinking that maybe I don't need to pass index but... yes. Because, if I have, like, I changed two different indexes. Now I undo. I will check current_character_palette_index but it will give me the current one which... I mean it's kinda like when I update y_offset, I never pass the frame. I just take current_frame. But it's kinda different because there is an undo_redo for when you change frames, but there isn't one for when you change palette selected. Hoho. So that's the difference. (I think it'd be distracting, but if anyone asks, I can add it).
         else:
-            self.createanims.palette_info_text.configure(text=f"Selected index: No index selected.\nSelected color: {self.pal:02X}", fg="blue")
+            self.createanims.current_palette_info_text = f"Selected index: No index selected.\nSelected color: {self.pal:02X}\n\n"
+            self.createanims.palette_info_text.configure(text=self.createanims.current_palette_info_text, fg="blue")
 
 class TileImage:
 
@@ -377,7 +383,8 @@ class TileUtils:
     def update_palette_label_and_info(self):
         current_palette = self.createanims.characters[self.createanims.current_character].palette[self.createanims.current_character_pal_index]
         self.createanims.pal_label.config(text=f"Palette: {current_palette:02X}")
-        self.createanims.palette_info_text.configure(text=f"Selected index: {self.createanims.current_character_pal_index:02d}\nSelected color: {current_palette:02X}", fg="blue")
+        self.createanims.current_palette_info_text = f"Selected index: {self.createanims.current_character_pal_index:02d}\nSelected color: {current_palette:02X}\n\n"
+        self.createanims.palette_info_text.configure(text=self.createanims.current_palette_info_text, fg="blue")
 
     def clear_selections(self):
         self.createanims.chr_canvas.delete('TileImageRectangle')
@@ -393,13 +400,15 @@ class TileUtils:
         self.createanims.chr_entry.delete(0, "end")
         self.createanims.chr_entry.insert(0, str(self.createanims.current_chr_bank))
         self.createanims.pal_label.config(text=f"Palette:")
-        self.createanims.palette_info_text.configure(text="")
+        self.createanims.current_palette_info_text = ""
+        self.createanims.palette_info_text.configure(text=self.createanims.current_palette_info_text)
 
     def load_new_character_palette_for_index_value(self, character_pal_index, new_character_palette): #I'm still adding the value cause, yes there isn't a non_value in this case, it's different because this is happening as part of something else but, I still want to make it clear that this is included in an undo_redo. #That's the action itself and it can only happen if we're not playing an anim or, in general terms, if we pass the validations. This is the intermediary. A keyboard shortcut for example will run ColorPickerRectangle.select_and_update_pal_rectangle. Yes, I said it was going to be from TileUtils, but change of plans. This is good because, the ColorPickerRectangle will be selected, and if the PalRectangle update applies, it will be done as well, but otherwise it just won't. So it's great.
         character_palette = self.createanims.characters[self.createanims.current_character].palette
         character_palette[character_pal_index] = new_character_palette #Done! #We will need to store current_character_pal_index similarly to current_chr_tile_index for the refactor to fully work. And exactly, it's the exact same idea, the exact same reason: the relationship between the two. Between Anim and TileImage is same as ColorPickerRectangle and PalRectangle, like the more I think about it, the more literal it is.
         self.createanims.pal_label.config(text=f"Palette: {new_character_palette:02X}") #Restored. #Technically not the pal_rectangle itself but I mean, still logically part of the same update. Same unit.
-        self.createanims.palette_info_text.configure(text=f"Selected index: {character_pal_index:02d}\nSelected color: {new_character_palette:02X}", fg="blue")
+        self.createanims.current_palette_info_text = f"Selected index: {character_pal_index:02d}\nSelected color: {new_character_palette:02X}\n\n"
+        self.createanims.palette_info_text.configure(text=self.createanims.current_palette_info_text, fg="blue")
         self.createanims.refresh_UI() #Done! #This could be a refresh_UI. #Though in that case, I would need to do it the same way as Anim, and save coordinates of rectangle, then restore... or otherwise save outline... that's why I did it this way. But then I found a way with Anim so. Yeah, I could soon replicate it here, it might be part of what's making UndoRedo so complicated here.
 
     def toggle_palette_for_tile_index_value(self, tile_index):

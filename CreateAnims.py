@@ -48,6 +48,7 @@ class CreateAnims:
         self.current_character_pal_index = None #Similarly, we'll need it for the relationship/associations between a PalRectangle and a ColorPickerRectangle.
         self.current_color_picker_rectangle = None
         self.current_tile_image_rectangle = None
+        self.current_tile_image_multiple_tiles_rectangle = None #Maybe we can use this instead of the bool?
         self.current_chr_tile_index = None #We will need it to update anim's image.
         self.current_anim_image_rectangle = None
         self.characters_directory = None
@@ -61,7 +62,7 @@ class CreateAnims:
         self.in_play_anim = False
         self.in_physics_window = False
         self.in_exception = False
-        self.tile_image_multiple_tiles_rectangle_bool = False
+        #self.tile_image_multiple_tiles_rectangle_bool = False
         self.physics_list = []
         self.current_palette_info_text = ""
 

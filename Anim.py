@@ -85,36 +85,38 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.select() #Select
         if self.createanims.current_tile_image_multiple_tiles_rectangle is not None:
             frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
-            current_tile_index = self.createanims.current_tile_image_multiple_tiles_rectangle.tile_index
-            current_anim_index = self.anim_index
-            final_tile_index = current_tile_index + 0x10*(self.createanims.current_tile_image_multiple_tiles_rectangle.height - 1) + (self.createanims.current_tile_image_multiple_tiles_rectangle.width - 1)
-            maximum_anim_index = len(frame.tiles) - 1 #Do I... save it in a var? I could directly check against len... ah ok whatever.
-            #print(f"final tile index {final_tile_index:02X}")
-            #multiple_tiles_rectangle_width_boundary = current_tile_index + self.createanims.current_tile_image_multiple_tiles_rectangle.width #If the rectangle has width=1...
-            while current_tile_index <= final_tile_index: #The other corner of the rectangle. For CHR it is defined, for anim it is undefined, we cannot calculate it beforehand. We'll find out as we traverse the CHR rectangle.
-                tile_index_start = current_tile_index
-                anim_index_start = current_anim_index #Details details. When we go to the next row, we don't want to go to the next row from where we are at that point. We want to go to the next from where we started.
-                multiple_tiles_rectangle_width_boundary = current_tile_index + (self.createanims.current_tile_image_multiple_tiles_rectangle.width - 1)
-                anim_width_boundary = frame.metadata.x_length*(current_anim_index // frame.metadata.x_length) + (frame.metadata.x_length -1) #No, for anim the logic is a bit more complex. It is always going to be a multiple of the x_length, for example is x_length (width) is 3, then those are going to be 0x02, 0x05, 0x08 and so on and so forth. So it's always going to be x_length*(current_row + 1). Or just current_row if we start counting from 1 instead of 0. But yes, once we got the current row (the start of the row), the rest is the exact same logic as for the tile rectangle. They're all rectangles. Beautiful.
-                while (current_tile_index <= multiple_tiles_rectangle_width_boundary) and (current_anim_index <= anim_width_boundary): #It can be <=, but not >. It's the boundary, it is inclusive.
-                    frame.tiles[current_anim_index] = current_tile_index
-                    current_tile_index += 1
-                    current_anim_index += 1 #There's probably a way with enumerate, but whatever, I will prefer super explicit here.
-                    #if current_anim_index > anim_width_boundary:
-                        #break #Break of the current while, but not the whole while as a whole (pun... intended, I think).
-                current_tile_index = tile_index_start + 0x10 #It's always the same concept, the width. It just so happens that for CHR the width is fixed, so we represent that here by directly adding 0x10.
-                current_anim_index = anim_index_start + frame.metadata.x_length #This is the advancing in parallel which I was originally going to do through some sort of zip list iteration or something of the sort but no, let's go with this. It's clearer.
-                if current_anim_index > maximum_anim_index: #We're already out of bounds, we can just exit. For CHR, we'll never be out of index because the selection is always valid (we can't select anything outside the CHR window).
-                    break #So that we can run the common refresh. Could also call refresh here but yeah.
-            self.createanims.anim.refresh()
-            return
-        if self.createanims.current_chr_tile_index is not None: #And update. If applies. Same as TileUtils too. #If there is some tile in the CHR window selected.
+            old_tiles = frame.tiles[:]
+            new_tiles = self.paste_tile_image_multiple_tiles_rectangle(frame) #paste_chr_rectangle #We will first check the result before refreshing/seeing whether to create an UndoRedo record.
+            if old_tiles == new_tiles: #You might think, but wait, you changed Frame! You modified it inside the function, that's wrong! My view is, the values are still the same, as per this check.
+                return
+            self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_indexes_value, old_tiles[:]], [self.createanims.anim.load_new_tile_indexes_value, new_tiles[:]])
+        elif self.createanims.current_chr_tile_index is not None: #And update. If applies. Same as TileUtils too. #If there is some tile in the CHR window selected.
             old_index = self.anim_index
             frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
             old_tile = frame.tiles[self.anim_index] #I usually leave only old lines but... let's make an exception here for the sake of clarity.
             if old_tile == self.createanims.current_chr_tile_index:
                 return
             self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, self.createanims.current_chr_tile_index])
+
+    def paste_tile_image_multiple_tiles_rectangle(self, frame):
+        current_tile_index = self.createanims.current_tile_image_multiple_tiles_rectangle.tile_index
+        current_anim_index = self.anim_index
+        final_tile_index = current_tile_index + 0x10*(self.createanims.current_tile_image_multiple_tiles_rectangle.height - 1) + (self.createanims.current_tile_image_multiple_tiles_rectangle.width - 1)
+        maximum_anim_index = len(frame.tiles) - 1 #Do I... save it in a var? I could directly check against len... ah ok whatever.
+        while current_tile_index <= final_tile_index: #The other corner of the rectangle. For CHR it is defined, for anim it is undefined, we cannot calculate it beforehand. We'll find out as we traverse the CHR rectangle.
+            tile_index_start = current_tile_index
+            anim_index_start = current_anim_index #Details details. When we go to the next row, we don't want to go to the next row from where we are at that point. We want to go to the next from where we started.
+            multiple_tiles_rectangle_width_boundary = current_tile_index + (self.createanims.current_tile_image_multiple_tiles_rectangle.width - 1)
+            anim_width_boundary = frame.metadata.x_length*(current_anim_index // frame.metadata.x_length) + (frame.metadata.x_length -1) #No, for anim the logic is a bit more complex. It is always going to be a multiple of the x_length, for example is x_length (width) is 3, then those are going to be 0x02, 0x05, 0x08 and so on and so forth. So it's always going to be x_length*(current_row + 1). Or just current_row if we start counting from 1 instead of 0. But yes, once we got the current row (the start of the row), the rest is the exact same logic as for the tile rectangle. They're all rectangles. Beautiful.
+            while (current_tile_index <= multiple_tiles_rectangle_width_boundary) and (current_anim_index <= anim_width_boundary): #It can be <=, but not >. It's the boundary, it is inclusive.
+                frame.tiles[current_anim_index] = current_tile_index
+                current_tile_index += 1
+                current_anim_index += 1 #There's probably a way with enumerate, but whatever, I will prefer super explicit here.
+            current_tile_index = tile_index_start + 0x10 #It's always the same concept, the width. It just so happens that for CHR the width is fixed, so we represent that here by directly adding 0x10.
+            current_anim_index = anim_index_start + frame.metadata.x_length #This is the advancing in parallel which I was originally going to do through some sort of zip list iteration or something of the sort but no, let's go with this. It's clearer.
+            if current_anim_index > maximum_anim_index: #We're already out of bounds, we can just exit. For CHR, we'll never be out of index because the selection is always valid (we can't select anything outside the CHR window).
+                break #So that we can run the common refresh. Could also call refresh here but yeah.
+        return frame.tiles
 
     def clear(self): #So here's a difference with for example select_and_update scenarios: naming was relatively simple because we could say select_and_update. But here there's no select. There's only an update but it doesn't feel right to say update, it's like, update in those cases meant to tie so to speak two images, like AnimImage and TileImage or ColorPickerRectangle and PalRectangle. But that's not the case here. And at the same time, we'll also need a second function from Anim in this case (TileUtils in others) because, well, that's the approach I'm taking now and I do think it saves memory maybe I could run a test but either way I like it more. So there'll be clear, and then another name for the function more specific.
         old_index = self.anim_index #Copypasted from select_and_update. It's very very similar.
@@ -531,7 +533,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def load_new_tile_for_index_value(self, anim_index, tile_index):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
         frame.tiles[anim_index] = tile_index
-        self.createanims.anim.refresh()
+        self.refresh()
+
+    def load_new_tile_indexes_value(self, frame_tiles): #So I was gonna say, load_tile_image_multiple_tiles_rectangle, but it's very similar to new_tile_for_index, except here it's many. Still value instead of values to preserve the suffix/ID of these UndoRedo functions.
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        frame.tiles = frame_tiles[:] #Actually, yes, we need to do this always. Because otherwise, when this frame.tiles is updated, the copy in UndoRedo will be updated too. Not what we want. #Will follow same format, [:] will be done from caller side.
+        self.refresh() #Of course! They cannot be shorter than 3 lines :p .
 
     def load_new_x_offset(self, new_x_offset, refresh_UI_flag=True):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]

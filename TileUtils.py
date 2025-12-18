@@ -266,7 +266,6 @@ class TileImage:
         self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+(16*width)-1, y+(16*height)-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
         self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(16*height)-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
         self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(16*height), width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
-        #self.createanims.tile_image_multiple_tiles_rectangle_bool = True
 
     def select(self):
         self.chr_canvas.delete('TileImageRectangle') #I just realized, you're right. I can also always just delete everything and start again. Which would make the if/else block disappear. Realized because, I'm never clearing the bool come to think of it, but it still works wonders. And it's because, since I never clear it, it keeps deleting and starting again. But it works super well.

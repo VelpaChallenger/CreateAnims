@@ -22,7 +22,8 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_physics_imported_value": ("Imported physics for character anim physics ID {0} {1:02d} {2:02d}. Filename: {3}", "Change", ("character_name", "anim", "physics_id", "redo:1"), ("physics",)),
     "load_new_character_palette_for_index_value": ("Character {0}. Changed pal index {1:02X} from {2:02X} to {3:02X}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1"), ("pal",)), #Let's use hex here, more friendly for palettes. I mean, don't everyone use hex for pale'? Thinking...
     "toggle_palette_for_tile_index_value": ("Character {0}. Toggled CHR pal for bank {1:03d} for tile index {2:02X}.", "Change", ("character_name", "chr_bank", "undo:0"), ("chr", "chr_pal", "chr_bank", "chr.pal")),
-    "load_new_tile_for_index_value": ("Character {0}. Changed anim index {1:02X} from {2:02X} to {3:02X}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_tile_for_index_value": ("Character {0}. Changed anim index {1:02X} from {2:02X} to {3:02X} for frame ID {4:02d}.", "Change", ("character_name", "undo:0", "undo:1", "redo:1", "frame_id"), ("frames", "frame", "frame_id", "frame")),
+    "load_new_tile_indexes_value": ("Character {0}. Changed tile index (s) for frame ID {1:02d}.", "Change", ("character_name", "frame_id"), ("frames", "frame", "frame_id", "frame")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.

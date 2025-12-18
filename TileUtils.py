@@ -242,7 +242,10 @@ class TileImage:
         self.createanims.current_tile_image_multiple_tiles_rectangle = TileImageMultipleTilesRectangle(tile_image_object.tile_index, width, height) #Yes, let's make it a class.
         self.createanims.chr_canvas.delete('TileImageRectangle') #We need to remove it,
         x,y = self.chr_canvas.coords(tile_image_object.tile_image)
-        self.create_multiple_tiles_rectangle(x, y, abs(width), abs(height)) #and then create a new one. Because changing width and/or height will not always be enough. Suppose now the rectangle expands to the right, it won't suffice. Plus, makes more sense in my mental model of things.
+        self.create_multiple_tiles_rectangle(x, y, width, height) #and then create a new one. Because changing width and/or height will not always be enough. Suppose now the rectangle expands to the right, it won't suffice. Plus, makes more sense in my mental model of things.
+        self.createanims.chr_info_text.configure(text=f"{width}*{height} ({width*height} tiles selected)", fg='blue')
+        tile_selected_object = self.createanims.tiles_images[tile_selected]
+        tile_selected_object.update_tile_label() #self.tile_label.config(text=f"Tile: {tile_selected:02X} / {self.tile_palette_group:02X}") #Alternative: retrieve the tile_selected_object (not necessarily the same as tile_image_object! that's the tile_top_corner, or tile_top_left_object more specifically, not always the same), and then call its update_tile_label method. Oh... we need to retrieve the object anyways to get the palette_group. Whatever.
 
     def calculate_selection_dimensions(self, tile_index, tile_selected):
         tile_index_col = tile_index & 0xF #tile_index % 16 #As always, could do and as well, in this case & 0xF. Ehhh... yeah, let's do that, no idea what's more efficient but the and is definitely clearer on the intent.
@@ -268,6 +271,7 @@ class TileImage:
         self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(16*height), width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
 
     def select(self):
+        self.createanims.chr_info_text.configure(text="") #Specially for when selecting full rectangles, so that then you click one, and it automagically clears.
         self.chr_canvas.delete('TileImageRectangle') #I just realized, you're right. I can also always just delete everything and start again. Which would make the if/else block disappear. Realized because, I'm never clearing the bool come to think of it, but it still works wonders. And it's because, since I never clear it, it keeps deleting and starting again. But it works super well.
         x, y = self.chr_canvas.coords(self.tile_image)
         self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.

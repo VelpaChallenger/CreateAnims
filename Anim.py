@@ -6,9 +6,12 @@ from tkinter import messagebox
 INITIAL_X_FRAME = 375 #To know from where to start col by col, row by row. The cells.
 INITIAL_Y_FRAME = 200
 
-def func_AnimImage_on_left_click(createanims, anim_index, event=None): #A wrapper to go around memory leak issues with Tkinter.
+def func_AnimImage_on_left_click(createanims, anim_index, event): #A wrapper to go around memory leak issues with Tkinter.
     anim_image_object = createanims.anim_images[anim_index]
-    anim_image_object.on_left_click(event)
+    if event.state == 1: #Shift + Left click, but nothing else. If Shift + Ctrl + Left for example, it won't be 1 anymore
+        anim_image_object.on_shift_left_click(event)
+    else:
+        anim_image_object.on_left_click(event)
 
 def func_AnimImage_on_right_click(createanims, anim_index, event=None): #Idem
     anim_image_object = createanims.anim_images[anim_index]
@@ -17,6 +20,10 @@ def func_AnimImage_on_right_click(createanims, anim_index, event=None): #Idem
 def func_AnimImage_on_double_right_click(createanims, anim_index, event=None): #Idem
     anim_image_object = createanims.anim_images[anim_index]
     anim_image_object.on_double_right_click(event)
+
+def func_TileImage_on_shift_left_click_motion(createanims, anim_index, event=None):
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_shift_left_click_motion(event)
 
 class Frame:
     
@@ -61,6 +68,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", lambda event: func_AnimImage_on_left_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", lambda event: func_AnimImage_on_right_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", lambda event: func_AnimImage_on_double_right_click(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<Shift-B1-Motion>", lambda event: func_TileImage_on_shift_left_click_motion(createanims, anim_index, event))
 
     def on_left_click(self, event=None):
         self.select_and_update()
@@ -74,15 +82,81 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
     def on_double_right_click(self, event=None):
         self.clear()
 
+    def on_shift_left_click(self, event=None):
+        self.select()
+
+    def on_shift_left_click_motion(self, event):
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
+        initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
+        width = frame.metadata.x_length
+        height = frame.metadata.y_length
+        x = event.x - initial_x #This will make things easier. Just got a ?? moment because verify_motion_coordinates worked but get_tile didn't. Yeah, get_tile wasn't doing this.
+        y = event.y - initial_y
+        if not self.verify_motion_coordinates(x, y, width, height): #Those are the x and y we need to pass to preserve logic (such that it works pretty much same as TileImage). #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+            return
+        anim_selected = self.get_anim_selected_based_on_coordinates(y, x, width)
+        if self.createanims.current_anim_image_rectangle is None: #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
+            return
+        anim_image_object, width, height = self.calculate_selection_dimensions(self.anim_index, anim_selected, width)
+        self.createanims.current_anim_image_multiple_tiles_rectangle = AnimImageMultipleTilesRectangle(anim_image_object.anim_index, width, height) #Yes, let's make it a class.
+        self.createanims.anim_canvas.delete('AnimImageRectangle') #We need to remove it, #Oh I did notice you can just do self.anim_canvas. But I like the harmony. In the lines you know. You can't see it? Weird.
+        x,y = self.anim_canvas.coords(anim_image_object.anim_image) #Here I do use the self notation, yay!
+        self.create_multiple_tiles_rectangle(x, y, width, height) #and then create a new one. Because changing width and/or height will not always be enough. Suppose now the rectangle expands to the right, it won't suffice. Plus, makes more sense in my mental model of things.
+        #self.createanims.anim_info_text.configure(text=f"{width}*{height} ({width*height} tiles selected)", fg='blue') #Anim info coming soon!
+        #anim_selected_object = self.createanims.anim_images[anim_selected]
+        #anim_selected_object.update_tile_label()
+
+    def calculate_selection_dimensions(self, anim_index, anim_selected, width):
+        anim_index_col = anim_index % width #Now we do need this method.
+        anim_selected_col = anim_selected % width
+        multiple_rectangle_width = abs(anim_index_col - anim_selected_col) #Don't overwrite the other width.
+        anim_index_row = anim_index // width
+        anim_selected_row = anim_selected // width
+        height = abs(anim_index_row - anim_selected_row)
+        if (anim_index_col < anim_selected_col) and (anim_index_row < anim_selected_row):
+            anim_top_corner = anim_index
+        elif (anim_index_col < anim_selected_col) and (anim_index_row >= anim_selected_row):
+            anim_top_corner = anim_index - width*height
+        elif (anim_index >= anim_selected_col) and (anim_index_row < anim_selected_row):
+            anim_top_corner = anim_selected - width*height
+        elif (anim_index >= anim_selected_col) and (anim_index_row >= anim_selected_row):
+            anim_top_corner = anim_selected
+        anim_image_object = self.createanims.anim_images[anim_top_corner]
+        return anim_image_object, multiple_rectangle_width+1, height+1
+
+    def create_multiple_tiles_rectangle(self, x, y, width, height): #overwrite, expand, create... many possible verbs here. Let's go with this one.
+        self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+(16*width)-1, y+(16*height)-1, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(16*height)-2, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(16*height), width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
+
+    def verify_motion_coordinates(self, x, y, width, height):
+        return (
+            x >= 0 and #Both have to be positive (i.e., don't go too much to the left or too much up).
+            y >= 0 and
+            x < (width*16) and #Right, in our system each unit in width equals 2 pixels, no wait, equals 16 pixels, because it's one tile and each tile is 16 pixels here, so yeah. Of course, this could be a constant var pixels and would make it a lot easier if we later changed it. Arghhh... I am saying and still not doing it that way? Same reason as always, it adds complexity and, do we really want it? Hmmmm... anyways, search by 16 should do the trick to find all the affected places. #Actually, those have to be < and not <=. At that point, the result gives a tile out of range. I think this is still correct either way though, as I'm pretty sure last one is pixels 112 to 127 and 240 to 255. #Each image is 16 pixels wide, canvas is 256 pixels wide.
+            y < (height*16) #Same, now for y. So with this we cover all 4 corners.
+        )
+
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)
         self.anim_canvas.delete("AnimImageRectangle")
+        self.createanims.current_anim_image_multiple_tiles_rectangle = None
         self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
         self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
         self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
 
     def select_and_update(self): #I was going to say select_and_update_anim_image but it's kinda redudant I think? We already are in AnimImage in this context, unlike ColorPickerRectangle which is updating a PalRectangle. This time, the update doesn't happen when you click on the TileImage, but on the AnimImage. That's why the difference. But the rest is the same. We still have both a select and a select_and and all that.
-        self.select() #Select
+        if self.createanims.current_anim_image_multiple_tiles_rectangle is not None:
+            frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+            old_tiles = frame.tiles[:]
+            new_tiles = self.paste_anim_image_multiple_tiles_rectangle(frame, old_tiles) #Oh yes, thank me for separating it into a different method. There are indeed differences. I will need old_tiles here. #paste_chr_rectangle #We will first check the result before refreshing/seeing whether to create an UndoRedo record.
+            self.select() #Select #Has to happen here specifically, after we're already done using it. #Not a favourite of mine, but this will do. I cannot have it at the start, it'll restart the multiple to None. Making this code non-runnable. Yes. Non-runnable.
+            if old_tiles == new_tiles: #You might think, but wait, you changed Frame! You modified it inside the function, that's wrong! My view is, the values are still the same, as per this check.
+                return
+            self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_indexes_value, old_tiles[:]], [self.createanims.anim.load_new_tile_indexes_value, new_tiles[:]]) #The function itself will be the same.
+            return
+        self.select() #The if condition didn't fulfill. Wasn't fulfilled. You get it. #Also yeah the alternative would be to change shortcuts and whatnot but whatever. Make new select methods or add if stuff there etc. etc.
         if self.createanims.current_tile_image_multiple_tiles_rectangle is not None:
             frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
             old_tiles = frame.tiles[:]
@@ -118,6 +192,26 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
                 break #So that we can run the common refresh. Could also call refresh here but yeah.
         return frame.tiles
 
+    def paste_anim_image_multiple_tiles_rectangle(self, frame, old_tiles):
+        multiple_rectangle_current_tile_index = self.createanims.current_anim_image_multiple_tiles_rectangle.anim_index
+        current_anim_index = self.anim_index
+        multiple_rectangle_final_tile_index = multiple_rectangle_current_tile_index + frame.metadata.x_length*(self.createanims.current_anim_image_multiple_tiles_rectangle.height - 1) + (self.createanims.current_anim_image_multiple_tiles_rectangle.width - 1)
+        maximum_anim_index = len(frame.tiles) - 1 #Do I... save it in a var? I could directly check against len... ah ok whatever.
+        while multiple_rectangle_current_tile_index <= multiple_rectangle_final_tile_index: #The other corner of the rectangle. For CHR it is defined, for anim it is undefined, we cannot calculate it beforehand. We'll find out as we traverse the CHR rectangle.
+            multiple_rectangle_tile_index_start = multiple_rectangle_current_tile_index
+            anim_index_start = current_anim_index #Details details. When we go to the next row, we don't want to go to the next row from where we are at that point. We want to go to the next from where we started.
+            multiple_tiles_rectangle_width_boundary = multiple_rectangle_current_tile_index + (self.createanims.current_anim_image_multiple_tiles_rectangle.width - 1)
+            anim_width_boundary = frame.metadata.x_length*(current_anim_index // frame.metadata.x_length) + (frame.metadata.x_length -1) #No, for anim the logic is a bit more complex. It is always going to be a multiple of the x_length, for example is x_length (width) is 3, then those are going to be 0x02, 0x05, 0x08 and so on and so forth. So it's always going to be x_length*(current_row + 1). Or just current_row if we start counting from 1 instead of 0. But yes, once we got the current row (the start of the row), the rest is the exact same logic as for the tile rectangle. They're all rectangles. Beautiful.
+            while (multiple_rectangle_current_tile_index <= multiple_tiles_rectangle_width_boundary) and (current_anim_index <= anim_width_boundary): #It can be <=, but not >. It's the boundary, it is inclusive.
+                frame.tiles[current_anim_index] = old_tiles[multiple_rectangle_current_tile_index] #This will give us the right tile_index in this case. #multiple_rectangle_current_tile_index
+                multiple_rectangle_current_tile_index += 1
+                current_anim_index += 1 #There's probably a way with enumerate, but whatever, I will prefer super explicit here.
+            multiple_rectangle_current_tile_index = multiple_rectangle_tile_index_start + frame.metadata.x_length #It's always the same concept, the width. It just so happens that for CHR the width is fixed, so we represent that here by directly adding 0x10.
+            current_anim_index = anim_index_start + frame.metadata.x_length #This is the advancing in parallel which I was originally going to do through some sort of zip list iteration or something of the sort but no, let's go with this. It's clearer.
+            if current_anim_index > maximum_anim_index: #We're already out of bounds, we can just exit. For CHR, we'll never be out of index because the selection is always valid (we can't select anything outside the CHR window).
+                break #So that we can run the common refresh. Could also call refresh here but yeah.
+        return frame.tiles
+
     def clear(self): #So here's a difference with for example select_and_update scenarios: naming was relatively simple because we could say select_and_update. But here there's no select. There's only an update but it doesn't feel right to say update, it's like, update in those cases meant to tie so to speak two images, like AnimImage and TileImage or ColorPickerRectangle and PalRectangle. But that's not the case here. And at the same time, we'll also need a second function from Anim in this case (TileUtils in others) because, well, that's the approach I'm taking now and I do think it saves memory maybe I could run a test but either way I like it more. So there'll be clear, and then another name for the function more specific.
         old_index = self.anim_index #Copypasted from select_and_update. It's very very similar.
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
@@ -125,6 +219,18 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         if old_tile == 0xFF: #Nothing to do then.
             return
         self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, 0xFF])
+
+    def get_anim_selected_based_on_coordinates(self, y, x, width): #Yes, y and x instead of x and y. I'm preserving the original order. It had to do with how it's all arranged. It's actually more intuitive.
+        anim_row = y // 16 #No wait, this is 16 really. Because this is based on x and y. It's the calculation that is different. #width #The more generic form. For CHR, it's always 16 / 0x10, but for an anim, not necessarily. To make this super generic, we could of course assign optional parameters. But eh, this is clearer to me.
+        anim_col = x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
+        return anim_row*width + anim_col
+
+class AnimImageMultipleTilesRectangle:
+
+    def __init__(self, anim_index, width, height): #1 point and width and height, enough to know exactly all the points contained in the rectangle. Beautiful maths.
+        self.anim_index = anim_index
+        self.width = width
+        self.height = height
 
 class PhysicsLabel:
 

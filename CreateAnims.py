@@ -51,6 +51,7 @@ class CreateAnims:
         self.current_tile_image_multiple_tiles_rectangle = None #Maybe we can use this instead of the bool?
         self.current_chr_tile_index = None #We will need it to update anim's image.
         self.current_anim_image_rectangle = None
+        self.current_anim_image_multiple_tiles_rectangle = None
         self.characters_directory = None
         self.palette_directory = None
         self.chr_directory = None

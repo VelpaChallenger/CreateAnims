@@ -21,7 +21,7 @@ def func_AnimImage_on_double_right_click(createanims, anim_index, event=None): #
     anim_image_object = createanims.anim_images[anim_index]
     anim_image_object.on_double_right_click(event)
 
-def func_TileImage_on_shift_left_click_motion(createanims, anim_index, event=None):
+def func_AnimImage_on_shift_left_click_motion(createanims, anim_index, event=None):
     anim_image_object = createanims.anim_images[anim_index]
     anim_image_object.on_shift_left_click_motion(event)
 
@@ -68,7 +68,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", lambda event: func_AnimImage_on_left_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", lambda event: func_AnimImage_on_right_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", lambda event: func_AnimImage_on_double_right_click(createanims, anim_index, event))
-        self.anim_canvas.tag_bind(self.anim_image, "<Shift-B1-Motion>", lambda event: func_TileImage_on_shift_left_click_motion(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<Shift-B1-Motion>", lambda event: func_AnimImage_on_shift_left_click_motion(createanims, anim_index, event))
 
     def on_left_click(self, event=None):
         self.select_and_update()

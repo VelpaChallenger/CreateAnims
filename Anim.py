@@ -279,7 +279,6 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.transparency = 1 #Default value. #Yes, let's leave this as part of Anim. It will still be accessible from CreateAnims, Command etc. etc.
         self.draw_frame_rectangle = 1 #I know I know. I'm mixing Frame and Anim quite a lot. Oh well. We'll survive. I think.
         self.draw_empty_cells = 1
-        self.frame_rectangle = None #No ID, will be created later if option is turned on.
         self.play_physics = True #By default, but may be turned False if for example the frames don't match. Alternatively, raise a warning/make it configurable whether to raise a warning.
 
     def refresh(self):
@@ -312,14 +311,13 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16)))
                     anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
                     if self.draw_empty_cells:
-                        anim_empty_rectangle = self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 15, width=1, outline="blue") #Alt name anim_empty_image, but I like more rectangle because, even though it's taking the place of what could be an image, it is a rectangle.
+                        self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 15, width=1, outline="blue", tag=f"EmptyRectangle{cell_id}") #We'll use the tag to make removal easier on the UndoRedo (index). #Alt name anim_empty_image, but I like more rectangle because, even though it's taking the place of what could be an image, it is a rectangle.
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, None, anim_image, cell_id, None, self.createanims.tile_label, pre_tkimg, final_img)) #We could also create an empty image but... I think I prefer the rectangle idea. Let's see how it goes.
                 initial_x += 16
                 cell_id += 1
-        if self.frame_rectangle is not None:
-            self.createanims.anim_canvas.delete(self.frame_rectangle)
+        self.createanims.anim_canvas.delete("AnimRedRectangle") #Simplifies logic. I'm doing all possible to simplify and follow more or less similar patterns. My patterns, the ones I can understand and follow. Will use the energy to understand and follow for other contexts.
         if self.draw_frame_rectangle:
-            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2)
+            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
         if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
             self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
 

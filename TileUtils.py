@@ -215,11 +215,11 @@ class TileImage:
         if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
             return
         tile_selected = self.get_tile_selected_based_on_coordinates(event.y, event.x)
-        tile_image_object = self.createanims.tiles_images[tile_selected]
-        if tile_image_object.in_motion or self.createanims.current_tile_image_rectangle is None: #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
+        tile_selected_object = self.createanims.tiles_images[tile_selected]
+        if tile_selected_object.in_motion: #Might be crazy... but with the refactor, I'm pretty sure we don't need the check anymore. It's crazy how much simplifies with a few changes. Or even with just one change. #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
             return
-        tile_image_object.in_motion = True
-        tile_image_object.toggle_palette() #Still explicit! #So beautiful. Because event=None, it just works. And we're being explicit that we want the exact same thing to happen.
+        tile_selected_object.in_motion = True
+        tile_selected_object.toggle_palette() #Still explicit! #So beautiful. Because event=None, it just works. And we're being explicit that we want the exact same thing to happen.
 
     def verify_motion_coordinates(self, x, y):
         return (
@@ -385,14 +385,6 @@ class TileUtils:
             tile_palette.extend(rgb_triplet) #putpalette doesn't accept triplets it would seem, has to be all values as a sequence.
         return int(bool(tile_palette_group)), tile_palette #Could be int(bool(tile_palette_group)), maybe to be more explicit but... either works. Actually yes, I'll just add it to make it explicit for me.
 
-    def delete_tile_image_rectangles(self): #I will need this for several sources. A restart that for now can come from ColorPickerRectangle or TileImage, but it may come also from Anim and potentially other places.
-        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_rectangle)
-        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_inner_rectangle)
-        self.createanims.chr_canvas.delete(self.createanims.current_tile_image_outer_rectangle)
-        self.createanims.current_tile_image_rectangle = None
-        self.createanims.current_tile_image_inner_rectangle = None
-        self.createanims.current_tile_image_outer_rectangle = None
-
     def store_tile_image_rectangle_coords(self):
         self.x1, self.y1, self.x2, self.y2 = self.createanims.chr_canvas.coords(self.createanims.current_tile_image_rectangle)
         self.x1_inner, self.y1_inner, self.x2_inner, self.y2_inner = self.createanims.chr_canvas.coords(self.createanims.current_tile_image_inner_rectangle)
@@ -457,7 +449,6 @@ class TileUtils:
     def toggle_palette_for_tile_index_value(self, tile_index):
         tile_image_object = self.createanims.tiles_images[tile_index] #No dependencies with specific IDs. So beautiful. (I'm talking about for example when you do create_image, a new ID is generated, but with this that doesn't matter)
         initial_x, initial_y = tile_image_object.chr_canvas.coords(tile_image_object.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
-        self.delete_tile_image_rectangles()
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
         tile_palette_row = tile_index // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
         tile_palette_row_tile = tile_index % 8
@@ -471,13 +462,10 @@ class TileUtils:
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         tile_image_object.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         tile_image_object.final_img = final_img #And again, we need to keep the reference. #Also, by doing this, the previous one can be removed.
-        tile_image_object.bind(self.createanims, tile_index)
-        x, y = initial_x, initial_y
-        self.createanims.current_tile_image_rectangle = tile_image_object.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-        self.createanims.current_tile_image_inner_rectangle = tile_image_object.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-        self.createanims.current_tile_image_outer_rectangle = tile_image_object.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="TileImageRectangle")
+        tile_image_object.bind(self.createanims, tile_index) #Why? Because the previous image was deleted. We need to bind to the new one.
         tile_image_object.tile_palette_group = tile_palette_group
         tile_image_object.update_tile_label() #Let's do it here so that the undo/redo can show that as well. Courtesy. #Update labels.
+        tile_image_object.select() #This will take care of everything. Simplified logic. #self.chr_canvas.delete("TileImageRectangle") #In practice, this is really all I need. Actually... not even this. Select will take care of it.
         self.createanims.anim.refresh()
 
     def validate_chr_bank(self, new_value):

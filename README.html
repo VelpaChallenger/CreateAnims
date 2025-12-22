@@ -135,9 +135,10 @@
                     </ul>
                     <p>Actions you can take on the frame itself (not by using the buttons and interface in the Anim Command Base, that will be expanded on another section below):</p>
                     <ul>
-                        <li><b><em>Left click</em></b>: Select a tile. If there is a CHR tile selected, it will update the tile in the frame with that of the CHR. Otherwise doesn't do anything on its own other than changing the selection in the frame.</li>
+                        <li><b><em>Left click</em></b>: Select a tile. If there is a CHR tile selected, it will update the tile in the frame with that of the CHR. Otherwise doesn't do anything on its own other than changing the selection in the frame. Hold to apply the same to more tiles.</li>
                         <li><b><em>Right click</em></b>: Select a tile in both the frame and the CHR. Doesn't do anything on its own other than changing the selection.</li>
-                        <li><b><em>Double right click</em></b>: Empty the selected tile (i.e. turn it into an empty $FF tile).</li>
+                        <li><b><em>Double right click</em></b>: Empty the selected tile (i.e. turn it into an empty $FF tile). Hold to apply the same to more tiles.</li>
+                        <li><b><em>Shift + left click</em></b>: Select one portion of the frame. Useful for moving stuff around in the frame (you can increase width or height, and then move).</li>
                     </ul>
 
                 <h3 id="Palette">Palette</h3>
@@ -163,6 +164,7 @@
                         <li><b><em>Left click</em></b>: Select a tile. Doesn't do anything on its own other than changing the selection in the CHR.</li>
                         <li><b><em>Double left click</em></b>: Toggle the tile's palette. Tiles can use palette group 0 or 1 (remember one tile can use only 4 colors at a time including the background or also called backdrop color, which is the transparency), and this toggles it. Sprite priority stuff is not considered here, those will be highly specific to the game in question.</li>
                         <li><b><em>Double right click + drag</em></b>: Toggle the palette for all tiles as you move the mouse while right clicking. Keep in mind that until you release, you cannot toggle the palette for an already toggled tile. If you regret your decision, you can either undo (more details on the respective section) or double right click again (or you could also just double left click to apply the change on just one tile or a few tiles).</li>
+                        <li><b><em>Shift + left click</em></b>: Select one portion of the CHR. Useful for then pasting into the frame.</li>
                     </ul>
                 <p>
                     To add new CHR, first make sure the CHR bank really is empty. I could add a check to see if the CHR bank is used maybe by another character but either way it'll be up to the user to check if the CHR bank is being used for other purposes like stages for example. You will also get this information in blue when you encounter an empty CHR bank for the currently selected character. How it works is that CreateAnims checks the ID in each .chr file, and if the new ID is not present in those, then it is considered new. But again, you have the final word on whether that's true or not.

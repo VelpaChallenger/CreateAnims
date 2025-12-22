@@ -25,6 +25,24 @@ def func_AnimImage_on_shift_left_click_motion(createanims, anim_index, event=Non
     anim_image_object = createanims.anim_images[anim_index]
     anim_image_object.on_shift_left_click_motion(event)
 
+def func_AnimImage_on_left_click_motion(createanims, anim_index, event=None):
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_left_click_motion(event)
+
+def func_AnimImage_on_left_click_release(createanims, anim_index, event=None):
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_left_click_release(event)
+
+def func_AnimImage_on_right_click_motion(createanims, anim_index, event=None): #Apparently double click motion is not possible in Tkinter. Well, that won't stop me.
+    anim_image_object = createanims.anim_images[anim_index]
+    if not anim_image_object.double_right_clicked: #Has to be a double click motion.
+        return
+    anim_image_object.on_double_right_click_motion(event)
+
+def func_AnimImage_on_right_click_release(createanims, anim_index, event=None):
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_right_click_release(event)
+
 class Frame:
     
     def __init__(self, file_format_validator, frame_bytes):
@@ -65,10 +83,19 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.tile_label = tile_label
         self.pre_tkimg = pre_tkimg #This is the image as in img.putpalette. It's before we do the conversion from PIL image to Tkinter image. So, pre_tkimg. Useful for transparency when drawing anim.
         self.final_img = final_img #This is the final, processed img, like the ImageTk image. It's only being saved to protect it from the gc. Meanie.
+        self.bind(createanims, anim_index)
+        self.in_motion = False
+        self.double_right_clicked = False
+
+    def bind(self, createanims, anim_index):
         self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", lambda event: func_AnimImage_on_left_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", lambda event: func_AnimImage_on_right_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", lambda event: func_AnimImage_on_double_right_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Shift-B1-Motion>", lambda event: func_AnimImage_on_shift_left_click_motion(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<B1-Motion>", lambda event: func_AnimImage_on_left_click_motion(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<ButtonRelease-1>", lambda event: func_AnimImage_on_left_click_release(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<B3-Motion>", lambda event: func_AnimImage_on_right_click_motion(createanims, anim_index, event))
+        self.anim_canvas.tag_bind(self.anim_image, "<ButtonRelease-3>", lambda event: func_AnimImage_on_right_click_release(createanims, anim_index, event))
 
     def on_left_click(self, event=None):
         self.select_and_update()
@@ -80,6 +107,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             self.tile_image_object.update_tile_label()
 
     def on_double_right_click(self, event=None):
+        self.double_right_clicked = True #This will be the trick, the under my sleeve.
         self.clear()
 
     def on_shift_left_click(self, event=None):
@@ -106,6 +134,42 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         #self.createanims.anim_info_text.configure(text=f"{width}*{height} ({width*height} tiles selected)", fg='blue') #Anim info coming soon!
         #anim_selected_object = self.createanims.anim_images[anim_selected]
         #anim_selected_object.update_tile_label()
+
+    def on_left_click_motion(self, event): #Awesome! For motion it works flawlessly beautiful. No need to check state or whatever like for just left click.
+        if self.createanims.current_chr_tile_index is None:
+            return
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #The first part is identical to that of shift_left_click_motion. Could encapsulate in function, but I like this level of detail.
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
+        initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
+        width = frame.metadata.x_length
+        height = frame.metadata.y_length
+        x = event.x - initial_x #This will make things easier. Just got a ?? moment because verify_motion_coordinates worked but get_tile didn't. Yeah, get_tile wasn't doing this.
+        y = event.y - initial_y
+        if not self.verify_motion_coordinates(x, y, width, height): #Those are the x and y we need to pass to preserve logic (such that it works pretty much same as TileImage). #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+            return
+        anim_selected = self.get_anim_selected_based_on_coordinates(y, x, width)
+        anim_selected_object = self.createanims.anim_images[anim_selected] #We'll see how it performs. Depending on that, I might do something like what I did for toggle_palette for TileImage.
+        if anim_selected_object.in_motion: #No need to check selection here. Well, will break if the motion will ever happen without left click. It is necessary for TileImage due to that same reason. Right click doesn't select, so Right click and motion... will break if nothing selected. Well actually with the refactor... it might not.
+            return
+        anim_selected_object.in_motion = True
+        anim_selected_object.select_and_update() #It might work out actually. Let's give it a shot. Only one way to find out (hopefully nothing explodes!).
+
+    def on_double_right_click_motion(self, event): #No need to check chr_index here. You can still clear a lot of tiles in the frame.
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #The first part is identical to that of shift_left_click_motion. Could encapsulate in function, but I like this level of detail.
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
+        initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
+        width = frame.metadata.x_length
+        height = frame.metadata.y_length
+        x = event.x - initial_x #This will make things easier. Just got a ?? moment because verify_motion_coordinates worked but get_tile didn't. Yeah, get_tile wasn't doing this.
+        y = event.y - initial_y
+        if not self.verify_motion_coordinates(x, y, width, height): #Those are the x and y we need to pass to preserve logic (such that it works pretty much same as TileImage). #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
+            return
+        anim_selected = self.get_anim_selected_based_on_coordinates(y, x, width)
+        anim_selected_object = self.createanims.anim_images[anim_selected] #We'll see how it performs. Depending on that, I might do something like what I did for toggle_palette for TileImage.
+        if anim_selected_object.in_motion: #No need to check selection here. Well, will break if the motion will ever happen without left click. It is necessary for TileImage due to that same reason. Right click doesn't select, so Right click and motion... will break if nothing selected. Well actually with the refactor... it might not.
+            return
+        anim_selected_object.in_motion = True
+        anim_selected_object.clear() #Pretty much same, but clear instead of select_and_update.
 
     def calculate_selection_dimensions(self, anim_index, anim_selected, width):
         anim_index_col = anim_index % width #Now we do need this method.
@@ -137,6 +201,13 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             x < (width*16) and #Right, in our system each unit in width equals 2 pixels, no wait, equals 16 pixels, because it's one tile and each tile is 16 pixels here, so yeah. Of course, this could be a constant var pixels and would make it a lot easier if we later changed it. Arghhh... I am saying and still not doing it that way? Same reason as always, it adds complexity and, do we really want it? Hmmmm... anyways, search by 16 should do the trick to find all the affected places. #Actually, those have to be < and not <=. At that point, the result gives a tile out of range. I think this is still correct either way though, as I'm pretty sure last one is pixels 112 to 127 and 240 to 255. #Each image is 16 pixels wide, canvas is 256 pixels wide.
             y < (height*16) #Same, now for y. So with this we cover all 4 corners.
         )
+
+    def on_left_click_release(self, event=None):
+        self.createanims.anim.clear_in_motion() #Do it for aaall anim images.
+
+    def on_right_click_release(self, event=None):
+        self.double_right_clicked = False #Indeed, new logic. If I had sent directly clear_in_motion, this wouldn't have been possible. Awesome.
+        self.createanims.anim.clear_in_motion() #Do it for aaall anim images.
 
     def select(self):
         x, y = self.anim_canvas.coords(self.anim_image)
@@ -339,6 +410,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.current_anim_image_inner_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black", tag="AnimImageRectangle")
         x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
         self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black", tag="AnimImageRectangle")
+
+    def clear_in_motion(self):
+        for anim_image in self.createanims.anim_images: #tile_images but... whatever. Let's leave tiles_images.
+            anim_image.in_motion = False
 
     def clear_selections(self):
         #Anim fields
@@ -636,8 +711,33 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def load_new_tile_for_index_value(self, anim_index, tile_index):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
-        frame.tiles[anim_index] = tile_index
-        self.refresh()
+        frame.tiles[anim_index] = tile_index #The change itself. The below, we need to do for UI purposes.
+        anim_image_object = self.createanims.anim_images[anim_index] #Inspired by TileUtils toggle palette code.
+        initial_x, initial_y = anim_image_object.anim_canvas.coords(anim_image_object.anim_image)
+        if tile_index != 0xFF: #It's pretty much the exact same as the refresh, only in a more particular way, for a single AnimImage instead of all the ones that compose the frame.
+            self.createanims.anim_canvas.delete(f"EmptyRectangle{anim_index}") #If there is any.
+            tile_image_object = self.createanims.tiles_images[tile_index & 0x7F] #I was confused. I do need this one, not the one currently, that could be None because it might an $FF, it doesn't matter in this case. #tile_image_object = anim_image_object.tile_image_object
+            anim_image_object.tile_image_object = tile_image_object #Similarly, we need to make the assignment manually here too.
+            pre_tkimg = tile_image_object.pre_tkimg
+            self.decide_transparency_anim_image(pre_tkimg, self.transparency)
+        else:
+            anim_image_object.tile_image_object = None #Has to be done manually, as everything else, now that we don't call refresh.
+            pixels = [0x00] * 64 #Fully transparent. This works as a fill.
+            img = Image.frombytes("P", (8, 8), bytes(pixels))
+            tile_palette = [0x00] * 12 #Like, just whatever. We won't use them.
+            img.putpalette(tile_palette)
+            pre_tkimg = img
+            img.info['transparency'] = 0 #Always transparent in this case, nothing to decide.
+            if self.draw_empty_cells:
+                self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 15, width=1, outline="blue", tag=f"EmptyRectangle{anim_index}")
+        self.createanims.anim_canvas.delete("AnimRedRectangle")
+        if self.draw_frame_rectangle:
+            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
+        final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16)))
+        anim_image_object.anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+        anim_image_object.final_img = final_img
+        anim_image_object.bind(self.createanims, anim_index)
+        anim_image_object.select()
 
     def load_new_tile_indexes_value(self, frame_tiles): #So I was gonna say, load_tile_image_multiple_tiles_rectangle, but it's very similar to new_tile_for_index, except here it's many. Still value instead of values to preserve the suffix/ID of these UndoRedo functions.
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]

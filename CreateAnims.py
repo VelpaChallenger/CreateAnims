@@ -2,6 +2,7 @@
 
 import tkinter
 from tkinter import Tk, ttk, font
+from PIL import Image, ImageTk
 import traceback
 import sys
 
@@ -12,6 +13,8 @@ from Anim import *
 from CreateAnimsButton import *
 from UndoRedo import *
 from FileFormatValidator import *
+
+CreateAnimsImg = Image.open("CreateAnimsIcon.png")
 
 FONT = ("TkDefaultFont", 16)
 
@@ -308,6 +311,9 @@ class CreateAnims:
         self.stop_anim_button.pack(side="top", padx=(5, 2), pady=(5, 5))
         self.edit_physics_button = ttk.Button(frame_anim_player, text="Edit Physics", command=self.button.edit_physics_button, takefocus=0)
         self.edit_physics_button.pack(side="top", padx=(5, 2), pady=(5, 5))
+
+        photo = ImageTk.PhotoImage(CreateAnimsImg)
+        self.root.wm_iconphoto(True, photo)
 
         self.root.bind_all("<Button-1>", self.bind_all_focus)
 
@@ -607,8 +613,12 @@ class CreateAnims:
 
         self.about_title = tkinter.Label(self.about_window, text="CreateAnims VelpaChallenger") #My idea is once I have the icon, to put the date below the icon.
         self.about_title.pack()
+        img = ImageTk.PhotoImage(CreateAnimsImg.resize((120, 120)))
+        self.about_png_img = [img] #Say no to garbage collection of PhotoImage.
+        self.about_version_icon = tkinter.Label(self.about_window, image=img, bd=0)
+        self.about_version_icon.pack()
         self.about_version = tkinter.Label(self.about_window, text=f"Version: {CREATEANIMS_VERSION} {CREATEANIMS_VERSION_DATE}", anchor="nw") #Okay, let's put it here, the date.
-        self.about_version.pack(anchor="nw", pady=(120, 0))
+        self.about_version.pack(anchor="nw", pady=(0, 0))
         self.about_commit_frame = tkinter.Frame(self.about_window, bd=0)
         self.about_commit_frame.pack(anchor="nw")
         self.about_commit_text = tkinter.Label(self.about_commit_frame, text=f"Commit:", anchor="nw", padx=0)

@@ -35,7 +35,9 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['CreateAnims.ico'],
 )
 
 import shutil
 shutil.copyfile('README.html', '{0}/README.html'.format(DISTPATH))
+shutil.copyfile('CreateAnimsIcon.png', '{0}/CreateAnimsIcon.png'.format(DISTPATH))

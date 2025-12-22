@@ -1,6 +1,7 @@
 __pycache__/
 build/
 dist/
+CreateAnims_DefaultCharacters/
 *.txt
 *.bak
 *.exe

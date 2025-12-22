@@ -265,5 +265,10 @@ class UndoRedo:
             return
         if not self.trace:
             messagebox.showinfo(title="No unsaved changes", message="You don't have any changes to save.")
-            return False
+            return
+        if self.createanims.root_dir == "CreateAnims_DefaultCharacters":
+            self.createanims.root.bell()
+            response = messagebox.askyesno(title="Attempting to save in DefaultCharacters", message="You're attempting to save in CreateAnims_DefaultCharacters, CreateAnims' default Characters directory. All the data you save here will be ERASED next time you start CreateAnims! If you want to keep the changes in this directory, please make a copy of it and then open it in CreateAnims. Otherwise, please confirm you're ok with the data being overwritten next time you open CreateAnims.", default='no')
+            if not response:
+                return
         self.createanims.init_save_changes_window()

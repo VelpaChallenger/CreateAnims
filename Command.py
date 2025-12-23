@@ -10,6 +10,7 @@ class Command:
 
     def utils_load_game_anims(self, source): #Oh yeah, can be Refreshed to Last Saved, or can be yeah, Opened Characters Directory and then the path. Yes.
         from create_anims import load_game_anims #I would usually avoid this but... here it's fine. I'm not making create_anims a class or something just for this. Or adding it to a helper of sorts and whatever. No, this is still better and preferable. Not perfect, not what I want or what I'd like, but better and preferable.
+        self.createanims.root.attributes('-disabled', 1) #Just realized that you can hover and do stuff while stuff is loading. No, you shouldn't be able to do that. Yes, it's a thread, yes the bar is supposed to update but, you're not supposed to do other stuff other than wait. Wait patiently. Until the end.
         self.createanims.characters.clear()
         self.createanims.characters_dict.clear() #= {}
         self.createanims.physics_list.clear()

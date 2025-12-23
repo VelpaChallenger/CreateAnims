@@ -58,6 +58,8 @@ def post_load(root, createanims, loading_bar):
     root.destroy()
     createanims.anim.load_new_character_value(0) #Let's do this here, in main thread.
     createanims.root.deiconify() #Let's hope it works. #It does! Also, for when you Refresh to Last Saved, this doesn't do anything. Now I'm thankful that there aren't errors or anything for things that you might expect an error for. Though, maybe that would still be better and I could try-except, but in any case, no, it doesn't throw any error. It just doesn't do anything if the window is already displaying.
+    createanims.root.attributes('-disabled', 0) #We reenable here, and if it was already enabled, meh, whatever, who cares.
+    createanims.root.focus_force()
 
 def show_error_and_close(createanims, exception_type, exception_message):
     tkinter.messagebox.showerror(title=f"Critical Error! {exception_type}", message=f"An error of type {exception_type} has occurred. Details: {exception_message}")

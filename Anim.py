@@ -13,6 +13,10 @@ def func_AnimImage_on_left_click(createanims, anim_index, event): #A wrapper to 
     else:
         anim_image_object.on_left_click(event)
 
+def func_AnimImage_on_enter(createanims, anim_index, event=None):
+    anim_image_object = createanims.anim_images[anim_index]
+    anim_image_object.on_enter(event)
+
 def func_AnimImage_on_right_click(createanims, anim_index, event=None): #Idem
     anim_image_object = createanims.anim_images[anim_index]
     anim_image_object.on_right_click(event)
@@ -88,6 +92,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.double_right_clicked = False
 
     def bind(self, createanims, anim_index):
+        self.anim_canvas.tag_bind(self.anim_image, "<Enter>", lambda event: func_AnimImage_on_enter(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Button-1>", lambda event: func_AnimImage_on_left_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Button-3>", lambda event: func_AnimImage_on_right_click(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<Double-Button-3>", lambda event: func_AnimImage_on_double_right_click(createanims, anim_index, event))
@@ -97,11 +102,27 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.anim_canvas.tag_bind(self.anim_image, "<B3-Motion>", lambda event: func_AnimImage_on_right_click_motion(createanims, anim_index, event))
         self.anim_canvas.tag_bind(self.anim_image, "<ButtonRelease-3>", lambda event: func_AnimImage_on_right_click_release(createanims, anim_index, event))
 
+    def on_enter(self, event=None):
+        self.update_anim_info()
+
+    def update_anim_info(self):
+        if self.tile_image_object is None:
+            tile_id = "Clear"
+        else:
+            tile_id = f"{self.tile_image_object.tile_index:02X}"
+        multiple_msg = "" #The block starts here. If we ever add anything else, we keep appending to it, playing with the order of the ifs in case we want them in a specific order.
+        if self.createanims.current_anim_image_multiple_tiles_rectangle is not None:
+            width = self.createanims.current_anim_image_multiple_tiles_rectangle.width
+            height = self.createanims.current_anim_image_multiple_tiles_rectangle.height
+            multiple_msg = f"{width}*{height} ({width*height} tiles selected) " #We add the space. Then, if there was nothing, it can still work and display as expected.
+        self.createanims.anim_info_text.configure(text=f"{multiple_msg}Cell: {self.anim_index:02X} Tile: {tile_id}", fg="blue")
+
     def on_left_click(self, event=None):
         self.select_and_update()
 
     def on_right_click(self, event=None):
         self.select()
+        self.update_anim_info() #Let's do it here too. Why? It feels odd for me when I select an AnimImageMultipleTilesRectangle, and then right click, there's no more multiple, but it's still showing in the info.
         if self.tile_image_object is not None: #It could be the empty one, in which case, don't do anything, just select in Anim.
             self.tile_image_object.select()
             self.tile_image_object.update_tile_label()
@@ -131,9 +152,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.createanims.anim_canvas.delete('AnimImageRectangle') #We need to remove it, #Oh I did notice you can just do self.anim_canvas. But I like the harmony. In the lines you know. You can't see it? Weird.
         x,y = self.anim_canvas.coords(anim_image_object.anim_image) #Here I do use the self notation, yay!
         self.create_multiple_tiles_rectangle(x, y, width, height) #and then create a new one. Because changing width and/or height will not always be enough. Suppose now the rectangle expands to the right, it won't suffice. Plus, makes more sense in my mental model of things.
-        #self.createanims.anim_info_text.configure(text=f"{width}*{height} ({width*height} tiles selected)", fg='blue') #Anim info coming soon!
-        #anim_selected_object = self.createanims.anim_images[anim_selected]
-        #anim_selected_object.update_tile_label()
+        self.createanims.anim_info_text.configure(text=f"{width}*{height} ({width*height} tiles selected)", fg='blue') #And released! There it is! #Anim info coming soon!
 
     def on_left_click_motion(self, event): #Awesome! For motion it works flawlessly beautiful. No need to check state or whatever like for just left click.
         if self.createanims.current_chr_tile_index is None:
@@ -737,6 +756,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         anim_image_object.anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         anim_image_object.final_img = final_img
         anim_image_object.bind(self.createanims, anim_index)
+        anim_image_object.update_anim_info()
         anim_image_object.select()
 
     def load_new_tile_indexes_value(self, frame_tiles): #So I was gonna say, load_tile_image_multiple_tiles_rectangle, but it's very similar to new_tile_for_index, except here it's many. Still value instead of values to preserve the suffix/ID of these UndoRedo functions.

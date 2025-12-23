@@ -236,8 +236,6 @@ class TileImage:
         if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
             return
         tile_selected = self.get_tile_selected_based_on_coordinates(event.y, event.x)
-        if self.createanims.current_tile_image_rectangle is None: #Cannot do if there is no selection. #No, we're leaving it this way. Cool to know which ones we already updated. Then the rectangle won't move. And we'll be able to see last updated. #But in this case, maybe we can still update the Tile / CHR Palette labels and move the rectangles/selector.
-            return
         tile_image_object, width, height = self.calculate_selection_dimensions(self.tile_index, tile_selected)
         self.createanims.current_tile_image_multiple_tiles_rectangle = TileImageMultipleTilesRectangle(tile_image_object.tile_index, width, height) #Yes, let's make it a class.
         self.createanims.chr_canvas.delete('TileImageRectangle') #We need to remove it,

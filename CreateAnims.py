@@ -19,7 +19,7 @@ CreateAnimsImg = Image.open("CreateAnimsIcon.png")
 FONT = ("TkDefaultFont", 16)
 
 WIDTH = 872
-HEIGHT = 620
+HEIGHT = 680
 INITIAL_X = 500
 INITIAL_Y = 200
 
@@ -311,6 +311,16 @@ class CreateAnims:
         self.stop_anim_button.pack(side="top", padx=(5, 2), pady=(5, 5))
         self.edit_physics_button = ttk.Button(frame_anim_player, text="Edit Physics", command=self.button.edit_physics_button, takefocus=0)
         self.edit_physics_button.pack(side="top", padx=(5, 2), pady=(5, 5))
+
+        separator = ttk.Separator(self.root, orient='horizontal')
+        separator.grid(row=6, column=0, columnspan=3, sticky="nsew")
+
+        frame_anim_info = tkinter.Frame(self.root, border=0)
+        frame_anim_info.grid(row=7, column=0, columnspan=3, sticky="nw")
+        self.anim_info = tkinter.LabelFrame(frame_anim_info, text="ANIM INFO", bd=2, width=WIDTH-10, height=50)
+        self.anim_info.pack(side="left", padx=5, pady=5)
+        self.anim_info_text = tkinter.Label(self.anim_info, text="", justify="left", wraplength=500)
+        self.anim_info_text.place(x=5, y=5)
 
         photo = ImageTk.PhotoImage(CreateAnimsImg)
         self.root.wm_iconphoto(True, photo)

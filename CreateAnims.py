@@ -435,6 +435,8 @@ class CreateAnims:
         self.physics_dialog_x_entry = tkinter.Entry(self.physics_dialog_x_frame, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.physics_dialog_x_entry.bind("<Return>", self.entry_return.physics_dialog_x_entry)
         self.physics_dialog_x_entry.pack(side="left")
+        self.physics_dialog_x_label_info = tkinter.Label(self.physics_dialog_x_frame, text="", fg="red", padx=5)
+        self.physics_dialog_x_label_info.pack(side="left")
 
         self.physics_dialog_y_frame = tkinter.Frame(self.physics_dialog, border=0)
         self.physics_dialog_y_frame.pack(anchor="nw")
@@ -444,6 +446,8 @@ class CreateAnims:
         self.physics_dialog_y_entry = tkinter.Entry(self.physics_dialog_y_frame, width=4, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.physics_dialog_y_entry.bind("<Return>", self.entry_return.physics_dialog_x_entry)
         self.physics_dialog_y_entry.pack(side="left", pady=(5, 5))
+        self.physics_dialog_y_label_info = tkinter.Label(self.physics_dialog_y_frame, text="", fg="red", padx=5)
+        self.physics_dialog_y_label_info.pack(side="left")
 
         physics = self.physics_list[self.current_physics_id] #Ah, what a refresher. I don't have to type so much createanims here.
         x_physics = self.anim.calculate_physics(physics[2*frame_index]) #Same as always. #Here too we need to convert. But that's why we have calculate_physics. We can call it from there directly.

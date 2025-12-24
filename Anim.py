@@ -450,6 +450,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.physics_id_entry.delete(0, "end")
         self.createanims.physics_id_entry.insert(0, str(self.createanims.current_physics_id))
+        self.createanims.anim_info_text.configure(text="")
 
         #Frame fields
         frame_metadata = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata
@@ -476,93 +477,119 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def validate_anim_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Anim must be a decimal number including zero.", fg="red")
             return False
         character = self.createanims.characters[self.createanims.current_character]
         if int(new_value) > len(character.anims) - 1: #Validation 2: value must not be greater than the maximum amount of anims for the current character.
             self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Anim cannot be greater than the maximum currently loaded {len(character.anims) - 1}.", fg="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Anim cannot start with zero.", fg="red")
             return False
         if new_value.startswith("-"): #Validation 4: number cannot be negative. Will copypaste this to all entries, they all have this bug. Started with height, then checked with all. X Offset and Y Offset are the only ones exempt since they can be negative.
             self.createanims.anim_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Anim cannot be negative.", fg="red")
             return False
         self.createanims.anim_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_frame_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Frame must be a decimal number including zero.", fg="red")
             return False
         anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
         if int(new_value) > len(anim.frame_ids) - 1: #Validation 2: value must not be greater than the maximum amount of frames for the current anim of the current character.
             self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Frame cannot be greater than the maximum currenty loaded {len(anim.frame_ids) - 1}. (Anim {self.createanims.current_anim:02X}).", fg="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Frame cannot start with zero.", fg="red")
             return False
         if new_value.startswith("-"): #Validation 4: number cannot be negative.
             self.createanims.frame_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Frame cannot be negative.", fg="red")
             return False
         self.createanims.frame_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_frame_id_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Frame ID must be a decimal number including zero.", fg="red")
             return False
         character = self.createanims.characters[self.createanims.current_character]
         if int(new_value) > len(character.frames) - 1: #Validation 2: value must not be greater than the maximum amount of frames for the current character.
             self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Frame ID cannot be greater than the maximum currenty loaded {len(character.frames) - 1}.", fg="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Frame ID cannot start with zero.", fg="red")
             return False
         if new_value.startswith("-"): #Validation 4: number cannot be negative.
             self.createanims.frame_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Frame ID cannot be negative.", fg="red")
             return False
         self.createanims.frame_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_physics_id_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Physics ID must be a decimal number including zero.", fg="red")
             return False
         if int(new_value) > len(self.createanims.physics_list) - 1: #Validation 2: value must not be greater than the maximum amount of physics available.
             self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Physics ID cannot be greater than the maximum currenty loaded {len(self.createanims.physics_list) - 1}.", fg="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Physics ID cannot start with zero.", fg="red")
             return False
         if new_value.startswith("-"): #Validation 4: number cannot be negative.
             self.createanims.physics_id_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Physics ID cannot be negative.", fg="red")
             return False
         self.createanims.physics_id_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_physics_dialog_x_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
+            self.createanims.physics_dialog_x_label_info.configure(text="")
             return True
         if (new_value.startswith("-") and len(new_value) > 1) or not new_value.startswith("-"): #This time we admit negatives. This is why, while duplicated a lot, I like having different validations for each entry. #If we're just typing the -, leave it be. Skip it.
             try: #Validation 1: value must be an integer number, including zero and negative.
@@ -575,6 +602,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     return False
             except ValueError:
                 self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
+                self.createanims.anim_info_text.configure(text="X Physics must be a number in the range -127 to 127 (-128 is the physics terminator).", fg="red") #So it cannot be used.
+                self.createanims.physics_dialog_x_label_info.configure(text="Range is -127 to 127") #In case they miss it, you know.
                 return False
         if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -585,6 +614,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="X Physics cannot start with zero.", fg="red")
+            self.createanims.physics_dialog_x_label_info.configure(text="Cannot start with zero") #In case they miss it, you know.
             return False
         if new_value == "-128": #Validation 4 (x_entry only, advantage of separating them! besides being able to highlight the entry): X entry cannot be 0x80. #Also yes, just simpler to check against the string in this case.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -594,11 +625,15 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             self.createanims.physics_dialog.focus_force()
             return False
         self.createanims.physics_dialog_x_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
+        self.createanims.physics_dialog_x_label_info.configure(text="")
         return True
 
     def validate_physics_dialog_y_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.physics_dialog_y_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
+            self.createanims.physics_dialog_y_label_info.configure(text="")
             return True
         if (new_value.startswith("-") and len(new_value) > 1) or not new_value.startswith("-"): #This time we admit negatives. This is why, while duplicated a lot, I like having different validations for each entry. #If we're just typing the -, leave it be. Skip it.
             try: #Validation 1: value must be an integer number, including zero and negative.
@@ -611,6 +646,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     return False
             except ValueError:
                 self.createanims.physics_dialog_y_entry.configure(highlightcolor="red", highlightbackground="red")
+                self.createanims.anim_info_text.configure(text="Y Physics must be a number in the range -128 to 127.", fg="red")
+                self.createanims.physics_dialog_y_label_info.configure(text="Range is -128 to 127")
                 return False
         if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.physics_dialog_y_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -621,8 +658,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.physics_dialog_y_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Y Physics cannot start with zero.", fg="red")
+            self.createanims.physics_dialog_y_label_info.configure(text="Cannot start with zero") #In case they miss it, you know.
             return False
         self.createanims.physics_dialog_y_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
+        self.createanims.physics_dialog_y_label_info.configure(text="")
         return True
 
     def validate_x_offset_entry(self, new_value):
@@ -637,6 +678,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     return False
             except ValueError:
                 self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+                self.createanims.anim_info_text.configure(text="X Offset must be a number in the range -127 to 127.", fg="red")
                 return False
         if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -644,8 +686,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="X Offset cannot start with zero.", fg="red")
             return False
         self.createanims.x_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_y_offset_entry(self, new_value):
@@ -660,6 +704,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     return False
             except ValueError:
                 self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+                self.createanims.anim_info_text.configure(text="Y Offset must be a number in the range -31 to 31.", fg="red")
                 return False
         if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -667,65 +712,83 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Y Offset cannot start with zero.", fg="red")
             return False
         self.createanims.y_offset_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_width_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Width must be a decimal number greater than zero.", fg="red")
             return False
         if int(new_value) > 60: #Validation 2: value must not be greater than 60 (technically possible to enter something greater but, way too big.)
             self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Width shall not be greater than 60.", fg="red")
             return False
         if int(new_value) <= 0: #Validation 3: Number cannot be zero (or negative). Another particularity.
             self.createanims.width_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Width must not be less than or equal to zero.", fg="red")
             return False
         self.createanims.width_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_height_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Height must be a decimal number greater than zero.", fg="red")
             return False
         if int(new_value) > 60: #Validation 2: value must not be greater than 60 (technically possible to enter something greater but, way too big.)
             self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Height must not be greater than 60.", fg="red")
             return False
         if int(new_value) <= 0: #Validation 3: Number cannot be zero. Another particularity. #And cannot be negative either. Yes, you would think the try int(new_value) is enough, but it's not. If you enter first 5, then -, it will let you. You press Enter, and it processes. Nothing breaks but well kinda actually because frame is empty and I'm not sure what would happen on Save... so yeah.
             self.createanims.height_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Height must not be less than or equal to zero.", fg="red")
             return False
         self.createanims.height_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def validate_character_entry(self, new_value):
         if not new_value: #Empty value is always welcome.
             self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
             return True
         try: #Validation 1: value must be an integer, 0 or positive.
             int(new_value)
         except ValueError:
             self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Character must be a decimal number including zero.", fg="red")
             return False
         if int(new_value) > len(self.createanims.characters) - 1: #Validation 2: value must not be greater than the maximum amount of characters.
             self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Character cannot be greater than the maximum currently loaded {len(self.createanims.characters) - 1}.", fg="red")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Character cannot start with zero.", fg="red")
             return False
         if new_value.startswith("-"): #Validation 4: number cannot be negative. #Updated from int(new_value) < 0 because I don't want -0 being possible either, might be confusing? I could leave it but whatever I don't like it, not right now.
             self.createanims.character_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text=f"Character cannot be negative.", fg="red")
             return False
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
         return True
 
     def load_new_tile_for_index_value(self, anim_index, tile_index):

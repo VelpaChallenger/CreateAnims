@@ -605,10 +605,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 self.createanims.anim_info_text.configure(text="X Physics must be a number in the range -127 to 127 (-128 is the physics terminator).", fg="red") #So it cannot be used.
                 self.createanims.physics_dialog_x_label_info.configure(text="Range is -127 to 127") #In case they miss it, you know.
                 return False
-        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
+        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine. #Leaving -128 as possible. So that the validation below picks it up.
             self.createanims.physics_dialog_x_entry.configure(highlightcolor="red", highlightbackground="red")
             self.createanims.physics_dialog.attributes('-disabled', 1)
-            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to teleport? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -128. Also, even if you enter say, 32... that's pretty high, it won't look very smooth. But well, maybe it's what you want. I won't stop you there :) .")
+            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to teleport? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -127. Also, even if you enter say, 32... that's pretty high, it won't look very smooth. But well, maybe it's what you want. I won't stop you there :) .")
             self.createanims.physics_dialog.attributes('-disabled', 0)
             self.createanims.physics_dialog.focus_force()
             return False
@@ -680,9 +680,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
                 self.createanims.anim_info_text.configure(text="X Offset must be a number in the range -127 to 127.", fg="red")
                 return False
-        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
+        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -127) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
-            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to give a really generous hitbox? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -128. Also, even if you enter say, 32... that's pretty high, the drawing will look really far from the actual position in-game. But well, maybe it's what you want. I won't stop you there :) .")
+            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to give a really generous hitbox? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -127. Also, even if you enter say, 32... that's pretty high, the drawing will look really far from the actual position in-game. But well, maybe it's what you want. I won't stop you there :) .")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -706,9 +706,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
                 self.createanims.anim_info_text.configure(text="Y Offset must be a number in the range -31 to 31.", fg="red")
                 return False
-        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -128) or (not new_value.startswith("-") and int(new_value) > 127): #Validation 2: value must not be greater than the admitted by the engine.
+        if (new_value.startswith("-") and len(new_value) > 1 and int(new_value) < -31) or (not new_value.startswith("-") and int(new_value) > 31): #Validation 2: value must not be greater than the admitted by the engine.
             self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
-            messagebox.showwarning(title="What a big number!", message="That's a big number you're trying to enter there. Are you trying to give a really generous hitbox? Well maybe actually. Or maybe you're just trying to troll the tool. Anyways, I would say you go for a different approach though. MK3 at least does not support positives greater than 127 and negatives lesser than -128. Also, even if you enter say, 32... that's pretty high, the drawing will look really far from the actual position in-game. But well, maybe it's what you want. I won't stop you there :) .")
+            messagebox.showwarning(title="What a big number! (no wait)", message="That's a big number you're trying to enter there. Well not that big actually, this was a copypaste from X Offset but they aren't the same, Y Offset allows for quite less, supposedly the other bits were used for other stuff but never made it in practice. So nah, I don't think you're just trying to troll the tool. Anyways, only numbers from -31 to 31!")
             return False
         if new_value.startswith("0") and len(new_value) > 1: #Validation 3: if number starts with 0, it cannot have more than just 1 digit.
             self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -839,7 +839,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.x_offset = new_x_offset
         self.createanims.x_offset_entry.delete(0, "end")
         self.createanims.x_offset_entry.insert(0, str(new_x_offset))
-        self.decide_arrow_buttons_status(new_x_offset, 127, self.createanims.x_offset_left_arrow, self.createanims.x_offset_right_arrow, lower_boundary=-128)
+        self.decide_arrow_buttons_status(new_x_offset, 127, self.createanims.x_offset_left_arrow, self.createanims.x_offset_right_arrow, lower_boundary=-127)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 
@@ -855,7 +855,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id].metadata.y_offset = new_y_offset
         self.createanims.y_offset_entry.delete(0, "end")
         self.createanims.y_offset_entry.insert(0, str(new_y_offset))
-        self.decide_arrow_buttons_status(new_y_offset, 127, self.createanims.y_offset_left_arrow, self.createanims.y_offset_right_arrow, lower_boundary=-128)
+        self.decide_arrow_buttons_status(new_y_offset, 31, self.createanims.y_offset_left_arrow, self.createanims.y_offset_right_arrow, lower_boundary=-31)
         if refresh_UI_flag:
             self.createanims.refresh_UI() #This will require a refresh. So that the frame is drawn where expected as per new offset.
 

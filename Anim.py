@@ -596,7 +596,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 new_value_int = int(new_value) #Ah but come to think of it, if it has a - and then a number, the int does work. So this logic can be simplified to just one try block. #Everything that comes afterwards must be a number. #If starts with "-" and has length 1, don't do any validation at all here.
                 if new_value.startswith("-") and new_value_int == 0: #Don't do that. You'll break the tool. Stop trolling the tool.
                     self.createanims.physics_dialog.attributes('-disabled', 1) #Disabled until you do read the message and reflect on your conduct.
-                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly google searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
+                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
                     self.createanims.physics_dialog.attributes('-disabled', 0)
                     self.createanims.physics_dialog.focus_force()
                     return False
@@ -640,7 +640,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 new_value_int = int(new_value) #Ah but come to think of it, if it has a - and then a number, the int does work. So this logic can be simplified to just one try block. #Everything that comes afterwards must be a number. #If starts with "-" and has length 1, don't do any validation at all here.
                 if new_value.startswith("-") and new_value_int == 0: #Don't do that. You'll break the tool. Stop trolling the tool.
                     self.createanims.physics_dialog.attributes('-disabled', 1) #Disabled until you do read the message and reflect on your conduct.
-                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly google searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
+                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
                     self.createanims.physics_dialog.attributes('-disabled', 0)
                     self.createanims.physics_dialog.focus_force()
                     return False
@@ -674,7 +674,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             try: #Validation 1: value must be an integer number, including zero and negative.
                 new_value_int = int(new_value) #Ah but come to think of it, if it has a - and then a number, the int does work. So this logic can be simplified to just one try block. #Everything that comes afterwards must be a number. #If starts with "-" and has length 1, don't do any validation at all here.
                 if new_value.startswith("-") and new_value_int == 0: #Don't do that. You'll break the tool. Stop trolling the tool.
-                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly google searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
+                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
                     return False
             except ValueError:
                 self.createanims.x_offset_entry.configure(highlightcolor="red", highlightbackground="red")
@@ -700,7 +700,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             try: #Validation 1: value must be an integer number, including zero and negative.
                 new_value_int = int(new_value) #Ah but come to think of it, if it has a - and then a number, the int does work. So this logic can be simplified to just one try block. #Everything that comes afterwards must be a number. #If starts with "-" and has length 1, don't do any validation at all here.
                 if new_value.startswith("-") and new_value_int == 0: #Don't do that. You'll break the tool. Stop trolling the tool.
-                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly google searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
+                    messagebox.showerror(title="Don't troll the tool", message=f"Don't troll the tool, I worked so hard on it you know. Besides, {new_value} is not even a number! lol *quickly searches* Ok it seems to be considered a number in some areas of computing, but not here! lol") #Don't troll CreateAnims, to make it feel closer. For now the tool, I like the sound of it too.
                     return False
             except ValueError:
                 self.createanims.y_offset_entry.configure(highlightcolor="red", highlightbackground="red")

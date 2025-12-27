@@ -938,6 +938,14 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             if not self.createanims.in_play_anim: #Don't show it when restarting due to Stop Anim.
                 messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frame(s) but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pair(s). Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
 
+    def append_physics_id_value(self):
+        self.createanims.physics_list.append([0x00, 0x00, 0x80])
+        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1)
+
+    def pop_physics_id_value(self):
+        self.createanims.physics_list.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
+        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1)
+
     def remove_physics_column_value(self, frame_index):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
         physics.pop(2*frame_index) #And that's it.

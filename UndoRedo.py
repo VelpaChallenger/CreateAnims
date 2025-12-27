@@ -26,6 +26,8 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "load_new_tile_indexes_value": ("Character {0}. Changed tile index (s) for frame ID {1:02d}.", "Change", ("character_name", "frame_id"), ("frames", "frame", "frame_id", "frame")),
     "insert_frame_value": ("Character {0}. Inserted frame {1:02d} for anim {2:02d}.", "Change", ("character_name", "undo:0", "anim"), ("anims", "anim", "anim", "anim")),
     "remove_frame_value": ("Character {0}. Removed frame {1:02d} for anim {2:02d}.", "Change", ("character_name", "undo:0", "anim"), ("anims", "anim", "anim", "anim")),
+    "append_physics_id_value": ("Created new physics {0:02d}.", "Change", ("last_physics_id",), ("physicsAddition",)),
+    "pop_physics_id_value": ("Removed new physics {0:02d}.", "Change", ("last_physics_id",), ("physicsAddition",)),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
@@ -38,6 +40,7 @@ class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's
         self.frame_id = createanims.current_frame_id
         self.chr_bank = createanims.current_chr_bank
         self.physics_id = createanims.current_physics_id
+        self.last_physics_id = len(createanims.physics_list) #For append and pop. Has to be without the -1 since it is in reference to the newly added one.
 
 class UndoRedo:
 
@@ -253,6 +256,8 @@ class UndoRedo:
             affected_file = f"- {character_name}/pal/{character_name}_usual.pal\n"
         elif file_type == "physics":
             affected_file = f"- physics/physics_{snapshot.physics_id:03d}.physics\n"
+        elif file_type == "physicsAddition":
+            affected_file = f"- physics/physics_{snapshot.last_physics_id:03d}.physics\n"
         else:
             file_character_type = name_UI[-1][1] #So structure is, first the folder (file_type), then the file_character_type (how it is referred to inside the folder, in the filename), then the corresponding attribute in the snapshot, then the file_extension.
             file_type_ID = snapshot.__dict__[name_UI[-1][2]] #So inside this folder, what's the exact file? Now last element and second element will tell us specifically.

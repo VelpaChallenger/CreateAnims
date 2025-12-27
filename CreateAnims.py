@@ -13,6 +13,7 @@ from Anim import *
 from CreateAnimsButton import *
 from UndoRedo import *
 from FileFormatValidator import *
+from MenuPopUp import *
 
 CreateAnimsImg = Image.open("CreateAnimsIcon.png")
 
@@ -46,6 +47,7 @@ class CreateAnims:
         self.button = CreateAnimsButton(self)
         self.undo_redo = UndoRedo(self)
         self.file_format_validator = FileFormatValidator(self)
+        self.menupopup = MenuPopUp(self)
         self.characters = []
         self.current_pal_rectangle = None
         self.current_character_pal_index = None #Similarly, we'll need it for the relationship/associations between a PalRectangle and a ColorPickerRectangle.
@@ -196,6 +198,10 @@ class CreateAnims:
         vcmd = (self.root.register(self.anim.validate_frame_entry), "%P")
         self.frame_entry = tkinter.Entry(frame_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.frame_entry.bind("<Return>", self.entry_return.frame_entry)
+        frame_entry_menu = tkinter.Menu(self.frame_entry, tearoff=0)
+        frame_entry_menu.add_command(label="Insert frame", command=self.menupopup.frame_entry_insert)
+        frame_entry_menu.add_command(label="Remove frame", command=self.menupopup.frame_entry_remove)
+        self.frame_entry.bind("<Button-3>", lambda event: self.menupopup.create_pop_up(frame_entry_menu, event))
         self.frame_entry.pack(side="left")
         self.frame_left_arrow = ttk.Button(frame_field, text="", style="Left.TButton", command=self.button.frame_left_arrow_button)
         self.frame_left_arrow.pack(side="left", padx=(5, 2))

@@ -1017,6 +1017,22 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if refresh_UI_flag:
             self.createanims.refresh_UI()
 
+    def insert_frame_value(self, frame_index):
+        frame_ids = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim].frame_ids
+        frame_ids.insert(frame_index, 0) #Default frame ID 0.
+        self.createanims.anim_info_text.configure(text="Remember to keep physics updated. Amount of physics frames should perfectly match amount of anim frames.", fg="blue")
+        self.createanims.anim.load_new_frame_value(frame_index) #This will apply all automagically.
+
+    def remove_frame_value(self, frame_index):
+        frame_ids = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim].frame_ids
+        frame_ids.pop(frame_index)
+        if frame_index != 0:
+            new_frame_index = frame_index - 1
+        else:
+            new_frame_index = 0 #Confusing, but suppose you have 0 and 1. You remove 0. Now 1 will occupy index 0. So there will still be something to draw.
+        self.createanims.anim_info_text.configure(text="Remember to keep physics updated. Amount of physics frames should perfectly match amount of anim frames.", fg="blue")
+        self.createanims.anim.load_new_frame_value(new_frame_index) #This will apply all automagically.
+
     def load_new_frame_id(self, new_frame_id, refresh_UI_flag=True):
         old_frame_id = self.createanims.current_frame_id
         if old_frame_id == new_frame_id:

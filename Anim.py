@@ -1132,6 +1132,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         import tkinter
         if not self.createanims.in_play_anim:
             return #And the chain stops.
+        if (len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2) != len(self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim].frame_ids):
+            self.createanims.anim_info_text.configure(text="Amount of anim frames does not match amount of physics frames. Disabling physics.", fg="red")
+            self.play_physics = False
         if self.play_physics:
             physics = self.createanims.physics_list[self.createanims.current_physics_id]
             x_physics = 2*self.calculate_physics(physics[2*self.createanims.current_frame])

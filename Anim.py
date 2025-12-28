@@ -1066,6 +1066,14 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if refresh_UI_flag:
             self.createanims.refresh_UI()
 
+    def append_frame_id_value(self):
+        self.createanims.characters[self.createanims.current_character].frames.append(Frame(self.createanims.file_format_validator, [0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0xFF]))
+        self.load_new_frame_id_value(len(self.createanims.characters[self.createanims.current_character].frames) - 1)
+
+    def pop_frame_id_value(self):
+        self.createanims.characters[self.createanims.current_character].frames.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
+        self.load_new_frame_id_value(len(self.createanims.characters[self.createanims.current_character].frames) - 1)
+
     def decide_arrow_buttons_status(self, new_value, upper_boundary, left_arrow, right_arrow, lower_boundary=0): #I was a bit hesitant to create two or rather to think of making two but... makes more sense. They are conceptually different. #Also yes let's make it more generic in this case.
         if new_value == lower_boundary: #Now I can send stuff like -128.
             left_arrow.configure(state="disabled")

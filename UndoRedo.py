@@ -28,6 +28,8 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "remove_frame_value": ("Character {0}. Removed frame {1:02d} for anim {2:02d}.", "Change", ("character_name", "undo:0", "anim"), ("anims", "anim", "anim", "anim")),
     "append_physics_id_value": ("Created new physics {0:02d}.", "Change", ("last_physics_id",), ("physicsAddition",)),
     "pop_physics_id_value": ("Removed new physics {0:02d}.", "Change", ("last_physics_id",), ("physicsAddition",)),
+    "append_frame_id_value": ("Character {0}. Created new frame ID {1:02d}.", "Change", ("character_name", "last_frame_id"), ("frames", "frame", "last_frame_id", "frame")),
+    "pop_frame_id_value": ("Character {0}. Removed new frame ID {1:02d}.", "Change", ("character_name", "last_frame_id"), ("frames", "frame", "last_frame_id", "frame")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.
@@ -41,6 +43,7 @@ class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's
         self.chr_bank = createanims.current_chr_bank
         self.physics_id = createanims.current_physics_id
         self.last_physics_id = len(createanims.physics_list) #For append and pop. Has to be without the -1 since it is in reference to the newly added one.
+        self.last_frame_id = len(createanims.characters[self.character].frames) #Same.
 
 class UndoRedo:
 

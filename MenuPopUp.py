@@ -32,3 +32,12 @@ class MenuPopUp:
 
     def physics_id_entry_pop(self): #This will not be visible. Or wait... hmmmmmmmmm... because what if you appended by mistake? Good point. But yeah, I like that. That is why, if you want to remove, you can only do so by Ctrl+Z means. It's not impossible to make a removal, but can cause very disastrous results in the ROM.
         self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_physics_id_value], [self.createanims.anim.pop_physics_id_value]) #No parameters. It is always append/pop.
+
+    def frame_id_entry_append(self):
+        if len(self.createanims.characters[self.createanims.current_character].frames) == 128:
+            self.createanims.anim_info_text.configure(text="Cannot insert. Maximum frames allowed per character: 128.", fg="red") #Well, technically... oh wait, you are right. It really is a cannot, because it works through a table too. The frames for anim is the one that has specific properties but the rest work very similar.
+            return
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.pop_frame_id_value], [self.createanims.anim.append_frame_id_value]) #No parameters. It is always append/pop.
+
+    def frame_id_entry_pop(self): #This will not be visible. Or wait... hmmmmmmmmm... because what if you appended by mistake? Good point. But yeah, I like that. That is why, if you want to remove, you can only do so by Ctrl+Z means. It's not impossible to make a removal, but can cause very disastrous results in the ROM.
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_frame_id_value], [self.createanims.anim.pop_frame_id_value]) #No parameters. It is always append/pop.

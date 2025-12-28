@@ -29,6 +29,8 @@ class MenuPopUp:
             self.createanims.anim_info_text.configure(text="Cannot insert. Maximum physics allowed: 128.", fg="red") #Cannot vs won't, as in, the game engine does not support more than 128 physics. Would have to split high and low bytes. Can do, but we don't need it for now. For now.
             return
         self.createanims.undo_redo.undo_redo([self.createanims.anim.pop_physics_id_value], [self.createanims.anim.append_physics_id_value]) #No parameters. It is always append/pop.
+        #self.createanims.anim_info_text.configure(text=f"Automagically applying anim ID {self.createanims.current_anim:02d} update. The next time you Undo you will see this change first.", fg="blue") #Might because, if it just so happened that the physics you already had was the same as default, then no change will be made. Oh wait... no no, it's different ID. So will always see.
+        #self.createanims.anim.load_new_physics_id(len(self.createanims.physics_list) - 1)
 
     def physics_id_entry_pop(self): #This will not be visible. Or wait... hmmmmmmmmm... because what if you appended by mistake? Good point. But yeah, I like that. That is why, if you want to remove, you can only do so by Ctrl+Z means. It's not impossible to make a removal, but can cause very disastrous results in the ROM.
         self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_physics_id_value], [self.createanims.anim.pop_physics_id_value]) #No parameters. It is always append/pop.

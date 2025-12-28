@@ -938,11 +938,11 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
 
     def append_physics_id_value(self):
         self.createanims.physics_list.append([0x00, 0x00, 0x80])
-        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1)
+        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1) #Actually, append must have it for a similar reason: when you apply Redo. Well, it's okay if it happens twice although... for the new frame ID, I might have to add the refresh flag. Yeah. Hmmmmm... yeah that's fine. Apply all the logic, minus the refresh. And done.
 
     def pop_physics_id_value(self):
         self.createanims.physics_list.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
-        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1)
+        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1) #Pop must have it. So arrows are updated.
 
     def remove_physics_column_value(self, frame_index):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]

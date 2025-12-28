@@ -260,12 +260,14 @@ class UndoRedo:
         elif file_type == "physics":
             affected_file = f"- physics/physics_{snapshot.physics_id:03d}.physics\n"
         elif file_type == "physicsAddition":
-            affected_file = f"- physics/physics_{snapshot.last_physics_id:03d}.physics\n"
+            affected_file = f"- physics/physics_{snapshot.last_physics_id:03d}.physics\n- {snapshot.character_name}/anims/{snapshot.character_name}_anim_{snapshot.anim:03d}.anim\n" #One of the few that has two affected files instead of just one.
         else:
             file_character_type = name_UI[-1][1] #So structure is, first the folder (file_type), then the file_character_type (how it is referred to inside the folder, in the filename), then the corresponding attribute in the snapshot, then the file_extension.
             file_type_ID = snapshot.__dict__[name_UI[-1][2]] #So inside this folder, what's the exact file? Now last element and second element will tell us specifically.
             file_extension = name_UI[-1][3]
             affected_file = f"- {character_name}/{file_type}/{character_name}_{file_character_type}_{file_type_ID:03d}.{file_extension}\n"
+            if name_UI[-1][2] == "last_frame_id": #name_UI[-1][2].startswith("last"): #There won't be more. When adding a new anim, nothing else has to be updated. So no necessary to make it generic, we can be direct.
+                affected_file += f"- {snapshot.character_name}/anims/{snapshot.character_name}_anim_{snapshot.anim:03d}.anim\n" #Literally same code as physicsAddition.
         return affected_file
 
     def tracer(self, event=None): #Not anymore. Brought some complications with navigations. #Will trace from stack_ptr to last_saved_ptr, in the corresponding direction, to show all unsaved changes.

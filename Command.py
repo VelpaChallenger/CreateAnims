@@ -378,7 +378,7 @@ class Command:
 
     def save_changes(self):
         try:
-            for affected_file in list(set(self.createanims.undo_redo.affected_files)):
+            for affected_file in list(set("".join(self.createanims.undo_redo.affected_files).rstrip().split("\n"))): #To support actions with more than just one affected file.
                 filename = affected_file[2:].rstrip() #Let's not forget the newline. #Remove the - used for displaying purposes.
                 filename_split = filename.split("/") #This might be more friendly for performance?
                 if filename_split[0] != "physics":

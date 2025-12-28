@@ -932,9 +932,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         anim = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim]
         anim.physics_id = new_physics_id #This is important because there can be two sources. Maybe we loaded a new anim, in which case this will leave it exactly as intended because, here the new_physics_id is the anim physics_id, but if we changed it via the physics ID entry, then it needs to be updated with the new value. And yes, same happens with CHR bank when we load_frame_id.
         self.decide_arrow_buttons_status(new_physics_id, len(self.createanims.physics_list) - 1, self.createanims.physics_id_left_arrow, self.createanims.physics_id_right_arrow) #And nothing else in this case. It's like loading a CHR in a way. Though it's even more different in that an update in physics ID does not require an UI refresh. It will only change the field, and then what happens when you click on Play Anim.
-        self.play_physics = True #Assume always possible unless stated (validated) otherwise.
         if len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2 != len(anim.frame_ids):
-            self.play_physics = False
             if not self.createanims.in_play_anim: #Don't show it when restarting due to Stop Anim.
                 messagebox.showwarning(title="Physics ID Mismatch", message=f"Warning: Anim {self.createanims.current_anim:02d} has {len(anim.frame_ids)} frame(s) but assigned physics ID {self.createanims.current_physics_id:02d} has {len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2} pair(s). Please consider updating either one of them. If you leave it as it is, you might see inconsistencies in the ROM.\nOnce you're done with your changes, consider reloading the physics ID. If this dialog no longer appears, the issue has been solved :) . Yay!")
 
@@ -1164,6 +1162,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         import tkinter
         if not self.createanims.in_play_anim:
             return #And the chain stops.
+        self.play_physics = True #Simpler: we decide everything here, rather than at a point where many things can still change (for example on edit physics then changes then play anim, will think False and won't let play with physics, but we already updated physics). #Assume always possible unless stated (validated) otherwise.
         if (len(self.createanims.physics_list[self.createanims.current_physics_id]) // 2) != len(self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim].frame_ids):
             self.createanims.anim_info_text.configure(text="Amount of anim frames does not match amount of physics frames. Disabling physics.", fg="red")
             self.play_physics = False

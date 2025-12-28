@@ -114,7 +114,7 @@
 
                 <p><b>WARNING</b>: You can see the updated shortcuts by going through the menu and then taking a look at the shortcut displayed to the right of the text. I will do my best to keep the docs in sync but if on doubt, CreateAnims has the final word as for the correct shortcut.</p>
 
-                <h3 id="Getting Started"></h3>
+                <h3 id="Getting Started">Getting Started</h3>
                 <p>
                     When CreateAnims first starts, a default directory with a default character (character_x) will be created. You will see a folder CreateAnims_DefaultDirectory being created, but please don't mess with it (I can see you now messing with it). It contains an example structure which you can also use as inspiration or to get a more, graphical, visual idea? of how to get a folder working with the data in your game. There's also the File Format subsection in Internals section which I recommend more for the details but, you know, both can help.
 
@@ -219,6 +219,14 @@
                     <p>
                         If there's a physics ID mismatch (you will get a warning), which happens when the amount of frames in the animation doesn't match the amount of frames in the physics ID, play anim will remain enabled, but without physics.
                     </p>
+                    <p>Additionally, by <b><em>Right click</em></b> on the following entries, you can:</p>
+                    <ul>
+                        <li><b><em>Anim</em></b>: Create a New Anim. You cannot remove existing ones (more details below).</li>
+                        <li><b><em>Frame</em></b>: Insert a frame at that point, or remove the current selected frame.</li>
+                        <li><b><em>Frame ID</em></b>: Create a New Frame ID. You cannot remove existing ones (more details below).</li>
+                        <li><b><em>Physics ID</em></b>: Create a New Physics ID. You cannot remove existing ones (more details below).</li>
+                    </ul>
+                    <p>You cannot remove existing frames, frame IDs and physics IDs because it could cause a lot of problems in the ROM. It's not an implementation problem (it's relatively simple code-wise, given one specific ROM), but more a matter of actually removing something from the ROM, which specifics might vary. So I prefer to leave it to the user. You can still Undo the additions.</p>
                 <h3 id="Physics">Physics</h3>
                 <p>
                     Physics are what give anims movement. Anims on themselves don't move. They might give the illusion of moving due to the changes in Y and X offsets, but they aren't moving. Technically speaking, without physics, the images are always placed at the exact same location. So that's what I mean when I say that they don't move (I do agree that we could argue they do move based on the definition we take, but under this definition, no, they don't move without physics).

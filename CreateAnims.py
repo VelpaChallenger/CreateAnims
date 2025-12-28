@@ -30,7 +30,7 @@ PHYSICS_INITIAL_X = 600
 PHYSICS_INITIAL_Y = 250
 
 CREATEANIMS_VERSION_DATE = "Local test"
-CREATEANIMS_VERSION = "v1.0.8" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
+CREATEANIMS_VERSION = "v1.0" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
 COMMIT_ID = "Local test"
 
 class CreateAnims:

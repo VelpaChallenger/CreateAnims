@@ -999,6 +999,14 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.load_new_frame_value(new_frame, refresh_UI_flag=False) #We always start at the first frame of the anim. #But can be changed/adjusted. Very useful to keep editing the same frame after stop anim.
         self.createanims.refresh_UI() #Potencial refactor: let load_new_chr_bank do the UI refresh. So don't pass flag anymore. And make sure to decide arrow status and stuff before loading new CHR bank. In theory, it shouldn't affect anything, if load runs last.
 
+    def append_anim_value(self):
+        self.createanims.characters[self.createanims.current_character].anims.append(CharacterAnim([0x00, 0x00]))
+        self.load_new_anim_value(len(self.createanims.characters[self.createanims.current_character].anims) - 1)
+
+    def pop_anim_value(self):
+        self.createanims.characters[self.createanims.current_character].anims.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
+        self.load_new_anim_value(len(self.createanims.characters[self.createanims.current_character].anims) - 1)
+
     def load_new_frame(self, new_frame, refresh_UI_flag=True):
         old_frame = self.createanims.current_frame
         if old_frame == new_frame:

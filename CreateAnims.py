@@ -30,7 +30,7 @@ PHYSICS_INITIAL_X = 600
 PHYSICS_INITIAL_Y = 250
 
 CREATEANIMS_VERSION_DATE = "Local test"
-CREATEANIMS_VERSION = "v1.0.7" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
+CREATEANIMS_VERSION = "v1.0.8" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
 COMMIT_ID = "Local test"
 
 class CreateAnims:
@@ -185,6 +185,9 @@ class CreateAnims:
         vcmd = (self.root.register(self.anim.validate_anim_entry), "%P")
         self.anim_entry = tkinter.Entry(frame_anim_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
         self.anim_entry.bind("<Return>", self.entry_return.anim_entry)
+        anim_entry_menu = tkinter.Menu(self.anim_entry, tearoff=0)
+        anim_entry_menu.add_command(label="New Anim", command=self.menupopup.anim_entry_append)
+        self.anim_entry.bind("<Button-3>", lambda event: self.menupopup.create_pop_up(anim_entry_menu, event))
         self.anim_entry.pack(side="left")
         self.anim_left_arrow = ttk.Button(frame_anim_field, text="", style="Left.TButton", command=self.button.anim_left_arrow_button)
         self.anim_left_arrow.pack(side="left", padx=(5, 2))

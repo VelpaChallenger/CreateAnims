@@ -331,7 +331,7 @@ class CreateAnims:
         frame_anim_info.grid(row=7, column=0, columnspan=3, sticky="nw")
         self.anim_info = tkinter.LabelFrame(frame_anim_info, text="ANIM INFO", bd=2, width=WIDTH-10, height=50)
         self.anim_info.pack(side="left", padx=5, pady=5)
-        self.anim_info_text = tkinter.Label(self.anim_info, text="", justify="left", wraplength=500)
+        self.anim_info_text = tkinter.Label(self.anim_info, text="", justify="left", wraplength=1000) #Should never get that long though. Only one line.
         self.anim_info_text.place(x=5, y=5)
 
         photo = ImageTk.PhotoImage(CreateAnimsImg)

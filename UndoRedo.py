@@ -52,6 +52,7 @@ class UndoRedo:
 
     def __init__(self, createanims): #The classics. Every component always has access to CreateAnims.
         self.createanims = createanims
+        self.in_switch_branch = False
         self.stack = [[None]] #Let's go with a list to start. #It starts with None because first is always undo, but there's nothing to undo, yet we need the space for the redo to work.
         self.stack_ptr = 0 #Our index. Where are we in the stack?
         self.stack_copy = None #We'll use this to know whether we can actually switch branches.
@@ -80,6 +81,7 @@ class UndoRedo:
         self.createanims.refresh_UI = lambda : None #Just don't do anything. For now.
         init_physics_window_flag = False
         destroy_physics_window_flag = False
+        self.in_switch_branch = True #Could do a similar logic to the others, update messagebox.showwarning to be a lambda but... for this, I prefer this approach. It would only for warnings and... no, let's do this. I can also reuse it for other potential stuff (don't ask me for examples now, it's a hypothetical future).
         while self.stack_ptr != self.stack_copy_ptr:
             undo = self.stack[self.stack_ptr][0]
             if undo[0].__name__ == "init_physics_window": #How about this huh? Do you like it? You want some init, I'll give you some init! #self.createanims.init_physics_window = lambda : None #I guess maybe there is some sort of copy being used? Well no matter. I have more tricks under my sleeve.
@@ -100,6 +102,7 @@ class UndoRedo:
                 affected_file = self.get_affected_file(snapshot, name_UI)
                 self.decide_trace_append_or_pop("undo", log_text, affected_file) #Technically, those are undo, even if we're in a Switch Branch. #or pop_or_append. Was also going to call it decide direction but in this specific, it doesn't make it as clear to me, other times I like to use like names but here I'll let it like that.
             self.stack_ptr -= 1 #Come to think of it, with the new approach of partially switching refresh_UI, I could use undo. Meh. Still, I wouldn't want to call decide_undo_redo_status.
+        self.in_switch_branch = False #Hopefully this is fine, but it should. At this point, all actions are finished. We only need to decide about the window, and that may cause a stop at this code, so, yeah. If this happened at the very end, the flag would still be at True and who knows, might cause a few problems.
         if self.createanims.in_physics_window:
             init_physics_window_flag = False #Even if the algorithm says 'True'. (I mean the chain of Undo in the stack). If anything, we may have to destroy, but never init if we're already in physics window.
         self.createanims.refresh_UI = aux_refresh_UI #Sweet, smooth like cheese! Am I hungry maybe?
@@ -115,7 +118,7 @@ class UndoRedo:
             self.createanims.destroy_physics_window()
         self.log_history += "- Repoint successful.\n" #Let's do it here. Too high in the code and it's like, but wait, you didn't even start. But has to be here, cannot be last due to init_physics_window, that has to be last always.
         if init_physics_window_flag:
-            self.createanims.init_physics_window() #Always, always at the end.
+            self.createanims.init_physics_window() #Always, always at the end. #For future me's peace of mind: you cannot init another physics window while the current one is still active, so no worries about attempting another switch branch while technically the last one hasn't finished yet. It works (just tested it... okay no, I'm about to test it). And confirmed, works! You don't want to know the internal mess, but it works (well I already said it though, the other code is technically still running while a second instance runs this, but since it stays at the very end when all ptrs and stack updated, all good).
 
     def copy_undo_redo(self): #We'll need a dedicated function. Let's do this. #Future me/someone I don't know asks details? copy.deepcopy doesn't work because Tkinter objects cannot be pickled. And we pretty much need that. Otherwise, the stack gets corrupted at self.stack[self.stack_ptr] due to the last pop and reinsertion before we jump back to the previous branch. So 5-10-15-20 then 5-8-11, you go back, now you get 5-8-15-20. Not what we want.
         anim_undo_redo_list = [] #Brand.

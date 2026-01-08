@@ -23,6 +23,9 @@ class Character:
         if not os.path.exists(chr_directory):
             raise CreateAnimsFileNameError(f"Invalid filename: Directory chr doesn't exist for character {name}.")
         chrs_filenames = os.listdir(chr_directory) #Don't ask me why here I use os.sep and in other places I use forward slash.
+        if not chrs_filenames:
+            raise CreateAnimsFileNameError(f"Invalid filename: Directory chr for character {name} is empty. Please add at least one .chr and .chr.pal file with the expected format (see docs for details, section internals).")
+        found_chr_pal = False #This ends up being the simplest solution. Other solutions/alternatives involve peeking ahead or stuff like that.
         chr_palettes = {}
         chrs = {}
         total_chrs = len(chrs_filenames) #We'll make an exception here. Since they're different files, but part of the same, logical, unit you could say, we'll do it here.
@@ -52,6 +55,9 @@ class Character:
                 raise CreateAnimsFileFormatError(f"Invalid CHR format for file {name}_chr_{chr_id:03d}.chr: CHR is not exactly 2048 bytes long (2K). Each character uses 2K of the total 4K for sprites.")
             chrs[chr_id] = character_chr
             loading_bar['value'] += 1
+            found_chr_pal = True
+        if not found_chr_pal:
+            raise CreateAnimsFileNameError(f"Invalid filename: Directory chr for character {name} is not empty, but it doesn't contain any .chr.pal files. Please add at least one .chr and .chr.pal file with the expected format (see docs for details, section internals).")
         return chr_palettes, chrs
 
     def get_palette(self, file_format_validator, name, loading_bar, loading_bar_label, character_text):
@@ -89,6 +95,8 @@ class Character:
         if not os.path.exists(frames_directory):
             raise CreateAnimsFileNameError(f"Invalid filename: Directory frames doesn't exist for character {name}.")
         frames_filenames = os.listdir(frames_directory) #Don't ask me why here I use os.sep and in other places I use forward slash.
+        if not frames_filenames:
+            raise CreateAnimsFileNameError(f"Invalid filename: Directory frames for character {name} is empty. Please add at least one .frame file with the expected format (see docs for details, section internals).")
         frames = [] #This one will be 0-indexed. Frame 00, frame 01 etc.
         total_frames = len(frames_filenames)
         for frame_id in range(total_frames): #And it happened. #Potentially range(frame_ids) or something of the sort.
@@ -124,6 +132,8 @@ class Character:
         if not os.path.exists(anims_directory):
             raise CreateAnimsFileNameError(f"Invalid filename: Directory anims doesn't exist for character {name}.")
         anims_filenames = os.listdir(anims_directory) #Don't ask me why here I use os.sep and in other places I use forward slash.
+        if not anims_filenames:
+            raise CreateAnimsFileNameError(f"Invalid filename: Directory anims for character {name} is empty. Please add at least one .anim file with the expected format (see docs for details, section internals).")
         anims = [] #This one will be 0-indexed too. Anim 00, Anim 01 etc. #Might change this soon enough because some anims don't have files, like I removed them, like anim 0xF I believe. Yeah just checked.
         total_anims = len(anims_filenames)
         for anim_id in range(total_anims): #Potentially range(frame_ids) or something of the sort.

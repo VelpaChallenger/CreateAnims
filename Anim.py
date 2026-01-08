@@ -967,16 +967,19 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         old_character = self.createanims.current_character
         if old_character == new_character:
             return
+        old_anim = self.createanims.current_anim #Might be changed later, so gotta save it.
+        if self.createanims.current_anim > len(self.createanims.characters[new_character].anims) - 1:
+            self.createanims.current_anim = len(self.createanims.characters[new_character].anims) - 1 #Fixes bug where you append new anim, navigate to another character, crash, the anim is not available for that other character. Doesn't happen for frames (anims) because it is always restarted to 0, since anims frames vary a lot. Anims are usually same between characters, but after deep thought, this won't be always the case, even if often. Fall animation (stage fatality), you want it for all. Stryker explosives, you want it only for Stryker.
         old_frame = self.createanims.current_frame #We do need this since suppose we updated frame to 2, then changed Characters, when going back to the previous Character, it'll be back to 0 and it can give the feeling that there was nothing undone. I mean if you, update frame ID to 1, then change, then undo two times, you won't see any change.
-        self.createanims.undo_redo.undo_redo([self.load_new_character_value, old_character, old_frame], [self.load_new_character_value, new_character])
+        self.createanims.undo_redo.undo_redo([self.load_new_character_value, old_character, old_anim, old_frame], [self.load_new_character_value, new_character, self.createanims.current_anim]) #current_anim might match or not match old anim.
 
-    def load_new_character_value(self, new_character, new_frame=0):
+    def load_new_character_value(self, new_character, new_anim, new_frame=0): #New_anim has to be mandatory now. To avoid bugs where characters have a varying amount of anims (happens a lot when appending new anims). Which reminds me... when first starting CreateAnims, is there a check in case no files are found? No, there isn't. Will add shortly too. Something like No files found. There must be at least one.
         self.createanims.character_entry.configure(highlightcolor="white", highlightbackground="white")
         self.createanims.current_character = new_character
         self.createanims.character_entry.delete(0, "end")
         self.createanims.character_entry.insert(0, str(new_character))
         self.decide_arrow_buttons_status(new_character, len(self.createanims.characters) - 1, self.createanims.character_left_arrow, self.createanims.character_right_arrow)
-        self.load_new_anim_value(self.createanims.current_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
+        self.load_new_anim_value(new_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
 
     def load_new_anim(self, new_anim, new_frame=0):
         old_anim = self.createanims.current_anim

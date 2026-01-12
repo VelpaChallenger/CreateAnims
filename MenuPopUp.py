@@ -22,7 +22,7 @@ class MenuPopUp:
             self.createanims.anim_info_text.configure(text="If this frame is removed, the anim would have no frames. Impossible.", fg="red")
             return
         frame_index = self.createanims.current_frame
-        self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_frame_value, frame_index], [self.createanims.anim.remove_frame_value, frame_index])
+        self.createanims.undo_redo.undo_redo([self.createanims.anim.insert_frame_value, frame_index, self.createanims.current_frame_id], [self.createanims.anim.remove_frame_value, frame_index])
 
     def physics_id_entry_append(self):
         if len(self.createanims.physics_list) == 128:

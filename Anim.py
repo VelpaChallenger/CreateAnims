@@ -1034,9 +1034,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         if refresh_UI_flag:
             self.createanims.refresh_UI()
 
-    def insert_frame_value(self, frame_index):
+    def insert_frame_value(self, frame_index, frame_id_value=0): #For a plain insert, will be 0, but for an Undo, has to be the old frame_id_value.
         frame_ids = self.createanims.characters[self.createanims.current_character].anims[self.createanims.current_anim].frame_ids
-        frame_ids.insert(frame_index, 0) #Default frame ID 0.
+        frame_ids.insert(frame_index, frame_id_value) #Default frame ID 0.
         self.createanims.anim_info_text.configure(text="Remember to keep physics updated. Amount of physics frames should perfectly match amount of anim frames.", fg="blue")
         self.createanims.anim.load_new_frame_value(frame_index) #This will apply all automagically.
 

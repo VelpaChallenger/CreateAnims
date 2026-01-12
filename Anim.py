@@ -940,9 +940,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.physics_list.append([0x00, 0x00, 0x80])
         self.load_new_physics_id_value(len(self.createanims.physics_list) - 1) #Actually, append must have it for a similar reason: when you apply Redo. Well, it's okay if it happens twice although... for the new frame ID, I might have to add the refresh flag. Yeah. Hmmmmm... yeah that's fine. Apply all the logic, minus the refresh. And done.
 
-    def pop_physics_id_value(self):
+    def pop_physics_id_value(self, physics_id_before_append):
         self.createanims.physics_list.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
-        self.load_new_physics_id_value(len(self.createanims.physics_list) - 1) #Pop must have it. So arrows are updated.
+        self.load_new_physics_id_value(physics_id_before_append) #Pop must have it. So arrows are updated.
 
     def remove_physics_column_value(self, frame_index):
         physics = self.createanims.physics_list[self.createanims.current_physics_id]
@@ -1006,9 +1006,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.characters[self.createanims.current_character].anims.append(CharacterAnim([0x00, 0x00]))
         self.load_new_anim_value(len(self.createanims.characters[self.createanims.current_character].anims) - 1)
 
-    def pop_anim_value(self):
+    def pop_anim_value(self, anim_before_append):
         self.createanims.characters[self.createanims.current_character].anims.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
-        self.load_new_anim_value(len(self.createanims.characters[self.createanims.current_character].anims) - 1)
+        self.load_new_anim_value(anim_before_append)
 
     def load_new_frame(self, new_frame, refresh_UI_flag=True):
         old_frame = self.createanims.current_frame
@@ -1079,9 +1079,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.characters[self.createanims.current_character].frames.append(Frame(self.createanims.file_format_validator, [0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0xFF]))
         self.load_new_frame_id_value(len(self.createanims.characters[self.createanims.current_character].frames) - 1)
 
-    def pop_frame_id_value(self):
+    def pop_frame_id_value(self, frame_id_before_append):
         self.createanims.characters[self.createanims.current_character].frames.pop() #By definition, there'll always be at least one. When CreateAnims first opens, there must be at least one. You cannot pop. So you must append. Then you can only Ctrl+Z.
-        self.load_new_frame_id_value(len(self.createanims.characters[self.createanims.current_character].frames) - 1)
+        self.load_new_frame_id_value(frame_id_before_append)
 
     def decide_arrow_buttons_status(self, new_value, upper_boundary, left_arrow, right_arrow, lower_boundary=0): #I was a bit hesitant to create two or rather to think of making two but... makes more sense. They are conceptually different. #Also yes let's make it more generic in this case.
         if new_value == lower_boundary: #Now I can send stuff like -128.

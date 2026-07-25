@@ -729,4 +729,4 @@ class CreateAnims:
         for widget in self.root.winfo_children(): #Physics Window might be open, or not, Physics Dialog might be open, Log History window, Trace, etc. etc... so with this code, we make sure that those windows are destroyed if they exist and CreateAnims can close. And go to sleep and rest.
             if isinstance(widget, tkinter.Toplevel):
                 widget.destroy()
-        sys.exit(999)
+        sys.exit(999) #Why sys.exit and not exit? exit is not meant for user programs, even if I use it all the time. In the context of executables, the program breaks with a "name not defined" error. cx_freeze removes site initialization (which exit requires so that builtins.exit exists), and presumably, PyInstaller does too.

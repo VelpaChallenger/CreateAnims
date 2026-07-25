@@ -311,7 +311,7 @@ class Command:
 
     def load_new_frame_imported_value(self, new_frame_bytes, imported_from_filename):
         character = self.createanims.characters[self.createanims.current_character]
-        character.frames[self.createanims.current_frame_id] = Frame(new_frame_bytes) #At this point, the old Frame will be garbage collected and the memory freed.
+        character.frames[self.createanims.current_frame_id] = Frame(self.createanims.file_format_validator, new_frame_bytes) #At this point, the old Frame will be garbage collected and the memory freed.
         self.createanims.anim.load_new_frame_value(self.createanims.current_frame) #Same logic as anim. This was causing bugs in UndoRedo. This has to update CHR bank and a bunch of other stuff.
 
     def import_anim(self): #On second thought, maybe I'll let it be. Sometimes anim before frame, sometimes frame after anim.

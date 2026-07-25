@@ -15,6 +15,8 @@ from UndoRedo import *
 from FileFormatValidator import *
 from MenuPopUp import *
 
+from rinfo import *
+
 CreateAnimsImg = Image.open("CreateAnimsIcon.png")
 
 FONT = ("TkDefaultFont", 16)
@@ -28,10 +30,6 @@ PHYSICS_WIDTH = 430
 PHYSICS_HEIGHT = 310
 PHYSICS_INITIAL_X = 600
 PHYSICS_INITIAL_Y = 250
-
-CREATEANIMS_VERSION_DATE = "Local test"
-CREATEANIMS_VERSION = "v1.0" #The third one means pre-release. Not meant to be used in production but maybe you want it to test some stuff and things like that. Mostly meant for before v1.0.
-COMMIT_ID = "Local test"
 
 class CreateAnims:
 

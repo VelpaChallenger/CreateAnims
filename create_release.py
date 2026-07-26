@@ -1,4 +1,11 @@
 import subprocess
+import zipfile
+import shutil
+import os
+
+TARGET_FOLDER = "dist"
+ZIP_NAME = "CreateAnims.zip"
+RELEASE_NOTES = "release-notes.md"
 
 #Validation 1: Working tree must be clean. #(I'm really liking this format of validations via comments.)
 git_status_porcelain_subprocess = subprocess.Popen("git status --porcelain", shell=True, stdout=subprocess.PIPE) #Exactly, exactly what we need.
@@ -31,5 +38,11 @@ with open("rinfo.py", "w") as temp_rinfo:
     temp_rinfo.write(f"COMMIT_ID = \"{git_short_hash}\"\n")
 
 #And finally, create executable.
+shutil.rmtree(TARGET_FOLDER, ignore_errors=True)
 subprocess.run("PyInstaller create_anims.spec") #Run is better in this case. It waits, so otherwise we get an "empty console" of sorts where I have to manually press Enter (return) to continue using cmd.
-subprocess.run("git restore .") #Working tree is supposed to be clean at this point except for the CreateAnims.py updates, but we don't want those in our local. It's only for the executable.
+os.chdir(TARGET_FOLDER) #ZipFile.write() essentially gives each file the same path than it had when reading it. So dist/CreateAnims.exe will add a dist folder to the zip file. Not what we want.
+all_files = os.listdir()
+with zipfile.ZipFile(f"{ZIP_NAME}", mode="x") as temp_zip:
+    for file_ in all_files:
+        temp_zip.write(file_)
+subprocess.run(f"gh release create {version} -F ../{RELEASE_NOTES} --latest=true -t {version} {ZIP_NAME}")

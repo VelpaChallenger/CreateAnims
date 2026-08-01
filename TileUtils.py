@@ -238,7 +238,7 @@ class TileImage:
         tile_selected = self.get_tile_selected_based_on_coordinates(event.y, event.x)
         tile_image_object, width, height = self.calculate_selection_dimensions(self.tile_index, tile_selected)
         self.createanims.current_tile_image_multiple_tiles_rectangle = TileImageMultipleTilesRectangle(tile_image_object.tile_index, width, height) #Yes, let's make it a class.
-        self.createanims.chr_canvas.delete('TileImageRectangle') #We need to remove it,
+        self.createanims.chr_canvas.delete('TileImageRectangle')
         x,y = self.chr_canvas.coords(tile_image_object.tile_image)
         self.create_multiple_tiles_rectangle(x, y, width, height) #and then create a new one. Because changing width and/or height will not always be enough. Suppose now the rectangle expands to the right, it won't suffice. Plus, makes more sense in my mental model of things.
         self.createanims.chr_info_text.configure(text=f"{width}*{height} ({width*height} tiles selected)", fg='blue')
@@ -264,9 +264,9 @@ class TileImage:
         return tile_image_object, width+1, height+1 #Now there it is. #Not sure there is a mathematical formula that solves all. But only if they're the same, dimension is 1. Otherwise, do return the difference as it is. #Because suppose they're the same, they're both in same row, then the difference will return 0. But that doesn't mean dimension 0. It means dimension 1. Because it's one rectangle, not zero.
 
     def create_multiple_tiles_rectangle(self, x, y, width, height): #overwrite, expand, create... many possible verbs here. Let's go with this one.
-        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+(16*width)-1, y+(16*height)-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(16*height)-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(16*height), width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
+        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+(16*width)-1, y+(self.createanims.sprites.ypixels*height)-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(self.createanims.sprites.ypixels*height)-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(self.createanims.sprites.ypixels*height), width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
 
     def select(self):
         self.createanims.chr_info_text.configure(text="") #Specially for when selecting full rectangles, so that then you click one, and it automagically clears.

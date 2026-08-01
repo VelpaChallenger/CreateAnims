@@ -91,6 +91,10 @@ class CreateAnimsButton:
         new_character = self.createanims.current_character + 1
         self.createanims.anim.load_new_character(new_character)
 
+    def sprites_8x16_left_and_right_arrow_button(self, event=None): #They both do the same.
+        new_sprites_8x16_mode = self.createanims.sprites_8x16_mode ^ 1
+        self.createanims.anim.load_new_sprites_8x16_mode(new_sprites_8x16_mode)
+
     def play_anim_button(self, event=None):
         import tkinter
         self.createanims.current_frame_aux = self.createanims.current_frame

@@ -791,6 +791,25 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.anim_info_text.configure(text="")
         return True
 
+    def validate_8x16_entry(self, new_value):
+        if not new_value:
+            self.createanims.sprites_8x16_entry.configure(highlightcolor="white", highlightbackground="white")
+            self.createanims.anim_info_text.configure(text="")
+            return True
+        try: #Validation 1: value must be an integer, 0 or positive. Since validations repeat so much, we could make validations objects themselves, and then have a general validate which validates according to the set validation objects. Kinda like for validation_obj in self.validation_obj, validation_obj.validate().
+            int(new_value)
+        except ValueError:
+            self.createanims.sprites_8x16_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="Character must be a decimal number including zero.", fg="red")
+            return False
+        if new_value not in ("0", "1"): #Validation 2: value can only be 0 or 1.
+            self.createanims.sprites_8x16_entry.configure(highlightcolor="red", highlightbackground="red")
+            self.createanims.anim_info_text.configure(text="8x16 mode can only be 0 or 1. (0=8x8; 1=8x16)", fg="red")
+            return False
+        self.createanims.sprites_8x16_entry.configure(highlightcolor="white", highlightbackground="white")
+        self.createanims.anim_info_text.configure(text="")
+        return True
+
     def load_new_tile_for_index_value(self, anim_index, tile_index):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #It could be a good idea to add a get_frame(). But you know, that's what most people do. I only do it if it's convenient. Here, this is just way clearer.
         frame.tiles[anim_index] = tile_index #The change itself. The below, we need to do for UI purposes.
@@ -981,6 +1000,19 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.decide_arrow_buttons_status(new_character, len(self.createanims.characters) - 1, self.createanims.character_left_arrow, self.createanims.character_right_arrow)
         self.load_new_anim_value(new_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
 
+    def load_new_sprites_8x16_mode(self, new_sprites_8x16_mode):
+        old_sprites_8x16_mode = self.createanims.sprites_8x16_mode
+        if old_sprites_8x16_mode == new_sprites_8x16_mode: #This logic could also be part of a general load. Maybe.
+            return
+        self.createanims.undo_redo.undo_redo([self.load_new_sprites_8x16_mode_value, old_sprites_8x16_mode], [self.load_new_sprites_8x16_mode_value, new_sprites_8x16_mode])
+
+    def load_new_sprites_8x16_mode_value(self, new_sprites_8x16_mode):
+        self.createanims.sprites_8x16_mode = new_sprites_8x16_mode
+        self.createanims.sprites_8x16_entry.delete(0, "end")
+        self.createanims.sprites_8x16_entry.insert(0, str(new_sprites_8x16_mode))
+        self.decide_arrow_buttons_status(new_sprites_8x16_mode, 1, self.createanims.sprites_8x16_left_arrow, self.createanims.sprites_8x16_right_arrow)
+        self.createanims.refresh_UI()
+
     def load_new_anim(self, new_anim, new_frame=0):
         old_anim = self.createanims.current_anim
         if old_anim == new_anim:
@@ -1121,6 +1153,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(state="disabled")
         self.createanims.character_left_arrow.configure(state="disabled")
         self.createanims.character_right_arrow.configure(state="disabled")
+        self.createanims.sprites_8x16_entry.configure(state="disabled")
+        self.createanims.sprites_8x16_left_arrow.configure(state="disabled")
+        self.createanims.sprites_8x16_right_arrow.configure(state="disabled")
         self.createanims.edit_physics_button.configure(state="disabled")
         self.createanims.menu_bar.entryconfigure("File", state="disabled")
         self.createanims.menu_bar.entryconfigure("Edit", state="disabled")
@@ -1160,6 +1195,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.character_entry.configure(state="normal")
         self.createanims.character_left_arrow.configure(state="normal")
         self.createanims.character_right_arrow.configure(state="normal")
+        self.createanims.sprites_8x16_entry.configure(state="normal")
+        self.createanims.sprites_8x16_left_arrow.configure(state="normal")
+        self.createanims.sprites_8x16_right_arrow.configure(state="normal")
         self.createanims.edit_physics_button.configure(state="normal")
         self.createanims.menu_bar.entryconfigure("File", state="normal")
         self.createanims.menu_bar.entryconfigure("Edit", state="normal")

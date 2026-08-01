@@ -32,6 +32,7 @@ function_name_translation_dict = { #Given a function name, what will we show in 
     "pop_frame_id_value": ("Character {0}. Removed new frame ID {1:02d}.", "Change", ("character_name", "last_frame_id"), ("frames", "frame", "last_frame_id", "frame")),
     "append_anim_value": ("Character {0}. Created new anim {1:02d}.", "Change", ("character_name", "last_anim"), ("anims", "anim", "last_anim", "anim")),
     "pop_anim_value": ("Character {0}. Removed new anim {1:02d}.", "Change", ("character_name", "last_anim"), ("anims", "anim", "last_anim", "anim")),
+    "load_new_sprites_8x16_mode_value": ("Changed 8x16 mode from {0} to {1}.", "Navigation", ("undo:0", "redo:0")),
 }
 
 class CreateAnimsSnapshot: #You could also call it UndoRedoSnapshot because it's unused for UndoRedo but, still. Well could be used for other purposes as well.

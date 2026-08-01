@@ -68,6 +68,7 @@ class CreateAnims:
         self.in_exception = False
         self.physics_list = []
         self.current_palette_info_text = ""
+        self.sprites_8x16_mode = 0
 
     def init_anim_window(self):
         self.root = Tk() #Yes, this makes more sense when I think about it. And will make things smoother for the loading bar.
@@ -311,6 +312,19 @@ class CreateAnims:
         self.character_left_arrow.pack(side="left", padx=(5, 2))
         self.character_right_arrow = ttk.Button(frame_character_field, text="", style="Right.TButton", command=self.button.character_right_arrow_button)
         self.character_right_arrow.pack(side="left")
+
+        frame_sprites_8x16_field = tkinter.Frame(frame_character)
+        frame_sprites_8x16_field.grid(row=6, column=0, sticky="nw", padx=5, pady=5)
+        self.sprites_8x16_label = tkinter.Label(frame_sprites_8x16_field, text="8x16:", anchor="w", font=FONT, width=9)
+        self.sprites_8x16_label.pack(side="left")
+        vcmd = (self.root.register(self.anim.validate_8x16_entry), "%P")
+        self.sprites_8x16_entry = tkinter.Entry(frame_sprites_8x16_field, width=3, font=FONT, validate="key", validatecommand=vcmd, highlightcolor="white", highlightbackground="white", highlightthickness=1)
+        self.sprites_8x16_entry.bind("<Return>", self.entry_return.sprites_8x16_entry)
+        self.sprites_8x16_entry.pack(side="left")
+        self.sprites_8x16_left_arrow = ttk.Button(frame_sprites_8x16_field, text="", style="Left.TButton", command=self.button.sprites_8x16_left_and_right_arrow_button)
+        self.sprites_8x16_left_arrow.pack(side="left", padx=(5, 2))
+        self.sprites_8x16_right_arrow = ttk.Button(frame_sprites_8x16_field, text="", style="Right.TButton", command=self.button.sprites_8x16_left_and_right_arrow_button)
+        self.sprites_8x16_right_arrow.pack(side="left")
 
         separator = ttk.Separator(frame_command_base, orient='vertical')
         separator.pack(side="left", anchor="nw", fill="both")

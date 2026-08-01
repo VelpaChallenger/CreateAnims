@@ -107,3 +107,11 @@ class EntryReturn:
             return False
         new_character = int(character_entry_value)
         self.createanims.anim.load_new_character(new_character)
+
+    def sprites_8x16_entry(self, event=None):
+        sprites_8x16_value = self.createanims.sprites_8x16_entry.get()
+        if not sprites_8x16_value:
+            self.createanims.sprites_8x16_entry.configure(highlightcolor="red", highlightbackground="red")
+            return False
+        new_sprites_8x16_mode = int(sprites_8x16_value)
+        self.createanims.anim.load_new_sprites_8x16_mode(new_sprites_8x16_mode)

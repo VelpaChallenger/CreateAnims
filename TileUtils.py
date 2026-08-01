@@ -330,16 +330,27 @@ class TileUtils:
 
     def create_chr_images(self, chr_palette, character_chr):
         tile_i = 0
-        initial_y = -16
-        for row in range(8):
+        if self.createanims.sprites_8x16_mode:
+            tile_i_increment = 2
+            initial_y = -32
+            initial_y_increment = 32
+            rows_amount = 4
+            create_chr_image = self.create_chr_image_for_8x16
+        else:
+            tile_i_increment = 1
+            initial_y = -16
+            initial_y_increment = 16
+            rows_amount = 8
+            create_chr_image = self.create_chr_image_for_8x8
+        for row in range(rows_amount):
             initial_x = 0
-            initial_y += 16
+            initial_y += initial_y_increment
             for col in range(16):
-                self.create_chr_image(initial_x, initial_y, tile_i, chr_palette, character_chr)
+                create_chr_image(initial_x, initial_y, tile_i, chr_palette, character_chr)
                 initial_x += 16
-                tile_i += 1
+                tile_i += tile_i_increment
 
-    def create_chr_image(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
+    def create_chr_image_for_8x8(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
         pixels = self.get_pixels(tile_i, character_chr)
         img = Image.frombytes("P", (8, 8), bytes(pixels))
         tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
@@ -347,6 +358,17 @@ class TileUtils:
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, img, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
+
+    def create_chr_image_for_8x16(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
+        pixels_top = self.get_pixels(tile_i, character_chr)
+        pixels_bottom = self.get_pixels(tile_i+1, character_chr)
+        pixels_top.extend(pixels_bottom)
+        img = Image.frombytes("P", (8, 16), bytes(pixels_top))
+        tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette) #It will always take the one from the even-numbered tile.
+        img.putpalette(tile_palette)
+        final_img = ImageTk.PhotoImage(img.resize((16, 32)))
+        tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, img, final_img))
 
     def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
         pixels = []

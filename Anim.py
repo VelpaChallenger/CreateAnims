@@ -1011,6 +1011,11 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.sprites_8x16_entry.delete(0, "end")
         self.createanims.sprites_8x16_entry.insert(0, str(new_sprites_8x16_mode))
         self.decide_arrow_buttons_status(new_sprites_8x16_mode, 1, self.createanims.sprites_8x16_left_arrow, self.createanims.sprites_8x16_right_arrow)
+        self.createanims.chr_canvas.delete('TileImageRectangle')
+        self.createanims.current_tile_image_rectangle = None
+        self.createanims.current_chr_tile_index = None
+        self.createanims.anim_canvas.delete('AnimImageRectangle')
+        self.createanims.current_anim_image_rectangle = None
         self.createanims.refresh_UI()
 
     def load_new_anim(self, new_anim, new_frame=0):

@@ -368,7 +368,7 @@ class TileUtils:
         img.putpalette(tile_palette)
         final_img = ImageTk.PhotoImage(img.resize((16, 32)))
         tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, img, final_img))
+        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i // 2, tile_palette_group, self.createanims.tile_label, img, final_img))
 
     def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
         pixels = []

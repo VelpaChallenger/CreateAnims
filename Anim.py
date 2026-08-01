@@ -232,9 +232,9 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         x, y = self.anim_canvas.coords(self.anim_image)
         self.anim_canvas.delete("AnimImageRectangle")
         self.createanims.current_anim_image_multiple_tiles_rectangle = None
-        self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-        self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-        self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
+        self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+15, y+self.createanims.sprites.ypixels-1, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+14, y+self.createanims.sprites.ypixels-2, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+16, y+self.createanims.sprites.ypixels, width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
 
     def select_and_update(self): #I was going to say select_and_update_anim_image but it's kinda redudant I think? We already are in AnimImage in this context, unlike ColorPickerRectangle which is updating a PalRectangle. This time, the update doesn't happen when you click on the TileImage, but on the AnimImage. That's why the difference. But the rest is the same. We still have both a select and a select_and and all that.
         if self.createanims.current_anim_image_multiple_tiles_rectangle is not None:
@@ -311,7 +311,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, 0xFF])
 
     def get_anim_selected_based_on_coordinates(self, y, x, width): #Yes, y and x instead of x and y. I'm preserving the original order. It had to do with how it's all arranged. It's actually more intuitive.
-        anim_row = y // 16 #No wait, this is 16 really. Because this is based on x and y. It's the calculation that is different. #width #The more generic form. For CHR, it's always 16 / 0x10, but for an anim, not necessarily. To make this super generic, we could of course assign optional parameters. But eh, this is clearer to me.
+        anim_row = y // self.createanims.sprites.ypixels #No wait, this is 16 really. Because this is based on x and y. It's the calculation that is different. #width #The more generic form. For CHR, it's always 16 / 0x10, but for an anim, not necessarily. To make this super generic, we could of course assign optional parameters. But eh, this is clearer to me.
         anim_col = x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
         return anim_row*width + anim_col
 
@@ -402,14 +402,12 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     img.info['transparency'] = 0 #Always transparent in this case, nothing to decide.
                     final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, initial_y_increment)))
                     anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-                    if self.draw_empty_cells:
-                        self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + initial_y_increment-1, width=1, outline="blue", tag=f"EmptyRectangle{cell_id}") #We'll use the tag to make removal easier on the UndoRedo (index). #Alt name anim_empty_image, but I like more rectangle because, even though it's taking the place of what could be an image, it is a rectangle.
+                    self.decide_draw_empty_cells(initial_x, initial_y, cell_id)
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, None, anim_image, cell_id, None, self.createanims.tile_label, pre_tkimg, final_img)) #We could also create an empty image but... I think I prefer the rectangle idea. Let's see how it goes.
                 initial_x += 16
                 cell_id += 1
         self.createanims.anim_canvas.delete("AnimRedRectangle") #Simplifies logic. I'm doing all possible to simplify and follow more or less similar patterns. My patterns, the ones I can understand and follow. Will use the energy to understand and follow for other contexts.
-        if self.draw_frame_rectangle:
-            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (initial_y_increment*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
+        self.decide_draw_frame_rectangle(frame)
         if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
             self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
 
@@ -431,6 +429,14 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.current_anim_image_inner_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black", tag="AnimImageRectangle")
         x1, y1, x2, y2 = self.x1_outer, self.y1_outer, self.x2_outer, self.y2_outer
         self.createanims.current_anim_image_outer_rectangle = self.createanims.anim_canvas.create_rectangle(x1, y1, x2, y2, width=1, outline="black", tag="AnimImageRectangle")
+
+    def decide_draw_empty_cells(self, initial_x, initial_y, cell_id):
+        if self.draw_empty_cells:
+            self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + self.createanims.sprites.ypixels-1, width=1, outline="blue", tag=f"EmptyRectangle{cell_id}") #We'll use the tag to make removal easier on the UndoRedo (index). #Alt name anim_empty_image, but I like more rectangle because, even though it's taking the place of what could be an image, it is a rectangle.
+
+    def decide_draw_frame_rectangle(self, frame):
+        if self.draw_frame_rectangle:
+            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
 
     def clear_in_motion(self):
         for anim_image in self.createanims.anim_images: #tile_images but... whatever. Let's leave tiles_images.
@@ -831,12 +837,10 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             img.putpalette(tile_palette)
             pre_tkimg = img
             img.info['transparency'] = 0 #Always transparent in this case, nothing to decide.
-            if self.draw_empty_cells:
-                self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + 15, width=1, outline="blue", tag=f"EmptyRectangle{anim_index}")
+            self.decide_draw_empty_cells(initial_x, initial_y, anim_index)
         self.createanims.anim_canvas.delete("AnimRedRectangle")
-        if self.draw_frame_rectangle:
-            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
-        final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, 16)))
+        self.decide_draw_frame_rectangle(frame)
+        final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, self.createanims.sprites.ypixels)))
         anim_image_object.anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         anim_image_object.final_img = final_img
         anim_image_object.bind(self.createanims, anim_index)

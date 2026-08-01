@@ -72,6 +72,7 @@ class UndoRedo:
         self.trace = []
         self.trace_append_or_pop_flag = False
         self.affected_files = []
+        self.saved = False
 
     def switch_branch_undo_redo(self, event=None):
         if self.createanims.edit_menu.entrycget(2, 'state') == "disabled": #Won't use it after all. It still works. #If in physics_window, we won't care about that status. #Same, we'll check the status. #self.stack_copy is None: #We won't call undo. Undo will always pass parameters doing things its own way. We'll do things our way, so we'll have it in a different function here.

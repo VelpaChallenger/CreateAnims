@@ -355,17 +355,11 @@ class TileUtils:
         for pixel_row in range(8): #Until 7, but don't include 8.
             pixel_row_byte_low = bytes_tile_chr_row[pixel_row] #I know most documentation refers to it as planes and bla bla bla yada yada but I understand it more as high and low.
             pixel_row_byte_high = bytes_tile_chr_row[pixel_row+8] #So bytes_tile_chr_row has the bytes for the CHR row, in other words, for the tile (yeah, chr_tile_row might be a bit redundant but I understand it better that way). 
-            bit_col = 0x80 #To different of pixel_col which will be used for the range. But they fundamentally represent the same just with different numbers.
             for pixel_col in range(8): #And another 8 times for a total of 64 pixels to add. #Okay much better, pixel_row and pixel_col.
-                bit_low = pixel_row_byte_low & bit_col
-                if bit_low:
-                    bit_low = 0x1 #To avoid having to shift aaaaall the way to the right.
-                bit_high = pixel_row_byte_high & bit_col
-                if bit_high:
-                    bit_high = 0x1
+                bit_low = (pixel_row_byte_low & (0x80 >> pixel_col)) != 0
+                bit_high = (pixel_row_byte_high & (0x80 >> pixel_col)) != 0
                 pixel = (bit_high << 1) | (bit_low) #Will give either 0, 1, 2 or 3. That will be the color to use.
                 pixels.append(pixel)
-                bit_col >>= 1 #Can you do >>= without it breaking?
         return pixels
 
     def get_tile_palette(self, tile_i, chr_palette):

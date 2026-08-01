@@ -343,20 +343,20 @@ class TileUtils:
                 initial_x += 16
                 tile_i += tile_i_increment
 
-    def create_chr_image_for_8x8(self, tile_i, chr_palette, character_chr):
+    def create_chr_image_for_8x8(self, tile_i, chr_palette, character_chr, custom_background=None):
         pixels = self.get_pixels(tile_i, character_chr)
         img = Image.frombytes("P", (8, 8), bytes(pixels))
-        tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
+        tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette, custom_background=custom_background) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
         img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
         return tile_palette_group, img, final_img
 
-    def create_chr_image_for_8x16(self, tile_i, chr_palette, character_chr):
+    def create_chr_image_for_8x16(self, tile_i, chr_palette, character_chr, custom_background=None):
         pixels_top = self.get_pixels(tile_i, character_chr)
         pixels_bottom = self.get_pixels(tile_i+1, character_chr)
         pixels_top.extend(pixels_bottom)
         img = Image.frombytes("P", (8, 16), bytes(pixels_top))
-        tile_palette_group, tile_palette = self.get_tile_palette(tile_i+1, chr_palette) #It will always take the one from the even-numbered tile.
+        tile_palette_group, tile_palette = self.get_tile_palette(tile_i+1, chr_palette, custom_background=custom_background) #It will always take the one from the odd-numbered tile. Makes for consistency.
         img.putpalette(tile_palette)
         final_img = ImageTk.PhotoImage(img.resize((16, 32)))
         return tile_palette_group, img, final_img
@@ -375,7 +375,7 @@ class TileUtils:
                 pixels.append(pixel)
         return pixels
 
-    def get_tile_palette(self, tile_i, chr_palette):
+    def get_tile_palette(self, tile_i, chr_palette, custom_background=None):
         tile_palette = []
         tile_palette_row = tile_i // 8 #We don't care, in this context, about the remainder. Not yet, at least. #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
         tile_palette_row_tile = tile_i % 8 #Changed to tile, seems more accurate now. #Now we care about the remainder. So chr_palette_row and chr_palette_row_tile will pinpoint us the exact location.
@@ -388,6 +388,8 @@ class TileUtils:
         for pal in pal_group: #Some call the pal_group the subpalette so aka subpalette.
             rgb_triplet = SYSTEM_PALETTE[pal]
             tile_palette.extend(rgb_triplet) #putpalette doesn't accept triplets it would seem, has to be all values as a sequence.
+        if custom_background is not None:
+            tile_palette[0:3] = [custom_background, custom_background, custom_background]
         return int(bool(tile_palette_group)), tile_palette #Could be int(bool(tile_palette_group)), maybe to be more explicit but... either works. Actually yes, I'll just add it to make it explicit for me.
 
     def store_tile_image_rectangle_coords(self):

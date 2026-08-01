@@ -396,7 +396,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, tile_image_object, anim_image, cell_id, tile_image_object.tile_palette_group, self.createanims.tile_label, pre_tkimg, final_img))
                 else: #We will draw something, but not an image. A rectangle. A blue rectangle.
                     pixels = [0x00] * 64 #Fully transparent. This works as a fill.
-                    img = Image.frombytes("P", (8, 8), bytes(pixels))
+                    img = Image.frombytes("P", (8, 8), bytes(pixels)) #Doesn't break... #I mean you would expect 16 in 8x16 mode right? But yeah, doesn't break...
                     tile_palette = [0x00] * 12 #Like, just whatever. We won't use them.
                     img.putpalette(tile_palette)
                     pre_tkimg = img
@@ -1246,7 +1246,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         img = tkinter.PhotoImage(file=f"{self.createanims.root_dir}/{character.name}/images/{character.name}_frame_{frame_id:03d}.png") #(self.createanims.tiles_images[0].pre_tkimg.resize((16, 16)))
         self.createanims.png_img.append(img) #Say no to garbage collection of PhotoImage.
         frame = character.frames[frame_id]
-        self.createanims.play_anim_label.place(x=375+(frame.metadata.x_offset*2) + self.createanims.physics_initial_x, y=200 - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) + self.createanims.physics_initial_y)
+        self.createanims.play_anim_label.place(x=375+(frame.metadata.x_offset*2) + self.createanims.physics_initial_x, y=200 - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length) + self.createanims.physics_initial_y)
         self.createanims.play_anim_label.configure(image=img)
         if self.createanims.current_frame == len(character.anims[self.createanims.current_anim].frame_ids) - 1:
             self.createanims.current_frame = 0
@@ -1264,8 +1264,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 raise ValueError("Invalid frame ID for anim frame")
             frame = character.frames[frame_id]
             current_chr_bank = frame.metadata.chr_bank
-            refresh_chr(character, current_chr_bank)
-            png = generate_png(frame)
+            refresh_chr(character, current_chr_bank, self.createanims.sprites.ypixels, self.createanims.sprites.sprites_8x16_mode, self.createanims.sprites.create_chr_image)
+            png = generate_png(frame, self.createanims.sprites.ypixels)
             png_path = f"{self.createanims.root_dir}/{character.name}/images"
             os.path.isdir(png_path) or os.makedirs(png_path) #This time I feel like explaining, so or shortcircuits, which means, this is an indirect if. If the path exists, nothing else to do. If it doesn't, then make the dir.
             png.save(f"{png_path}/{character.name}_frame_{frame_id:03d}.png", "PNG")

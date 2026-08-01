@@ -11,11 +11,11 @@ class Sprites:
         else:
             return 16
 
-    def create_chr_image(self, tile_i, chr_palette, character_chr):
+    def create_chr_image(self, tile_i, chr_palette, character_chr, custom_background=None):
         if self.sprites_8x16_mode:
-            return self.createanims.tile_utils.create_chr_image_for_8x16(tile_i, chr_palette, character_chr)
+            return self.createanims.tile_utils.create_chr_image_for_8x16(tile_i, chr_palette, character_chr, custom_background=custom_background)
         else:
-            return self.createanims.tile_utils.create_chr_image_for_8x8(tile_i, chr_palette, character_chr)
+            return self.createanims.tile_utils.create_chr_image_for_8x8(tile_i, chr_palette, character_chr, custom_background=custom_background)
 
     def get_tile_index_for_chr_pal(self, tile_i):
         if self.sprites_8x16_mode:

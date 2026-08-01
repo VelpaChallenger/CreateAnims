@@ -273,24 +273,16 @@ class TileImage:
         self.chr_canvas.delete('TileImageRectangle') #I just realized, you're right. I can also always just delete everything and start again. Which would make the if/else block disappear. Realized because, I'm never clearing the bool come to think of it, but it still works wonders. And it's because, since I never clear it, it keeps deleting and starting again. But it works super well.
         self.createanims.current_tile_image_multiple_tiles_rectangle = None
         x, y = self.chr_canvas.coords(self.tile_image)
-        if self.createanims.sprites_8x16_mode: #You know, I'm starting to think it might be worth creating a Sprites class which contains all this info that keeps getting repeated. Sprites.initial_y_increment would be specially nice.
-            initial_y_increment = 32
-        else:
-            initial_y_increment = 16
-        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+initial_y_increment-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+initial_y_increment-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+initial_y_increment+1, width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
+        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+self.createanims.sprites.ypixels-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+self.createanims.sprites.ypixels-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+self.createanims.sprites.ypixels+1, width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
         self.createanims.current_chr_tile_index = self.tile_index #So you might think, why not do like PalRectangle, use the IDs. It breaks logic tile_image_object = self.createanims.tiles_images[tile_id & 0x7F] in Anim. It can still work but I prefer to leave that as it is which is already very clear and instead do this. It makes sense that it's a different logic.
 
     def update_tile_label(self): #I feel more comfortable calling this method from other components rather than on_enter. It will also make it easier if on_enter has to make something additional but from other places it should still be just the label. Very experimental anyways, might change in the future. I already call on_double_click from motion so... yeah.
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
 
     def get_tile_selected_based_on_coordinates(self, y, x): #Yes, y and x instead of x and y. I'm preserving the original order. It had to do with how it's all arranged. It's actually more intuitive.
-        if self.createanims.sprites_8x16_mode: #Confirmed, I will do the refactor soon enough.
-            y_distance = 32
-        else:
-            y_distance = 16
-        tile_row = y // y_distance
+        tile_row = y // self.createanims.sprites.ypixels
         tile_col = x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
         return tile_row*0x10 + tile_col
 
@@ -338,27 +330,16 @@ class TileUtils:
 
     def create_chr_images(self, chr_palette, character_chr):
         tile_i = 0
-        if self.createanims.sprites_8x16_mode:
-            tile_i_increment = 2
-            initial_y = -32
-            initial_y_increment = 32
-            rows_amount = 4
-            create_chr_image = self.create_chr_image_for_8x16 #This would be part of Sprites class, exactly. self.createanims.sprites.create_chr_image. And it will return self.create_chr_image_methods[self.sprites_8x16_mode](args).
-            tile_divider = 2
-        else:
-            tile_i_increment = 1
-            initial_y = -16
-            initial_y_increment = 16
-            rows_amount = 8
-            create_chr_image = self.create_chr_image_for_8x8
-            tile_divider = 1
-        for row in range(rows_amount):
+        initial_y = -self.createanims.sprites.ypixels
+        initial_y_increment = self.createanims.sprites.ypixels
+        tile_i_increment = self.createanims.sprites.ypixels // 16
+        for row in range(8 // tile_i_increment):
             initial_x = 0
             initial_y += initial_y_increment
             for col in range(16):
-                tile_palette_group, img, final_img = create_chr_image(tile_i, chr_palette, character_chr)
+                tile_palette_group, img, final_img = self.createanims.sprites.create_chr_image(tile_i, chr_palette, character_chr)
                 tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-                self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i // tile_divider, tile_palette_group, self.createanims.tile_label, img, final_img))
+                self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i // tile_i_increment, tile_palette_group, self.createanims.tile_label, img, final_img))
                 initial_x += 16
                 tile_i += tile_i_increment
 
@@ -474,23 +455,15 @@ class TileUtils:
         tile_image_object = self.createanims.tiles_images[tile_index] #No dependencies with specific IDs. So beautiful. (I'm talking about for example when you do create_image, a new ID is generated, but with this that doesn't matter)
         initial_x, initial_y = tile_image_object.chr_canvas.coords(tile_image_object.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
-        if self.createanims.sprites_8x16_mode:
-            tile_index_for_chr_pal = tile_index*2 + 1
-            tile_index_for_pixels = tile_index*2
-            create_chr_image = self.create_chr_image_for_8x16
-            resize_y = 32
-        else:
-            tile_index_for_chr_pal = tile_index
-            tile_index_for_pixels = tile_index
-            create_chr_image = self.create_chr_image_for_8x8
-            resize_y = 16
+        tile_index_for_chr_pal = self.createanims.sprites.get_tile_index_for_chr_pal(tile_index)
+        tile_index_for_pixels = self.createanims.sprites.get_tile_index_for_pixels(tile_index)
         tile_palette_row = tile_index_for_chr_pal // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
         tile_palette_row_tile = tile_index_for_chr_pal % 8
         chr_palette[tile_palette_row] ^= 1 << tile_palette_row_tile #Here's the gist of it, the magic. #The opposite. Also, yes, it seems like a lot of trouble for just one not but the alternative is to catch (cache) it or something which... meh.
         character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
-        tile_palette_group, img, final_img = create_chr_image(tile_index_for_pixels, chr_palette, character_chr)
+        tile_palette_group, img, final_img = self.createanims.sprites.create_chr_image(tile_index_for_pixels, chr_palette, character_chr)
         tile_image_object.pre_tkimg = img
-        final_img = ImageTk.PhotoImage(img.resize((16, resize_y)))
+        final_img = ImageTk.PhotoImage(img.resize((16, self.createanims.sprites.ypixels)))
         tile_image_object.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         tile_image_object.final_img = final_img #And again, we need to keep the reference. #Also, by doing this, the previous one can be removed.
         tile_image_object.bind(self.createanims, tile_index) #Why? Because the previous image was deleted. We need to bind to the new one.

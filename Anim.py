@@ -377,15 +377,9 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.createanims.anim_canvas.delete("all") #Yeah, we will delete everything just in case just like TileUtils. And well, not 'just in case', without this, tag bind Button-1, then Shift+T, and second time it doesn't work anymore. Probably due to these references not letting the changes go through or something of the sort.
         self.createanims.anim_images = []
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
-        if self.createanims.sprites_8x16_mode:
-            initial_y = -32
-            initial_y_increment = 32
-            resize_y = 32
-        else:
-            initial_y = -16
-            initial_y_increment = 16
-            resize_y = 16
-        initial_y += INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (resize_y*frame.metadata.y_length) #Has to happen at this point, where we now have access to the frame metadata. Also *2 because if y offset is 5, that means 10 pixels away in our system.
+        initial_y = -self.createanims.sprites.ypixels
+        initial_y_increment = self.createanims.sprites.ypixels
+        initial_y += INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (initial_y_increment*frame.metadata.y_length) #Has to happen at this point, where we now have access to the frame metadata. Also *2 because if y offset is 5, that means 10 pixels away in our system.
         cell_id = 0 #Let's call it this way, probably the most accurate. tile_id could be confused with the tile_id stored in the cell, frame_tile_id would be another candidate to refer to the tile_id stored in the frame, but mixing frame and tile can be a bit confusing as with row and tile in the same name (I did it for TileUtils).
         for row in range(frame.metadata.y_length):
             initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
@@ -396,7 +390,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     tile_image_object = self.createanims.tiles_images[tile_id & 0x7F] #Let's move it here to have cleaner checks. #We only care about bits 0-6. Actually I think I was going to run a script to fix that for all frames. But meanwhile we can do this. The idea is to remove the and #$7F in the code, I think it's still there for now.
                     pre_tkimg = tile_image_object.pre_tkimg
                     self.decide_transparency_anim_image(pre_tkimg, self.transparency)
-                    final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, resize_y))) #So yes, actually different images with same base, but still different.
+                    final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, initial_y_increment))) #So yes, actually different images with same base, but still different.
                     anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img) #Thanks past me. Issue solved. #WARNING! Potential memory issue here. I'm never deleting this anim_image with each refresh. Not a problem after doing many many tests but... it does make me curious that it seemed to be a problem with the CHR canvas. Or maybe that one was getting slower for different reasons. Could be. Still taking note of that here in case it comes handy later.
                     self.createanims.anim_images.append(AnimImage(self.createanims, self.createanims.anim_canvas, tile_image_object, anim_image, cell_id, tile_image_object.tile_palette_group, self.createanims.tile_label, pre_tkimg, final_img))
                 else: #We will draw something, but not an image. A rectangle. A blue rectangle.
@@ -406,7 +400,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                     img.putpalette(tile_palette)
                     pre_tkimg = img
                     img.info['transparency'] = 0 #Always transparent in this case, nothing to decide.
-                    final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, resize_y)))
+                    final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, initial_y_increment)))
                     anim_image = self.createanims.anim_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
                     if self.draw_empty_cells:
                         self.createanims.anim_canvas.create_rectangle(initial_x, initial_y, initial_x + 15, initial_y + initial_y_increment-1, width=1, outline="blue", tag=f"EmptyRectangle{cell_id}") #We'll use the tag to make removal easier on the UndoRedo (index). #Alt name anim_empty_image, but I like more rectangle because, even though it's taking the place of what could be an image, it is a rectangle.
@@ -415,7 +409,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
                 cell_id += 1
         self.createanims.anim_canvas.delete("AnimRedRectangle") #Simplifies logic. I'm doing all possible to simplify and follow more or less similar patterns. My patterns, the ones I can understand and follow. Will use the energy to understand and follow for other contexts.
         if self.draw_frame_rectangle:
-            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (resize_y*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
+            self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (initial_y_increment*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
         if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
             self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
 
@@ -1009,13 +1003,13 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.load_new_anim_value(new_anim, new_frame) #We preserve anim. I find it useful if you want to compare how the same anim looks from one character to the other. Frame cannot really be preserved or... oh wait. It can. Every anim... or... oh no. No it can't. Some anims will definitely have same amount of frames. But not necessarily.
 
     def load_new_sprites_8x16_mode(self, new_sprites_8x16_mode):
-        old_sprites_8x16_mode = self.createanims.sprites_8x16_mode
+        old_sprites_8x16_mode = self.createanims.sprites.sprites_8x16_mode
         if old_sprites_8x16_mode == new_sprites_8x16_mode: #This logic could also be part of a general load. Maybe.
             return
         self.createanims.undo_redo.undo_redo([self.load_new_sprites_8x16_mode_value, old_sprites_8x16_mode], [self.load_new_sprites_8x16_mode_value, new_sprites_8x16_mode])
 
     def load_new_sprites_8x16_mode_value(self, new_sprites_8x16_mode):
-        self.createanims.sprites_8x16_mode = new_sprites_8x16_mode
+        self.createanims.sprites.sprites_8x16_mode = new_sprites_8x16_mode
         self.createanims.sprites_8x16_entry.delete(0, "end")
         self.createanims.sprites_8x16_entry.insert(0, str(new_sprites_8x16_mode))
         self.decide_arrow_buttons_status(new_sprites_8x16_mode, 1, self.createanims.sprites_8x16_left_arrow, self.createanims.sprites_8x16_right_arrow)

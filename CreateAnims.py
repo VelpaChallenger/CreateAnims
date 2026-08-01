@@ -14,6 +14,7 @@ from CreateAnimsButton import *
 from UndoRedo import *
 from FileFormatValidator import *
 from MenuPopUp import *
+from Sprites import *
 
 from rinfo import *
 
@@ -46,6 +47,7 @@ class CreateAnims:
         self.undo_redo = UndoRedo(self)
         self.file_format_validator = FileFormatValidator(self)
         self.menupopup = MenuPopUp(self)
+        self.sprites = Sprites(self)
         self.characters = []
         self.current_pal_rectangle = None
         self.current_character_pal_index = None #Similarly, we'll need it for the relationship/associations between a PalRectangle and a ColorPickerRectangle.
@@ -68,7 +70,6 @@ class CreateAnims:
         self.in_exception = False
         self.physics_list = []
         self.current_palette_info_text = ""
-        self.sprites_8x16_mode = 0
 
     def init_anim_window(self):
         self.root = Tk() #Yes, this makes more sense when I think about it. And will make things smoother for the loading bar.

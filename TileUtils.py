@@ -273,9 +273,13 @@ class TileImage:
         self.chr_canvas.delete('TileImageRectangle') #I just realized, you're right. I can also always just delete everything and start again. Which would make the if/else block disappear. Realized because, I'm never clearing the bool come to think of it, but it still works wonders. And it's because, since I never clear it, it keeps deleting and starting again. But it works super well.
         self.createanims.current_tile_image_multiple_tiles_rectangle = None
         x, y = self.chr_canvas.coords(self.tile_image)
-        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+15, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+14, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+16, width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
+        if self.createanims.sprites_8x16_mode: #You know, I'm starting to think it might be worth creating a Sprites class which contains all this info that keeps getting repeated. Sprites.initial_y_increment would be specially nice.
+            initial_y_increment = 32
+        else:
+            initial_y_increment = 16
+        self.createanims.current_tile_image_rectangle = self.chr_canvas.create_rectangle(x, y, x+15, y+initial_y_increment-1, width=1, outline="white", tag="TileImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_tile_image_inner_rectangle = self.chr_canvas.create_rectangle(x+1, y+1, x+14, y+initial_y_increment-2, width=1, outline="black", tag="TileImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_tile_image_outer_rectangle = self.chr_canvas.create_rectangle(x-1, y-1, x+16, y+initial_y_increment+1, width=1, outline="black", tag="TileImageRectangle") #And now outer, helps a lot too.
         self.createanims.current_chr_tile_index = self.tile_index #So you might think, why not do like PalRectangle, use the IDs. It breaks logic tile_image_object = self.createanims.tiles_images[tile_id & 0x7F] in Anim. It can still work but I prefer to leave that as it is which is already very clear and instead do this. It makes sense that it's a different logic.
 
     def update_tile_label(self): #I feel more comfortable calling this method from other components rather than on_enter. It will also make it easier if on_enter has to make something additional but from other places it should still be just the label. Very experimental anyways, might change in the future. I already call on_double_click from motion so... yeah.

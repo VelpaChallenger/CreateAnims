@@ -339,40 +339,42 @@ class TileUtils:
             initial_y = -32
             initial_y_increment = 32
             rows_amount = 4
-            create_chr_image = self.create_chr_image_for_8x16
+            create_chr_image = self.create_chr_image_for_8x16 #This would be part of Sprites class, exactly. self.createanims.sprites.create_chr_image. And it will return self.create_chr_image_methods[self.sprites_8x16_mode](args).
+            tile_divider = 2
         else:
             tile_i_increment = 1
             initial_y = -16
             initial_y_increment = 16
             rows_amount = 8
             create_chr_image = self.create_chr_image_for_8x8
+            tile_divider = 1
         for row in range(rows_amount):
             initial_x = 0
             initial_y += initial_y_increment
             for col in range(16):
-                create_chr_image(initial_x, initial_y, tile_i, chr_palette, character_chr)
+                tile_palette_group, img, final_img = create_chr_image(tile_i, chr_palette, character_chr)
+                tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
+                self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i // tile_divider, tile_palette_group, self.createanims.tile_label, img, final_img))
                 initial_x += 16
                 tile_i += tile_i_increment
 
-    def create_chr_image_for_8x8(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
+    def create_chr_image_for_8x8(self, tile_i, chr_palette, character_chr):
         pixels = self.get_pixels(tile_i, character_chr)
         img = Image.frombytes("P", (8, 8), bytes(pixels))
         tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
         img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
         final_img = ImageTk.PhotoImage(img.resize((16, 16)))
-        tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, img, final_img)) #Now we'll send final_img as a parameter. Had to move it here when we now have the ID tile_image.
+        return tile_palette_group, img, final_img
 
-    def create_chr_image_for_8x16(self, initial_x, initial_y, tile_i, chr_palette, character_chr):
+    def create_chr_image_for_8x16(self, tile_i, chr_palette, character_chr):
         pixels_top = self.get_pixels(tile_i, character_chr)
         pixels_bottom = self.get_pixels(tile_i+1, character_chr)
         pixels_top.extend(pixels_bottom)
         img = Image.frombytes("P", (8, 16), bytes(pixels_top))
-        tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette) #It will always take the one from the even-numbered tile.
+        tile_palette_group, tile_palette = self.get_tile_palette(tile_i+1, chr_palette) #It will always take the one from the even-numbered tile.
         img.putpalette(tile_palette)
         final_img = ImageTk.PhotoImage(img.resize((16, 32)))
-        tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-        self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i // 2, tile_palette_group, self.createanims.tile_label, img, final_img))
+        return tile_palette_group, img, final_img
 
     def get_pixels(self, tile_i, character_chr): #First 8 values are for row 0, then for row 1, and until row 7 (8 rows total).
         pixels = []
@@ -468,16 +470,23 @@ class TileUtils:
         tile_image_object = self.createanims.tiles_images[tile_index] #No dependencies with specific IDs. So beautiful. (I'm talking about for example when you do create_image, a new ID is generated, but with this that doesn't matter)
         initial_x, initial_y = tile_image_object.chr_canvas.coords(tile_image_object.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
-        tile_palette_row = tile_index // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
-        tile_palette_row_tile = tile_index % 8
+        if self.createanims.sprites_8x16_mode:
+            tile_index_for_chr_pal = tile_index*2 + 1
+            tile_index_for_pixels = tile_index*2
+            create_chr_image = self.create_chr_image_for_8x16
+            resize_y = 32
+        else:
+            tile_index_for_chr_pal = tile_index
+            tile_index_for_pixels = tile_index
+            create_chr_image = self.create_chr_image_for_8x8
+            resize_y = 16
+        tile_palette_row = tile_index_for_chr_pal // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
+        tile_palette_row_tile = tile_index_for_chr_pal % 8
         chr_palette[tile_palette_row] ^= 1 << tile_palette_row_tile #Here's the gist of it, the magic. #The opposite. Also, yes, it seems like a lot of trouble for just one not but the alternative is to catch (cache) it or something which... meh.
         character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
-        pixels = self.get_pixels(tile_index, character_chr)
-        img = Image.frombytes("P", (8, 8), bytes(pixels))
-        tile_palette_group, tile_palette = self.get_tile_palette(tile_index, chr_palette) #Let's change the name. tile_palette. It's more accurate. #Exactly. As we have CHR and pixels. We also have chr_palette and pixels_palette. Beautiful.
-        img.putpalette(tile_palette) #Though, it'll always be the rgb of the group 0 or 1 palette so, in a way, it could be called even pal_rectangle.
+        tile_palette_group, img, final_img = create_chr_image(tile_index_for_pixels, chr_palette, character_chr)
         tile_image_object.pre_tkimg = img
-        final_img = ImageTk.PhotoImage(img.resize((16, 16)))
+        final_img = ImageTk.PhotoImage(img.resize((16, resize_y)))
         tile_image_object.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
         tile_image_object.final_img = final_img #And again, we need to keep the reference. #Also, by doing this, the previous one can be removed.
         tile_image_object.bind(self.createanims, tile_index) #Why? Because the previous image was deleted. We need to bind to the new one.

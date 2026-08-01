@@ -136,7 +136,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
 
     def on_shift_left_click_motion(self, event):
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
-        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
         initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
         width = frame.metadata.x_length
         height = frame.metadata.y_length
@@ -158,7 +158,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         if self.createanims.current_chr_tile_index is None:
             return
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #The first part is identical to that of shift_left_click_motion. Could encapsulate in function, but I like this level of detail.
-        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
         initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
         width = frame.metadata.x_length
         height = frame.metadata.y_length
@@ -175,7 +175,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
 
     def on_double_right_click_motion(self, event): #No need to check chr_index here. You can still clear a lot of tiles in the frame.
         frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id] #The first part is identical to that of shift_left_click_motion. Could encapsulate in function, but I like this level of detail.
-        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (16*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
+        initial_y = INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length) #No -16 here: that was only for the loop. But there is no loop here.
         initial_x = INITIAL_X_FRAME + (frame.metadata.x_offset*2)
         width = frame.metadata.x_length
         height = frame.metadata.y_length
@@ -209,16 +209,16 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
         return anim_image_object, multiple_rectangle_width+1, height+1
 
     def create_multiple_tiles_rectangle(self, x, y, width, height): #overwrite, expand, create... many possible verbs here. Let's go with this one.
-        self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+(16*width)-1, y+(16*height)-1, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
-        self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(16*height)-2, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
-        self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(16*height), width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
+        self.createanims.current_anim_image_rectangle = self.anim_canvas.create_rectangle(x, y, x+(16*width)-1, y+(self.createanims.sprites.ypixels*height)-1, width=1, outline="white", tag="AnimImageRectangle") #Let's give white a try. Maybe after you're reading this it's a different color.
+        self.createanims.current_anim_image_inner_rectangle = self.anim_canvas.create_rectangle(x+1, y+1, x+(16*width)-2, y+(self.createanims.sprites.ypixels*height)-2, width=1, outline="black", tag="AnimImageRectangle") #Actually inner, what I meant to say. #Outer, it's going to help for white tiles to be clearly visibly selected as well.
+        self.createanims.current_anim_image_outer_rectangle = self.anim_canvas.create_rectangle(x-1, y-1, x+(16*width), y+(self.createanims.sprites.ypixels*height), width=1, outline="black", tag="AnimImageRectangle") #And now outer, helps a lot too.
 
     def verify_motion_coordinates(self, x, y, width, height):
         return (
             x >= 0 and #Both have to be positive (i.e., don't go too much to the left or too much up).
             y >= 0 and
             x < (width*16) and #Right, in our system each unit in width equals 2 pixels, no wait, equals 16 pixels, because it's one tile and each tile is 16 pixels here, so yeah. Of course, this could be a constant var pixels and would make it a lot easier if we later changed it. Arghhh... I am saying and still not doing it that way? Same reason as always, it adds complexity and, do we really want it? Hmmmm... anyways, search by 16 should do the trick to find all the affected places. #Actually, those have to be < and not <=. At that point, the result gives a tile out of range. I think this is still correct either way though, as I'm pretty sure last one is pixels 112 to 127 and 240 to 255. #Each image is 16 pixels wide, canvas is 256 pixels wide.
-            y < (height*16) #Same, now for y. So with this we cover all 4 corners.
+            y < (height*self.createanims.sprites.ypixels) #Same, now for y. So with this we cover all 4 corners.
         )
 
     def on_left_click_release(self, event=None):

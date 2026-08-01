@@ -5,6 +5,7 @@ from tkinter import messagebox
 
 INITIAL_X_FRAME = 375 #To know from where to start col by col, row by row. The cells.
 INITIAL_Y_FRAME = 200
+MAX_SPRITE_AMOUNT = 32
 
 def func_AnimImage_on_left_click(createanims, anim_index, event): #A wrapper to go around memory leak issues with Tkinter.
     anim_image_object = createanims.anim_images[anim_index]
@@ -410,6 +411,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.decide_draw_frame_rectangle(frame)
         if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
             self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
+        self.decide_sprite_amount_warning(frame)
 
     def decide_transparency_anim_image(self, pre_tkimg, transparency):
         if transparency: #Updated logic. #One of those cases where I prefer == 0 rather than using not.
@@ -437,6 +439,11 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def decide_draw_frame_rectangle(self, frame):
         if self.draw_frame_rectangle:
             self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
+
+    def decide_sprite_amount_warning(self, frame):
+        current_sprite_amount = len([tile for tile in frame.tiles if tile != 0xFF])
+        if current_sprite_amount > MAX_SPRITE_AMOUNT:
+            messagebox.showwarning(title="Too many sprites!", message=f"Current sprite amount {current_sprite_amount} exceeds maximum allowed {MAX_SPRITE_AMOUNT}!")
 
     def clear_in_motion(self):
         for anim_image in self.createanims.anim_images: #tile_images but... whatever. Let's leave tiles_images.
@@ -829,6 +836,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             anim_image_object.tile_image_object = tile_image_object #Similarly, we need to make the assignment manually here too.
             pre_tkimg = tile_image_object.pre_tkimg
             self.decide_transparency_anim_image(pre_tkimg, self.transparency)
+            self.decide_sprite_amount_warning(frame)
         else:
             anim_image_object.tile_image_object = None #Has to be done manually, as everything else, now that we don't call refresh.
             pixels = [0x00] * 64 #Fully transparent. This works as a fill.

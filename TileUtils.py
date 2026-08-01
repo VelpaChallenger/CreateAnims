@@ -286,7 +286,11 @@ class TileImage:
         self.tile_label.config(text=f"Tile: {self.tile_index:02X} / {self.tile_palette_group:02X}")
 
     def get_tile_selected_based_on_coordinates(self, y, x): #Yes, y and x instead of x and y. I'm preserving the original order. It had to do with how it's all arranged. It's actually more intuitive.
-        tile_row = y // 16
+        if self.createanims.sprites_8x16_mode: #Confirmed, I will do the refactor soon enough.
+            y_distance = 32
+        else:
+            y_distance = 16
+        tile_row = y // y_distance
         tile_col = x // 16 #We only care about the integer part. >> 4 achieves same but, again this is more explicit for me.
         return tile_row*0x10 + tile_col
 

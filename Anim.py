@@ -116,7 +116,14 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             width = self.createanims.current_anim_image_multiple_tiles_rectangle.width
             height = self.createanims.current_anim_image_multiple_tiles_rectangle.height
             multiple_msg = f"{width}*{height} ({width*height} tiles selected) " #We add the space. Then, if there was nothing, it can still work and display as expected.
-        self.createanims.anim_info_text.configure(text=f"{multiple_msg}Cell: {self.anim_index:02X} Tile: {tile_id}", fg="blue")
+        frame = self.createanims.characters[self.createanims.current_character].frames[self.createanims.current_frame_id]
+        current_sprite_amount = len([tile for tile in frame.tiles if tile != 0xFF])
+        exceeded_sprites_msg = ""
+        fg_ = "blue"
+        if current_sprite_amount > MAX_SPRITE_AMOUNT: #We go back to original idea, anim_info_text, on hover. #Not sure if the same happened before, or I added the in_play_anim just for aesthetics, but right now it crashes since it would seem the showwarning kinda freezes the window, so the anim wants to keep playing, but the label is already destroyed, and bam.
+            exceeded_sprites_msg = f"Current sprite amount {current_sprite_amount} exceeds maximum allowed {MAX_SPRITE_AMOUNT}!"
+            fg_ = "red"
+        self.createanims.anim_info_text.configure(text=f"{multiple_msg}Cell: {self.anim_index:02X} Tile: {tile_id} {exceeded_sprites_msg}", fg=fg_)
 
     def on_left_click(self, event=None):
         self.select_and_update()
@@ -412,7 +419,6 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         self.decide_draw_frame_rectangle(frame)
         if self.createanims.current_anim_image_rectangle is not None: #I guess you're right. I mean no, you are right. I could handle the selections inside Anim, inside TileUtils and so on and so forth instead of CreateAnims. Although, I like that selections, which are something more global, are part of CreateAnims.
             self.regenerate_anim_image_rectangles() #Delete, and add again with previous cords.
-        self.decide_sprite_amount_warning(frame)
 
     def decide_transparency_anim_image(self, pre_tkimg, transparency):
         if transparency: #Updated logic. #One of those cases where I prefer == 0 rather than using not.
@@ -440,11 +446,6 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
     def decide_draw_frame_rectangle(self, frame):
         if self.draw_frame_rectangle:
             self.frame_rectangle = self.createanims.anim_canvas.create_rectangle(INITIAL_X_FRAME + (frame.metadata.x_offset*2), INITIAL_Y_FRAME - (frame.metadata.y_offset*2) - (self.createanims.sprites.ypixels*frame.metadata.y_length), INITIAL_X_FRAME + (frame.metadata.x_offset*2) + 16*frame.metadata.x_length, INITIAL_Y_FRAME - (frame.metadata.y_offset*2), outline="red", width=2, tag="AnimRedRectangle")
-
-    def decide_sprite_amount_warning(self, frame):
-        current_sprite_amount = len([tile for tile in frame.tiles if tile != 0xFF])
-        if current_sprite_amount > MAX_SPRITE_AMOUNT:
-            messagebox.showwarning(title="Too many sprites!", message=f"Current sprite amount {current_sprite_amount} exceeds maximum allowed {MAX_SPRITE_AMOUNT}!")
 
     def clear_in_motion(self):
         for anim_image in self.createanims.anim_images: #tile_images but... whatever. Let's leave tiles_images.
@@ -837,7 +838,6 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             anim_image_object.tile_image_object = tile_image_object #Similarly, we need to make the assignment manually here too.
             pre_tkimg = tile_image_object.pre_tkimg
             self.decide_transparency_anim_image(pre_tkimg, self.transparency)
-            self.decide_sprite_amount_warning(frame)
         else:
             anim_image_object.tile_image_object = None #Has to be done manually, as everything else, now that we don't call refresh.
             pixels = [0x00] * 64 #Fully transparent. This works as a fill.

@@ -27,7 +27,7 @@ def create_chr_images(chr_palette, character_chr, ypixels, sprites_8x16_mode, cr
             tiles_images.append(img)
             tile_i += yincrement
 
-def generate_png(frame, ypixels):
+def generate_png(frame, ypixels, get_tile_image_i):
     png = Image.new("RGB", (16*frame.metadata.x_length, ypixels*frame.metadata.y_length), "white")
     initial_y = -ypixels
     cell_id = 0
@@ -37,7 +37,7 @@ def generate_png(frame, ypixels):
         for col in range(frame.metadata.x_length):
             tile_id = frame.tiles[cell_id]
             if tile_id != 0xFF:
-                pre_tkimg = tiles_images[tile_id & 0x7F]
+                pre_tkimg = tiles_images[get_tile_image_i(tile_id & 0x7F)]
                 png.paste(pre_tkimg.resize((16, ypixels)), (initial_x, initial_y))
             else:
                 pixels = [0x00] * 64 #Maybe I can create an image like this and just reference it? Not sure how'd that work but might be worth a try. #Fully transparent. This works as a fill.

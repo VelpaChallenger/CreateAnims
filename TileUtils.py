@@ -76,27 +76,27 @@ def func_PalRectangle_on_left_click(createanims, pal_rectangle, event=None):
     pal_rectangle_object.on_left_click(event)
 
 def func_TileImage_on_enter(createanims, tile_index, event=None):
-    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object = createanims.tiles_images[createanims.sprites.get_tile_image_i(tile_index)]
     tile_image_object.on_enter(event)
 
 def func_TileImage_on_left_click(createanims, tile_index, event=None):
-    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object = createanims.tiles_images[createanims.sprites.get_tile_image_i(tile_index)]
     tile_image_object.on_left_click(event)
 
 def func_TileImage_on_double_left_click(createanims, tile_index, event=None):
-    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object = createanims.tiles_images[createanims.sprites.get_tile_image_i(tile_index)]
     tile_image_object.on_double_left_click(event)
 
 def func_TileImage_on_right_click_motion(createanims, tile_index, event=None):
-    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object = createanims.tiles_images[createanims.sprites.get_tile_image_i(tile_index)]
     tile_image_object.on_right_click_motion(event)
 
 def func_TileImage_on_right_click_release(createanims, tile_index, event=None):
-    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object = createanims.tiles_images[createanims.sprites.get_tile_image_i(tile_index)]
     tile_image_object.on_right_click_release(event)
 
 def func_TileImage_on_shift_left_click_motion(createanims, tile_index, event=None):
-    tile_image_object = createanims.tiles_images[tile_index]
+    tile_image_object = createanims.tiles_images[createanims.sprites.get_tile_image_i(tile_index)]
     tile_image_object.on_shift_left_click_motion(event)
 
 class PalRectangle: #I usually don't do this, but whatever. The main is TileUtils.
@@ -236,7 +236,7 @@ class TileImage:
         if not self.verify_motion_coordinates(event.x, event.y): #You're right, I have to do this here. As a guard, and with original event.x and event.y values. #You cannot trigger motion outside the boundaries. Let's verify that.
             return
         tile_selected = self.get_tile_selected_based_on_coordinates(event.y, event.x)
-        tile_image_object, width, height = self.calculate_selection_dimensions(self.tile_index, tile_selected)
+        tile_image_object, width, height = self.calculate_selection_dimensions(self.createanims.sprites.get_tile_image_i(self.tile_index), tile_selected)
         self.createanims.current_tile_image_multiple_tiles_rectangle = TileImageMultipleTilesRectangle(tile_image_object.tile_index, width, height) #Yes, let's make it a class.
         self.createanims.chr_canvas.delete('TileImageRectangle')
         x,y = self.chr_canvas.coords(tile_image_object.tile_image)
@@ -329,7 +329,7 @@ class TileUtils:
             self.regenerate_tile_image_rectangles()
 
     def create_chr_images(self, chr_palette, character_chr):
-        tile_i = 0
+        tile_i = self.createanims.sprites.sprites_8x16_mode
         initial_y = -self.createanims.sprites.ypixels
         initial_y_increment = self.createanims.sprites.ypixels
         tile_i_increment = self.createanims.sprites.ypixels // 16
@@ -339,7 +339,7 @@ class TileUtils:
             for col in range(16):
                 tile_palette_group, img, final_img = self.createanims.sprites.create_chr_image(tile_i, chr_palette, character_chr)
                 tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)
-                self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i // tile_i_increment, tile_palette_group, self.createanims.tile_label, img, final_img))
+                self.createanims.tiles_images.append(TileImage(self.createanims, self.createanims.chr_canvas, tile_image, tile_i, tile_palette_group, self.createanims.tile_label, img, final_img))
                 initial_x += 16
                 tile_i += tile_i_increment
 
@@ -352,11 +352,11 @@ class TileUtils:
         return tile_palette_group, img, final_img
 
     def create_chr_image_for_8x16(self, tile_i, chr_palette, character_chr, custom_background=None):
-        pixels_top = self.get_pixels(tile_i, character_chr)
-        pixels_bottom = self.get_pixels(tile_i+1, character_chr)
+        pixels_top = self.get_pixels(tile_i-1, character_chr)
+        pixels_bottom = self.get_pixels(tile_i, character_chr)
         pixels_top.extend(pixels_bottom)
         img = Image.frombytes("P", (8, 16), bytes(pixels_top))
-        tile_palette_group, tile_palette = self.get_tile_palette(tile_i+1, chr_palette, custom_background=custom_background) #It will always take the one from the odd-numbered tile. Makes for consistency.
+        tile_palette_group, tile_palette = self.get_tile_palette(tile_i, chr_palette, custom_background=custom_background) #It will always take the one from the odd-numbered tile. Makes for consistency.
         img.putpalette(tile_palette)
         final_img = ImageTk.PhotoImage(img.resize((16, 32)))
         return tile_palette_group, img, final_img
@@ -454,16 +454,14 @@ class TileUtils:
         self.createanims.refresh_UI() #Done! #This could be a refresh_UI. #Though in that case, I would need to do it the same way as Anim, and save coordinates of rectangle, then restore... or otherwise save outline... that's why I did it this way. But then I found a way with Anim so. Yeah, I could soon replicate it here, it might be part of what's making UndoRedo so complicated here.
 
     def toggle_palette_for_tile_index_value(self, tile_index):
-        tile_image_object = self.createanims.tiles_images[tile_index] #No dependencies with specific IDs. So beautiful. (I'm talking about for example when you do create_image, a new ID is generated, but with this that doesn't matter)
+        tile_image_object = self.createanims.tiles_images[self.createanims.sprites.get_tile_image_i(tile_index)] #No dependencies with specific IDs. So beautiful. (I'm talking about for example when you do create_image, a new ID is generated, but with this that doesn't matter)
         initial_x, initial_y = tile_image_object.chr_canvas.coords(tile_image_object.tile_image) #We could also cache this but uh, yeah. Let's get them here before we delete the image (also yeah, if I stored it, I would have to update it with every move... not fun).
         chr_palette = self.createanims.characters[self.createanims.current_character].chr_palettes[self.createanims.current_chr_bank] #It has a bit of everything from refresh_chr. But has to be different because on the one hand, I only want just one image updated. And on the other, it'd just get messy to have everything under the same function.
-        tile_index_for_chr_pal = self.createanims.sprites.get_tile_index_for_chr_pal(tile_index)
-        tile_index_for_pixels = self.createanims.sprites.get_tile_index_for_pixels(tile_index)
-        tile_palette_row = tile_index_for_chr_pal // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
-        tile_palette_row_tile = tile_index_for_chr_pal % 8
+        tile_palette_row = tile_index // 8 #We can also do >> 3 which is same as the lsr we see in the code but I mean whatever.
+        tile_palette_row_tile = tile_index % 8
         chr_palette[tile_palette_row] ^= 1 << tile_palette_row_tile #Here's the gist of it, the magic. #The opposite. Also, yes, it seems like a lot of trouble for just one not but the alternative is to catch (cache) it or something which... meh.
         character_chr = self.createanims.characters[self.createanims.current_character].chrs[self.createanims.current_chr_bank]
-        tile_palette_group, img, final_img = self.createanims.sprites.create_chr_image(tile_index_for_pixels, chr_palette, character_chr)
+        tile_palette_group, img, final_img = self.createanims.sprites.create_chr_image(tile_index, chr_palette, character_chr)
         tile_image_object.pre_tkimg = img
         final_img = ImageTk.PhotoImage(img.resize((16, self.createanims.sprites.ypixels)))
         tile_image_object.tile_image = self.createanims.chr_canvas.create_image(initial_x, initial_y, anchor="nw", image=final_img)

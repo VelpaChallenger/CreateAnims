@@ -264,7 +264,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             self.createanims.undo_redo.undo_redo([self.createanims.anim.load_new_tile_for_index_value, old_index, old_tile], [self.createanims.anim.load_new_tile_for_index_value, old_index, self.createanims.current_chr_tile_index])
 
     def paste_tile_image_multiple_tiles_rectangle(self, frame):
-        current_tile_index = self.createanims.current_tile_image_multiple_tiles_rectangle.tile_index
+        current_tile_index = self.createanims.sprites.get_tile_image_i(self.createanims.current_tile_image_multiple_tiles_rectangle.tile_index)
         current_anim_index = self.anim_index
         final_tile_index = current_tile_index + 0x10*(self.createanims.current_tile_image_multiple_tiles_rectangle.height - 1) + (self.createanims.current_tile_image_multiple_tiles_rectangle.width - 1)
         maximum_anim_index = len(frame.tiles) - 1 #Do I... save it in a var? I could directly check against len... ah ok whatever.
@@ -274,7 +274,7 @@ class AnimImage: #Yes, this is what I was talking about before. I'm pretty sure 
             multiple_tiles_rectangle_width_boundary = current_tile_index + (self.createanims.current_tile_image_multiple_tiles_rectangle.width - 1)
             anim_width_boundary = frame.metadata.x_length*(current_anim_index // frame.metadata.x_length) + (frame.metadata.x_length -1) #No, for anim the logic is a bit more complex. It is always going to be a multiple of the x_length, for example is x_length (width) is 3, then those are going to be 0x02, 0x05, 0x08 and so on and so forth. So it's always going to be x_length*(current_row + 1). Or just current_row if we start counting from 1 instead of 0. But yes, once we got the current row (the start of the row), the rest is the exact same logic as for the tile rectangle. They're all rectangles. Beautiful.
             while (current_tile_index <= multiple_tiles_rectangle_width_boundary) and (current_anim_index <= anim_width_boundary): #It can be <=, but not >. It's the boundary, it is inclusive.
-                frame.tiles[current_anim_index] = current_tile_index
+                frame.tiles[current_anim_index] = self.createanims.sprites.get_tile_i(current_tile_index)
                 current_tile_index += 1
                 current_anim_index += 1 #There's probably a way with enumerate, but whatever, I will prefer super explicit here.
             current_tile_index = tile_index_start + 0x10 #It's always the same concept, the width. It just so happens that for CHR the width is fixed, so we represent that here by directly adding 0x10.
@@ -388,7 +388,8 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             for col in range(frame.metadata.x_length):
                 tile_id = frame.tiles[cell_id]
                 if tile_id != 0xFF: #So 0x7F is still a valid tile. So, we need to do it before & 0x7F.
-                    tile_image_object = self.createanims.tiles_images[tile_id & 0x7F] #Let's move it here to have cleaner checks. #We only care about bits 0-6. Actually I think I was going to run a script to fix that for all frames. But meanwhile we can do this. The idea is to remove the and #$7F in the code, I think it's still there for now.
+                    tile_id = self.createanims.sprites.validate_tile_id(cell_id, tile_id & 0x7F)
+                    tile_image_object = self.createanims.tiles_images[self.createanims.sprites.get_tile_image_i(tile_id)] #Let's move it here to have cleaner checks. #We only care about bits 0-6. Actually I think I was going to run a script to fix that for all frames. But meanwhile we can do this. The idea is to remove the and #$7F in the code, I think it's still there for now.
                     pre_tkimg = tile_image_object.pre_tkimg
                     self.decide_transparency_anim_image(pre_tkimg, self.transparency)
                     final_img = ImageTk.PhotoImage(pre_tkimg.resize((16, initial_y_increment))) #So yes, actually different images with same base, but still different.
@@ -832,7 +833,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
         initial_x, initial_y = anim_image_object.anim_canvas.coords(anim_image_object.anim_image)
         if tile_index != 0xFF: #It's pretty much the exact same as the refresh, only in a more particular way, for a single AnimImage instead of all the ones that compose the frame.
             self.createanims.anim_canvas.delete(f"EmptyRectangle{anim_index}") #If there is any.
-            tile_image_object = self.createanims.tiles_images[tile_index & 0x7F] #I was confused. I do need this one, not the one currently, that could be None because it might an $FF, it doesn't matter in this case. #tile_image_object = anim_image_object.tile_image_object
+            tile_image_object = self.createanims.tiles_images[self.createanims.sprites.get_tile_image_i(tile_index & 0x7F)] #I was confused. I do need this one, not the one currently, that could be None because it might an $FF, it doesn't matter in this case. #tile_image_object = anim_image_object.tile_image_object
             anim_image_object.tile_image_object = tile_image_object #Similarly, we need to make the assignment manually here too.
             pre_tkimg = tile_image_object.pre_tkimg
             self.decide_transparency_anim_image(pre_tkimg, self.transparency)
@@ -1265,7 +1266,7 @@ class Anim: #Yes this could be AnimUtils. Or maybe FrameUtils, come to think of 
             frame = character.frames[frame_id]
             current_chr_bank = frame.metadata.chr_bank
             refresh_chr(character, current_chr_bank, self.createanims.sprites.ypixels, self.createanims.sprites.sprites_8x16_mode, self.createanims.sprites.create_chr_image)
-            png = generate_png(frame, self.createanims.sprites.ypixels)
+            png = generate_png(frame, self.createanims.sprites.ypixels, self.createanims.sprites.get_tile_image_i)
             png_path = f"{self.createanims.root_dir}/{character.name}/images"
             os.path.isdir(png_path) or os.makedirs(png_path) #This time I feel like explaining, so or shortcircuits, which means, this is an indirect if. If the path exists, nothing else to do. If it doesn't, then make the dir.
             png.save(f"{png_path}/{character.name}_frame_{frame_id:03d}.png", "PNG")

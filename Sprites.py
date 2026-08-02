@@ -34,7 +34,8 @@ class Sprites:
     def validate_tile_id(self, cell_id, tile_id):
         if self.sprites_8x16_mode:
             if tile_id % 2 == 0:
-                messagebox.showwarning(title="Tile ID Mismatch!", message=f"You are in 8x16 mode, but the frame has an even-numbered tile ID. Tile ID {tile_id:02X} at cell {cell_id:02X} will be rounded up to {tile_id+1:02X}. IMPORTANT: Tile ID's high bit is not considered in any mode.")
+                if not any(tile_image.in_motion for tile_image in self.createanims.tiles_images): #I hope you don't hate nesting. #Want context instead? Messageboxes showing up one on top of the other during motion.
+                    messagebox.showwarning(title="Tile ID Mismatch!", message=f"You are in 8x16 mode, but the frame has an even-numbered tile ID. Tile ID {tile_id:02X} at cell {cell_id:02X} will be rounded up to {tile_id+1:02X}. IMPORTANT: Tile ID's high bit is not considered in any mode.")
                 return tile_id+1
             return tile_id
         else:
